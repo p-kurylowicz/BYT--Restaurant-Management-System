@@ -1,0 +1,60 @@
+*.md
+
+
+target/
+
+
+pom.xml.tag
+pom.xml.releaseBackup
+pom.xml.versionsBackup
+release.properties
+dependency-reduced-pom.xml
+build.log
+.mvn/timing.properties
+
+### IDEs ###
+# IntelliJ
+.idea/
+*.iml
+*.iws
+out/
+
+# Eclipse
+.project
+.classpath
+.settings/
+bin/
+
+# VS Code
+.vscode/
+*.code-workspace
+
+# NetBeans
+nbproject/
+build/
+dist/
+
+### Build Artifacts ###
+# Zignoruj skompilowane archiwa, nawet jeśli znajdą się poza katalogiem /target
+*.jar
+*.war
+*.ear
+*.zip
+*.tar.gz
+
+### Logs and Temporary Files ###
+*.log
+*.tmp
+# Lokalne pliki konfiguracyjne, które nie powinny być w repozytorium
+local.properties
+
+### Extent Persistence Data Files ###
+# All .dat files from extent persistence should not be committed
+data/
+*.dat
+/target
+.claude
+.*/
+!.git/
+Documents
+!/readme.md
