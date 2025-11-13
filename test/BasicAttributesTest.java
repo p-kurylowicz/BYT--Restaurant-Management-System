@@ -5,8 +5,15 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 
 /**
- * Unit tests for Basic Attributes
- * Tests validation of: strings, numbers, dates, emails, etc.
+ * Tests for basic attribute validation and constraints.
+ *
+ * <p>Test categories:
+ * <ul>
+ *   <li>String validation: non-null, non-empty, trimming</li>
+ *   <li>Numeric validation: non-negative values, range constraints</li>
+ *   <li>Date validation: past dates, future dates</li>
+ *   <li>Email validation: format checks</li>
+ * </ul>
  */
 public class BasicAttributesTest {
 

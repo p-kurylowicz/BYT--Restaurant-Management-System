@@ -6,8 +6,14 @@ import java.time.LocalDateTime;
 import java.time.LocalTime;
 
 /**
- * Unit tests for Optional Attributes
- * Tests attributes that can be null, like Reservation.specialRequests
+ * Tests for optional attribute implementation (nullable fields).
+ *
+ * <p>Test categories:
+ * <ul>
+ *   <li>Null defaults: optional attributes can be null initially</li>
+ *   <li>Setting values: optional attributes can be assigned non-null values</li>
+ *   <li>Validation: non-null values still meet normal constraints</li>
+ * </ul>
  */
 public class OptionalAttributesTest {
 

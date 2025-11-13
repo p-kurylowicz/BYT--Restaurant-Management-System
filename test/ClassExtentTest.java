@@ -4,8 +4,15 @@ import static org.junit.jupiter.api.Assertions.*;
 import java.time.LocalDateTime;
 
 /**
- * Unit tests for Class Extent Pattern
- * Tests that objects are automatically added to class extent and extent is properly encapsulated
+ * Tests for class extent management (object tracking).
+ *
+ * <p>Test categories:
+ * <ul>
+ *   <li>Auto-registration: objects added to extent on creation</li>
+ *   <li>Retrieval: getAllX() returns all created instances</li>
+ *   <li>Encapsulation: returned collections are unmodifiable</li>
+ *   <li>Clearing: clearExtent() removes all instances</li>
+ * </ul>
  */
 public class ClassExtentTest {
 

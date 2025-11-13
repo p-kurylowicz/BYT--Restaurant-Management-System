@@ -5,8 +5,15 @@ import java.io.File;
 import java.time.LocalDateTime;
 
 /**
- * Unit tests for Extent Persistence
- * Tests saving and loading class extents to/from files
+ * Tests for extent persistence (save/load to XML files).
+ *
+ * <p>Test categories:
+ * <ul>
+ *   <li>Save/load cycle: data integrity after serialization</li>
+ *   <li>Empty extent: handling zero objects</li>
+ *   <li>Missing files: graceful failure on load</li>
+ *   <li>File cleanup: proper resource management</li>
+ * </ul>
  */
 public class ExtentPersistenceTest {
 

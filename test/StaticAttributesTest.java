@@ -7,8 +7,15 @@ import java.time.LocalTime;
 import java.util.Arrays;
 
 /**
- * Unit tests for Static Attributes
- * Tests MenuItem.TAX_RATE and Reservation.CANCELLATION_WINDOW_HOURS
+ * Tests for static attribute implementation.
+ *
+ * <p>Test categories:
+ * <ul>
+ *   <li>Constant values: TAX_RATE (0.23), CANCELLATION_WINDOW_HOURS (4)</li>
+ *   <li>Uniform application: same value across all instances</li>
+ *   <li>Inheritance: static attributes accessible in subclasses</li>
+ *   <li>Business rules: used in calculations and validations</li>
+ * </ul>
  */
 public class StaticAttributesTest {
 

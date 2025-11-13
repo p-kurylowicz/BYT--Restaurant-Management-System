@@ -6,8 +6,15 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * Unit tests for Multi-Value Attributes
- * Tests collections like List<Ingredient> in MenuItem
+ * Tests for multi-value attribute implementation (collections).
+ *
+ * <p>Test categories:
+ * <ul>
+ *   <li>Multiple elements: handling lists with multiple items</li>
+ *   <li>Empty collections: optional multi-value (0..*) support</li>
+ *   <li>Encapsulation: unmodifiable view returns</li>
+ *   <li>Element validation: individual item constraint checks</li>
+ * </ul>
  */
 public class MultiValueAttributesTest {
 

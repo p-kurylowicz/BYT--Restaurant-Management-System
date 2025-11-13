@@ -1,370 +1,560 @@
-import java.time.LocalDate;
-import java.time.LocalDateTime;
-import java.time.LocalTime;
-import java.util.Arrays;
-
-/**
- * Restaurant Management System - Main Demonstration
- *
- * This demonstrates the implementation of:
- * - Basic attributes (name, email, phone, etc.)
- * - Complex attributes (NutritionalInfo)
- * - Multi-value attributes (ingredients list)
- * - Static attributes (TAX_RATE, CANCELLATION_WINDOW_HOURS)
- * - Derived attributes (needsReorder, yearsOfService, isExperienced)
- * - Optional attributes (specialRequests, servedTimestamp)
- * - Class extent (static collections of all instances)
- * - Extent persistence (save/load to files)
- */
-public class Main {
-    public static void main(String[] args) {
-        System.out.println("===== RESTAURANT MANAGEMENT SYSTEM =====");
-        System.out.println("Demonstrating all required attribute types and class extent\n");
-
-        // Load all persisted extents on application startup
-        loadAllExtents();
-
-        try {
-            demonstrateCustomerManagement();
-            demonstrateInventoryManagement();
-            demonstrateMenuManagement();
-            demonstrateEmployeeManagement();
-            demonstrateReservationSystem();
-            demonstrateOrderingSystem();
-            demonstrateExtentPersistence();
-
-            System.out.println("\n===== DEMONSTRATION COMPLETE =====");
-            System.out.println("All attribute types successfully demonstrated:");
-            System.out.println("✓ Basic attributes");
-            System.out.println("✓ Complex attributes (NutritionalInfo)");
-            System.out.println("✓ Multi-value attributes");
-            System.out.println("✓ Static attributes (TAX_RATE, CANCELLATION_WINDOW_HOURS)");
-            System.out.println("✓ Derived attributes (needsReorder, yearsOfService, isExperienced)");
-            System.out.println("✓ Optional attributes");
-            System.out.println("✓ Class extent and persistence");
-
-        } catch (Exception e) {
-            System.err.println("Error: " + e.getMessage());
-            e.printStackTrace();
-        }
-    }
-
-    private static void demonstrateCustomerManagement() {
-        System.out.println("--- Customer Management (Basic Attributes) ---");
-
-        Customer customer1 = new Customer("John", "Doe", "john.doe@email.com",
-            "+48123456789", LocalDateTime.now().minusYears(2));
-        Customer customer2 = new Customer("Jane", "Smith", "jane.smith@email.com",
-            "+48987654321", LocalDateTime.now().minusMonths(6));
-
-        System.out.println("Created customers: " + Customer.getAllCustomers().size());
-        System.out.println("  " + customer1);
-        System.out.println("  " + customer2);
-        System.out.println();
-    }
-
-    private static void demonstrateInventoryManagement() {
-        System.out.println("--- Inventory Management (Derived Attributes) ---");
-
-        // Create ingredients with different stock levels
-        Ingredient tomatoes = new Ingredient("Tomatoes", "kg", 50, 20, 3.50);
-        Ingredient cheese = new Ingredient("Mozzarella", "kg", 15, 20, 12.00); // Below reorder point
-        Ingredient flour = new Ingredient("Flour", "kg", 100, 25, 2.00);
-
-        System.out.println("Ingredients created: " + Ingredient.getAllIngredients().size());
-        System.out.println("  " + tomatoes + " - Needs reorder: " + tomatoes.getNeedsReorder());
-        System.out.println("  " + cheese + " - Needs reorder: " + cheese.getNeedsReorder());
-        System.out.println("  " + flour + " - Needs reorder: " + flour.getNeedsReorder());
-
-        // Demonstrate supplier and supply log
-        Supplier supplier = new Supplier("Fresh Foods Inc", "+48111222333",
-            "orders@freshfoods.pl", 4.5);
-        SupplyLog delivery = new SupplyLog(supplier, cheese, LocalDate.now(), 11.50, 30);
-        delivery.registerDelivery();
-
-        System.out.println("\nAfter delivery:");
-        System.out.println("  " + cheese + " - Needs reorder: " + cheese.getNeedsReorder());
-        System.out.println();
-    }
-
-    private static void demonstrateMenuManagement() {
-        System.out.println("--- Menu Management (Complex, Multi-value, and Static Attributes) ---");
-
-        // Get ingredients
-        Ingredient tomatoes = Ingredient.getAllIngredients().get(0);
-        Ingredient cheese = Ingredient.getAllIngredients().get(1);
-        Ingredient flour = Ingredient.getAllIngredients().get(2);
-
-        // Create complex attribute (NutritionalInfo)
-        NutritionalInfo pizzaNutrition = new NutritionalInfo(850, 35.0, 95.0, 28.0, 6.0);
-
-        // Create menu item with multi-value attribute (ingredients list)
-        MainDish pizza = new MainDish(
-            "Margherita Pizza",
-            "Classic Italian pizza with tomatoes, mozzarella, and basil",
-            32.00,  // Base price without tax
-            "/images/margherita.jpg",
-            "Italian",
-            pizzaNutrition,  // Complex attribute
-            Arrays.asList(tomatoes, cheese, flour),  
-            2  // Spice level
-        );
-
-        System.out.println("Menu item created: " + pizza.getName());
-        System.out.println("  Ingredients: " + pizza.getIngredients().size());
-        System.out.println("  " + pizzaNutrition);
-        System.out.println("  Base price: " + pizza.getPrice() + " PLN");
-
-        // Demonstrate static attribute (TAX_RATE)
-        System.out.println("\n  Static TAX_RATE: " + (MenuItem.TAX_RATE * 100) + "%");
-        System.out.println("  Price with tax: " + pizza.calculatePriceWithTax() + " PLN");
-
-        // Create beverage
-        NutritionalInfo cokaNutrition = new NutritionalInfo(140, 0, 39.0, 0, 0);
-        Ingredient water = new Ingredient("Water", "L", 500, 50, 0.10);
-        Ingredient syrup = new Ingredient("Cola Syrup", "L", 80, 20, 5.50);
-
-        Beverage cola = new Beverage(
-            "Coca-Cola",
-            "Classic soft drink",
-            8.00,
-            "/images/cola.jpg",
-            "American",
-            cokaNutrition,
-            Arrays.asList(water, syrup),
-            0.0  // No alcohol
-        );
-
-        System.out.println("\nBeverage created: " + cola.getName());
-        System.out.println("  Alcoholic: " + cola.isAlcoholic());
-        System.out.println("  Price with tax: " + cola.calculatePriceWithTax() + " PLN");
-
-        // Create menu
-        Menu springMenu = new Menu("Spring 2024", "Spring");
-        springMenu.addMenuItem(pizza);
-        springMenu.addMenuItem(cola);
-
-        System.out.println("\nMenu '" + springMenu.getName() + "' has " +
-            springMenu.getMenuItems().size() + " items");
-        System.out.println();
-    }
-
-    private static void demonstrateEmployeeManagement() {
-        System.out.println("--- Employee Management (Derived Attributes) ---");
-
-        // Create employees with different hire dates
-        Waiter newWaiter = new Waiter("Tom", "tom@restaurant.pl", "+48222333444",
-            LocalDate.now().minusYears(2), 28.00, "Main Hall");
-
-        Waiter experiencedWaiter = new Waiter("Sarah", "sarah@restaurant.pl", "+48333444555",
-            LocalDate.now().minusYears(7), 38.00, "Terrace");
-
-        Manager manager = new Manager("Robert", "robert@restaurant.pl", "+48444555666",
-            LocalDate.now().minusYears(10), 55.00, "Front of House", 8);
-
-        System.out.println("Employees created: " + Employee.getAllEmployees().size());
-        System.out.println("  " + newWaiter.getName() +
-            " - Years of service: " + newWaiter.getYearsOfService() +
-            ", Experienced: " + newWaiter.getIsExperienced());
-        System.out.println("  " + experiencedWaiter.getName() +
-            " - Years of service: " + experiencedWaiter.getYearsOfService() +
-            ", Experienced: " + experiencedWaiter.getIsExperienced());
-        System.out.println("  " + manager.getName() +
-            " - Years of service: " + manager.getYearsOfService() +
-            ", Experienced: " + manager.getIsExperienced());
-        System.out.println();
-    }
-
-    private static void demonstrateReservationSystem() {
-        System.out.println("--- Reservation System (Static and Optional Attributes) ---");
-
-        Customer customer = Customer.getAllCustomers().get(0);
-
-        // Create tables
-        Table table1 = new Table(1, 4, "Main Hall");
-        Table table2 = new Table(2, 2, "Terrace");
-
-        // Create reservation for next week (can be cancelled)
-        Reservation futureReservation = new Reservation(customer,
-            LocalDate.now().plusDays(7), LocalTime.of(19, 0), 4);
-        futureReservation.addTable(table1);
-
-        
-        futureReservation.setSpecialRequests("Window seat, celebrating anniversary");
-
-        System.out.println("Reservation created for " + futureReservation.getDate());
-        System.out.println("  Special requests (optional): " + futureReservation.getSpecialRequests());
-
-        // Demonstrate static attribute (CANCELLATION_WINDOW_HOURS)
-        System.out.println("\n  Static CANCELLATION_WINDOW_HOURS: " +
-            Reservation.CANCELLATION_WINDOW_HOURS + " hours");
-        System.out.println("  Can be cancelled: " + futureReservation.canBeCancelled());
-
-        // Create reservation within cancellation window
-        Reservation soonReservation = new Reservation(customer,
-            LocalDate.now(), LocalTime.now().plusHours(2), 2);
-        System.out.println("\nReservation in 2 hours:");
-        System.out.println("  Can be cancelled: " + soonReservation.canBeCancelled() +
-            " (within " + Reservation.CANCELLATION_WINDOW_HOURS + " hour window)");
-        System.out.println();
-    }
-
-    private static void demonstrateOrderingSystem() {
-        System.out.println("--- Ordering System ---");
-
-        Customer customer = Customer.getAllCustomers().get(0);
-
-        // Create dine-in order
-        DineIn order = new DineIn(customer);
-        Table table = Table.getAllTables().get(0);
-        table.reserve();
-        order.addTable(table);
-
-        // Create order request
-        OrderRequest request = new OrderRequest();
-
-
-        MenuItem pizza = MenuItem.getAllMenuItems().get(0);
-        MenuItem cola = MenuItem.getAllMenuItems().get(1);
-
-        ItemQuantity pizzaItem = new ItemQuantity(pizza, 2);
-        pizzaItem.setSpecialRequests("Extra cheese, no onions"); 
-
-        ItemQuantity colaItem = new ItemQuantity(cola, 2);
-
-        request.addItemQuantity(pizzaItem);
-        request.addItemQuantity(colaItem);
-        request.confirmRequest();
-
-        order.addOrderRequest(request);
-
-        System.out.println("Order created: " + order);
-        System.out.println("  Total: " + order.getTotal() + " PLN (including " +
-            (MenuItem.TAX_RATE * 100) + "% tax)");
-        System.out.println("  Items: " + order.getItems());
-
-        // Finalize and pay
-        order.finalizeOrder();
-
-        Payment payment = new Card(order.getTotal(), "1234", "Visa");
-        payment.confirmPayment();
-        order.setPayment(payment);
-        order.completeOrder();
-
-        System.out.println("  Status: " + order.getStatus());
-        System.out.println("  Payment: " + payment);
-        System.out.println();
-    }
-
-    /**
-     * Load all persisted extents on application startup
-     * This ensures data persists throughout the application lifecycle
-     */
-    private static void loadAllExtents() {
-        System.out.println("--- Loading Persisted Data ---");
-
-        int loadedCount = 0;
-
-        // Load all extents from persistence files
-        if (Customer.loadExtent("customers.dat")) {
-            System.out.println("✓ Loaded Customers: " + Customer.getAllCustomers().size());
-            loadedCount++;
-        }
-        if (Employee.loadExtent("employees.dat")) {
-            System.out.println("✓ Loaded Employees: " + Employee.getAllEmployees().size());
-            loadedCount++;
-        }
-        if (MenuItem.loadExtent("menu_items.dat")) {
-            System.out.println("✓ Loaded Menu Items: " + MenuItem.getAllMenuItems().size());
-            loadedCount++;
-        }
-        if (Ingredient.loadExtent("ingredients.dat")) {
-            System.out.println("✓ Loaded Ingredients: " + Ingredient.getAllIngredients().size());
-            loadedCount++;
-        }
-        if (Table.loadExtent("tables.dat")) {
-            System.out.println("✓ Loaded Tables: " + Table.getAllTables().size());
-            loadedCount++;
-        }
-        if (Order.loadExtent("orders.dat")) {
-            System.out.println("✓ Loaded Orders: " + Order.getAllOrders().size());
-            loadedCount++;
-        }
-        if (OrderRequest.loadExtent("order_requests.dat")) {
-            System.out.println("✓ Loaded Order Requests: " + OrderRequest.getAllOrderRequests().size());
-            loadedCount++;
-        }
-        if (Reservation.loadExtent("reservations.dat")) {
-            System.out.println("✓ Loaded Reservations: " + Reservation.getAllReservations().size());
-            loadedCount++;
-        }
-        if (Payment.loadExtent("payments.dat")) {
-            System.out.println("✓ Loaded Payments: " + Payment.getAllPayments().size());
-            loadedCount++;
-        }
-        if (Supplier.loadExtent("suppliers.dat")) {
-            System.out.println("✓ Loaded Suppliers: " + Supplier.getAllSuppliers().size());
-            loadedCount++;
-        }
-        if (SupplyLog.loadExtent("supply_logs.dat")) {
-            System.out.println("✓ Loaded Supply Logs: " + SupplyLog.getAllSupplyLogs().size());
-            loadedCount++;
-        }
-        if (Menu.loadExtent("menus.dat")) {
-            System.out.println("✓ Loaded Menus: " + Menu.getAllMenus().size());
-            loadedCount++;
-        }
-
-        if (loadedCount == 0) {
-            System.out.println("No persisted data found - starting with fresh data");
-        } else {
-            System.out.println("\n✓ Successfully loaded " + loadedCount + " extent(s) from persistent storage");
-        }
-
-        System.out.println();
-    }
-
-    private static void demonstrateExtentPersistence() {
-        System.out.println("--- Extent Persistence ---");
-
-        try {
-            // Save ALL extents to files for complete persistence
-            System.out.println("Saving all class extents to files...");
-
-            Customer.saveExtent("customers.dat");
-            Employee.saveExtent("employees.dat");
-            MenuItem.saveExtent("menu_items.dat");
-            Ingredient.saveExtent("ingredients.dat");
-            Table.saveExtent("tables.dat");
-            Order.saveExtent("orders.dat");
-            OrderRequest.saveExtent("order_requests.dat");
-            Reservation.saveExtent("reservations.dat");
-            Payment.saveExtent("payments.dat");
-            Supplier.saveExtent("suppliers.dat");
-            SupplyLog.saveExtent("supply_logs.dat");
-            Menu.saveExtent("menus.dat");
-
-            System.out.println("✓ Saved all extents successfully");
-
-            // Display extent counts
-            System.out.println("\nClass extent counts:");
-            System.out.println("  Customers: " + Customer.getAllCustomers().size());
-            System.out.println("  Employees: " + Employee.getAllEmployees().size());
-            System.out.println("  Menu Items: " + MenuItem.getAllMenuItems().size());
-            System.out.println("  Ingredients: " + Ingredient.getAllIngredients().size());
-            System.out.println("  Tables: " + Table.getAllTables().size());
-            System.out.println("  Orders: " + Order.getAllOrders().size());
-            System.out.println("  Order Requests: " + OrderRequest.getAllOrderRequests().size());
-            System.out.println("  Reservations: " + Reservation.getAllReservations().size());
-            System.out.println("  Payments: " + Payment.getAllPayments().size());
-            System.out.println("  Suppliers: " + Supplier.getAllSuppliers().size());
-            System.out.println("  Supply Logs: " + SupplyLog.getAllSupplyLogs().size());
-            System.out.println("  Menus: " + Menu.getAllMenus().size());
-
-        } catch (Exception e) {
-            System.err.println("Error saving extents: " + e.getMessage());
-        }
-
-        System.out.println();
-    }
-}
+//import java.time.LocalDate;
+//import java.time.LocalDateTime;
+//import java.time.LocalTime;
+//import java.util.Arrays;
+//import java.util.List;
+//
+///**
+// * Main demonstration class for the Restaurant Management System.
+// *
+// * REQUIRED METHOD IMPLEMENTATIONS (mark with TODO if missing):
+// *
+// * Order class:
+// *   - public String getOrderId() - returns unique order identifier
+// *   - public double calculateTotal() - calculates order total
+// *
+// * OrderRequest class:
+// *   - public void startPreparation() - sets status to IN_PREPARATION
+// *   - public void markAsReady() - sets status to READY
+// *
+// * Payment class:
+// *   - public void processPayment() - convenience method to confirm payment
+// *
+// * Ingredient class:
+// *   - public void increaseStock(double quantity) - increases stock by quantity
+// *   - public void reduceStock(double quantity) - decreases stock by quantity
+// */
+//public class Main {
+//    public static void main(String[] args) {
+//        System.out.println("===============================================================");
+//        System.out.println("   RESTAURANT MANAGEMENT SYSTEM - DEMONSTRATION");
+//        System.out.println("===============================================================\n");
+//
+//        // ================================================================
+//        // PART 1: EXTENT PERSISTENCE DEMONSTRATION
+//        // ================================================================
+//        System.out.println("---------------------------------------------------------------");
+//        System.out.println("PART 1: EXTENT PERSISTENCE (Save/Load from .dat files)");
+//        System.out.println("---------------------------------------------------------------\n");
+//
+//        demonstrateExtentPersistence();
+//
+//        // ================================================================
+//        // PART 2: CORE FUNCTIONALITY DEMONSTRATION
+//        // ================================================================
+//        System.out.println("\n---------------------------------------------------------------");
+//        System.out.println("PART 2: CORE RESTAURANT OPERATIONS");
+//        System.out.println("---------------------------------------------------------------\n");
+//
+//        demonstrateCoreOperations();
+//
+//        System.out.println("\n===============================================================");
+//        System.out.println("   DEMONSTRATION COMPLETED SUCCESSFULLY");
+//        System.out.println("===============================================================");
+//    }
+//
+//    /**
+//     * Demonstrates extent persistence - the key requirement of the project.
+//     * Shows how class extents are saved to .dat files and loaded back, maintaining state.
+//     */
+//    private static void demonstrateExtentPersistence() {
+//        System.out.println("[STEP 1] Creating sample data...\n");
+//
+//        // Create ingredients
+//        Ingredient tomato = new Ingredient("Tomato", "kg", 50.0, 10.0, 5.50);
+//        Ingredient cheese = new Ingredient("Cheese", "kg", 30.0, 8.0, 15.00);
+//        Ingredient flour = new Ingredient("Flour", "kg", 100.0, 20.0, 3.00);
+//
+//        // Create menu items with different types
+//        NutritionalInfo pizzaNutrition = new NutritionalInfo(800, 35, 90, 25, 5);
+//        MainDish margheritaPizza = new MainDish(
+//            "Margherita Pizza",
+//            "Classic Italian pizza with tomato and mozzarella",
+//            45.00,
+//            "pizza.jpg",
+//            "Italy",
+//            pizzaNutrition,
+//            Arrays.asList(tomato, cheese, flour),
+//            2 // spice level
+//        );
+//
+//        NutritionalInfo cokeNutrition = new NutritionalInfo(140, 0, 39, 0, 0);
+//        Beverage coke = new Beverage(
+//            "Coca-Cola",
+//            "Classic Coca-Cola 330ml",
+//            8.00,
+//            "coke.jpg",
+//            "USA",
+//            cokeNutrition,
+//            Arrays.asList(),
+//            0.0 // no alcohol
+//        );
+//
+//        NutritionalInfo tiramisuNutrition = new NutritionalInfo(450, 8, 45, 25, 2);
+//        Dessert tiramisu = new Dessert(
+//            "Tiramisu",
+//            "Classic Italian dessert",
+//            28.00,
+//            "tiramisu.jpg",
+//            "Italy",
+//            tiramisuNutrition,
+//            Arrays.asList(),
+//            false // no nuts
+//        );
+//
+//        // Create customers
+//        Customer customer1 = new Customer("John", "Doe", "john.doe@email.com", "123456789", LocalDateTime.now());
+//        Customer customer2 = new Customer("Jane", "Smith", "jane.smith@email.com", "987654321", LocalDateTime.now());
+//
+//        // Create employees
+//        Waiter waiter1 = new Waiter("Alice", "alice@restaurant.com", "111222333",
+//                                    LocalDate.of(2020, 3, 15), 25.00, "Section A");
+//        Manager manager1 = new Manager("Bob", "bob@restaurant.com", "444555666",
+//                                       LocalDate.of(2018, 1, 10), 45.00, "Operations", 3);
+//
+//        // Create tables
+//        Table table1 = new Table(1, 4, "Section A");
+//        Table table2 = new Table(2, 2, "Section A");
+//
+//        System.out.println("CREATED:");
+//        System.out.println("   - 3 Ingredients (Tomato, Cheese, Flour)");
+//        System.out.println("   - 3 Menu Items (Pizza, Coke, Tiramisu)");
+//        System.out.println("   - 2 Customers");
+//        System.out.println("   - 2 Employees (1 Waiter, 1 Manager)");
+//        System.out.println("   - 2 Tables\n");
+//
+//        // Display extent sizes before saving
+//        System.out.println("EXTENT SIZES (in memory):");
+//        System.out.println("   - Ingredients: " + Ingredient.getAllIngredients().size());
+//        System.out.println("   - Menu Items: " + MenuItem.getAllMenuItems().size());
+//        System.out.println("   - Customers: " + Customer.getAllCustomers().size());
+//        System.out.println("   - Employees: " + Employee.getAllEmployees().size());
+//        System.out.println("   - Tables: " + Table.getAllTables().size() + "\n");
+//
+//        // Save all extents to .dat files
+//        System.out.println("[STEP 2] Saving extents to .dat files...\n");
+//        try {
+//            Ingredient.saveExtent("ingredients.dat");
+//            System.out.println("   [OK] Saved ingredients.dat");
+//
+//            MenuItem.saveExtent("menu_items.dat");
+//            System.out.println("   [OK] Saved menu_items.dat");
+//
+//            Customer.saveExtent("customers.dat");
+//            System.out.println("   [OK] Saved customers.dat");
+//
+//            Employee.saveExtent("employees.dat");
+//            System.out.println("   [OK] Saved employees.dat");
+//
+//            Table.saveExtent("tables.dat");
+//            System.out.println("   [OK] Saved tables.dat");
+//
+//            System.out.println("\nAll extents saved to .dat files successfully!\n");
+//        } catch (Exception e) {
+//            System.out.println("[ERROR] Error saving extents: " + e.getMessage() + "\n");
+//        }
+//
+//        // Simulate application restart
+//        System.out.println("[STEP 3] Simulating application restart (clearing memory)...\n");
+//        System.out.println("   (In real scenario, extent would be cleared and reloaded on restart)\n");
+//
+//        // Load extents from .dat files
+//        System.out.println("[STEP 4] Loading extents from .dat files...\n");
+//        boolean ingredientsLoaded = Ingredient.loadExtent("ingredients.dat");
+//        System.out.println("   " + (ingredientsLoaded ? "[OK]" : "[FAIL]") + " Loaded ingredients.dat");
+//
+//        boolean menuItemsLoaded = MenuItem.loadExtent("menu_items.dat");
+//        System.out.println("   " + (menuItemsLoaded ? "[OK]" : "[FAIL]") + " Loaded menu_items.dat");
+//
+//        boolean customersLoaded = Customer.loadExtent("customers.dat");
+//        System.out.println("   " + (customersLoaded ? "[OK]" : "[FAIL]") + " Loaded customers.dat");
+//
+//        boolean employeesLoaded = Employee.loadExtent("employees.dat");
+//        System.out.println("   " + (employeesLoaded ? "[OK]" : "[FAIL]") + " Loaded employees.dat");
+//
+//        boolean tablesLoaded = Table.loadExtent("tables.dat");
+//        System.out.println("   " + (tablesLoaded ? "[OK]" : "[FAIL]") + " Loaded tables.dat");
+//
+//        System.out.println("\nLOAD RESULTS: " + (ingredientsLoaded && menuItemsLoaded && customersLoaded &&
+//                                           employeesLoaded && tablesLoaded ? "ALL SUCCESS" : "SOME FAILED") + "\n");
+//
+//        // Verify data integrity after load
+//        System.out.println("EXTENT SIZES (after loading from .dat files):");
+//        System.out.println("   - Ingredients: " + Ingredient.getAllIngredients().size());
+//        System.out.println("   - Menu Items: " + MenuItem.getAllMenuItems().size());
+//        System.out.println("   - Customers: " + Customer.getAllCustomers().size());
+//        System.out.println("   - Employees: " + Employee.getAllEmployees().size());
+//        System.out.println("   - Tables: " + Table.getAllTables().size() + "\n");
+//
+//        System.out.println(">>> EXTENT PERSISTENCE VERIFIED <<<");
+//        System.out.println("    Data persisted to .dat files and restored successfully!");
+//    }
+//
+//    /**
+//     * Demonstrates core restaurant management functionalities.
+//     */
+//    private static void demonstrateCoreOperations() {
+//        // Get existing objects from extents
+//        List<Customer> customers = Customer.getAllCustomers();
+//        List<MenuItem> menuItems = MenuItem.getAllMenuItems();
+//        List<Table> tables = Table.getAllTables();
+//        List<Employee> employees = Employee.getAllEmployees();
+//
+//        if (customers.isEmpty() || menuItems.isEmpty() || tables.isEmpty()) {
+//            System.out.println("[WARNING] No data available. Run extent persistence demonstration first.");
+//            return;
+//        }
+//
+//        Customer customer = customers.get(0);
+//        Table table = tables.get(0);
+//
+//        // ================================================================
+//        // 2.1: ATTRIBUTE TYPES DEMONSTRATION
+//        // ================================================================
+//        System.out.println("---------------------------------------------------------------");
+//        System.out.println("2.1: ATTRIBUTE TYPES");
+//        System.out.println("---------------------------------------------------------------\n");
+//
+//        MenuItem pizza = menuItems.stream()
+//            .filter(m -> m instanceof MainDish)
+//            .findFirst()
+//            .orElse(menuItems.get(0));
+//
+//        System.out.println("[STATIC ATTRIBUTE] TAX_RATE:");
+//        System.out.println("   Value: " + MenuItem.TAX_RATE + " (23% Polish VAT)");
+//        System.out.println("   Applied uniformly to all menu items\n");
+//
+//        System.out.println("[COMPLEX ATTRIBUTE] Nutritional Info:");
+//        System.out.println("   Item: " + pizza.getName());
+//        NutritionalInfo nutrition = pizza.getNutritionalInfo();
+//        System.out.println("   Calories: " + nutrition.getCalories() + " kcal");
+//        System.out.println("   Protein: " + nutrition.getProtein() + "g");
+//        System.out.println("   Carbohydrates: " + nutrition.getCarbs() + "g");
+//        System.out.println("   Fats: " + nutrition.getFats() + "g");
+//        System.out.println("   Fiber: " + nutrition.getFiber() + "g\n");
+//
+//        System.out.println("[MULTI-VALUE ATTRIBUTE] Ingredients:");
+//        System.out.println("   Item: " + pizza.getName());
+//        List<Ingredient> ingredients = pizza.getIngredients();
+//        if (ingredients.isEmpty()) {
+//            System.out.println("   No ingredients listed\n");
+//        } else {
+//            for (Ingredient ing : ingredients) {
+//                System.out.println("   - " + ing.getName() + " (" + ing.getUnit() + ")");
+//            }
+//            System.out.println();
+//        }
+//
+//        if (!employees.isEmpty()) {
+//            Employee emp = employees.get(0);
+//            System.out.println("[DERIVED ATTRIBUTES] Employee:");
+//            System.out.println("   Name: " + emp.getName());
+//            System.out.println("   Years of Service: " + emp.getYearsOfService() + " years");
+//            System.out.println("   (Calculated from hire date: " + emp.getHireDate() + ")");
+//            System.out.println("   Is Experienced (>=5 years): " + (emp.getIsExperienced() ? "Yes" : "No") + "\n");
+//        }
+//
+//        Ingredient ingredient = Ingredient.getAllIngredients().get(0);
+//        System.out.println("[DERIVED ATTRIBUTE] Ingredient Reorder Status:");
+//        System.out.println("   Name: " + ingredient.getName());
+//        System.out.println("   Current Stock: " + ingredient.getCurrentStock() + " " + ingredient.getUnit());
+//        System.out.println("   Reorder Point: " + ingredient.getReorderPoint() + " " + ingredient.getUnit());
+//        System.out.println("   Needs Reorder: " + (ingredient.getNeedsReorder() ? "YES [!]" : "NO") + "\n");
+//
+//        // ================================================================
+//        // 2.2: RESERVATION SYSTEM
+//        // ================================================================
+//        System.out.println("---------------------------------------------------------------");
+//        System.out.println("2.2: RESERVATION SYSTEM");
+//        System.out.println("---------------------------------------------------------------\n");
+//
+//        LocalDateTime reservationTime = LocalDateTime.now().plusDays(1).withHour(19).withMinute(0);
+//        Reservation reservation = new Reservation(
+//            customer,
+//            reservationTime.toLocalDate(),
+//            reservationTime.toLocalTime(),
+//            4
+//        );
+//        reservation.setSpecialRequests("Window seat preferred");
+//        reservation.addTable(table);
+//
+//        System.out.println("RESERVATION CREATED:");
+//        System.out.println("   Customer: " + customer.getName() + " " + customer.getSurname());
+//        System.out.println("   Date: " + reservation.getDate());
+//        System.out.println("   Time: " + reservation.getTime());
+//        System.out.println("   Party Size: " + reservation.getSize());
+//        System.out.println("   Status: " + reservation.getStatus());
+//        System.out.println("   Special Requests: " + reservation.getSpecialRequests());
+//        System.out.println("   [STATIC] Cancellation Window: " + Reservation.CANCELLATION_WINDOW_HOURS + " hours\n");
+//
+//        reservation.confirmReservation();
+//        System.out.println(">>> Reservation confirmed");
+//        System.out.println("    New Status: " + reservation.getStatus() + "\n");
+//
+//        // ================================================================
+//        // 2.3: DINE-IN ORDER (PROGRESSIVE ORDERING)
+//        // ================================================================
+//        System.out.println("---------------------------------------------------------------");
+//        System.out.println("2.3: DINE-IN ORDER (Progressive Ordering)");
+//        System.out.println("---------------------------------------------------------------\n");
+//
+//        DineIn dineInOrder = new DineIn(customer);
+//
+//        System.out.println("DINE-IN ORDER CREATED:");
+//        // TODO: Add getOrderId() method to Order class
+//        System.out.println("   Order ID: " + dineInOrder.getOrderId());
+//        System.out.println("   Type: Dine-In (supports multiple order requests)");
+//        System.out.println("   Customer: " + customer.getName() + " " + customer.getSurname());
+//        System.out.println("   Status: " + dineInOrder.getStatus());
+//        System.out.println("   Date: " + dineInOrder.getDate());
+//        System.out.println("   Time: " + dineInOrder.getTime() + "\n");
+//
+//        // First order request (appetizers)
+//        MenuItem pizza1 = menuItems.stream()
+//            .filter(m -> m instanceof MainDish)
+//            .findFirst()
+//            .orElse(menuItems.get(0));
+//
+//        OrderRequest request1 = new OrderRequest();
+//        ItemQuantity item1 = new ItemQuantity(pizza1, 2);
+//        item1.setSpecialRequests("Extra crispy");
+//        request1.addItemQuantity(item1);
+//        dineInOrder.addOrderRequest(request1);
+//
+//        System.out.println("ORDER REQUEST #1 (First Course):");
+//        System.out.println("   Request ID: " + request1.getRequestId());
+//        System.out.println("   Status: " + request1.getStatus());
+//        System.out.println("   Items: " + pizza1.getName() + " x2");
+//        System.out.println("   Special Requests: " + item1.getSpecialRequests());
+//        System.out.println("   Request Total: " + String.format("%.2f", request1.calculateRequestTotal()) + " PLN\n");
+//
+//        request1.confirmRequest();
+//        System.out.println("   [OK] Request confirmed: " + request1.getStatus());
+//
+//        // TODO: Add startPreparation() method to OrderRequest class
+//        request1.startPreparation();
+//        System.out.println("   [OK] Kitchen preparing: " + request1.getStatus() + "\n");
+//
+//        // Second order request (main course)
+//        OrderRequest request2 = new OrderRequest();
+//        ItemQuantity item2 = new ItemQuantity(pizza1, 1);
+//        item2.setSpecialRequests("Well done");
+//        request2.addItemQuantity(item2);
+//        dineInOrder.addOrderRequest(request2);
+//
+//        System.out.println("ORDER REQUEST #2 (Main Course):");
+//        System.out.println("   Request ID: " + request2.getRequestId());
+//        System.out.println("   Status: " + request2.getStatus());
+//        System.out.println("   Items: " + pizza1.getName() + " x1");
+//        System.out.println("   Request Total: " + String.format("%.2f", request2.calculateRequestTotal()) + " PLN\n");
+//
+//        // TODO: Add markAsReady() method to OrderRequest class
+//        request1.markAsReady();
+//        request1.markAsServed();
+//        System.out.println(">>> Request #1 completed and served");
+//        System.out.println("    Final Status: " + request1.getStatus() + "\n");
+//
+//        System.out.println("ORDER SUMMARY:");
+//        // TODO: Add calculateTotal() method to Order class (or use calculateFinalPrice())
+//        System.out.println("   Total Order Amount: " + String.format("%.2f", dineInOrder.calculateTotal()) + " PLN");
+//        System.out.println("   Order Requests: " + dineInOrder.getOrderRequests().size() + "\n");
+//
+//        // ================================================================
+//        // 2.4: TAKEAWAY ORDER
+//        // ================================================================
+//        System.out.println("---------------------------------------------------------------");
+//        System.out.println("2.4: TAKEAWAY ORDER (Single Batch)");
+//        System.out.println("---------------------------------------------------------------\n");
+//
+//        Customer customer2 = customers.size() > 1 ? customers.get(1) : customer;
+//        LocalTime collectionTime = LocalTime.now().plusHours(1);
+//        Takeaway takeawayOrder = new Takeaway(customer2, collectionTime);
+//
+//        MenuItem beverage = menuItems.stream()
+//            .filter(m -> m instanceof Beverage)
+//            .findFirst()
+//            .orElse(menuItems.get(0));
+//
+//        OrderRequest takeawayRequest = new OrderRequest();
+//        ItemQuantity takeawayItem = new ItemQuantity(beverage, 3);
+//        takeawayItem.setSpecialRequests("No ice");
+//        takeawayRequest.addItemQuantity(takeawayItem);
+//        takeawayOrder.addOrderRequest(takeawayRequest);
+//
+//        System.out.println("TAKEAWAY ORDER CREATED:");
+//        // TODO: Add getOrderId() method to Order class
+//        System.out.println("   Order ID: " + takeawayOrder.getOrderId());
+//        System.out.println("   Customer: " + customer2.getName() + " " + customer2.getSurname());
+//        System.out.println("   Collection Time: " + collectionTime);
+//        System.out.println("   Items: " + beverage.getName() + " x3");
+//        // TODO: Add calculateTotal() method to Order class
+//        System.out.println("   Total: " + String.format("%.2f", takeawayOrder.calculateTotal()) + " PLN");
+//        System.out.println("   Payment Required: Upfront (Card only)\n");
+//
+//        // Create card payment for takeaway
+//        // TODO: Add calculateTotal() method to Order class
+//        Card cardPayment = new Card(takeawayOrder.calculateTotal(), "4532", "Visa");
+//        takeawayOrder.setPayment(cardPayment);
+//        // TODO: Add processPayment() method to Payment class
+//        cardPayment.processPayment();
+//
+//        System.out.println("PAYMENT PROCESSED:");
+//        System.out.println("   Type: Card");
+//        System.out.println("   Card: Visa ending in " + cardPayment.getLastFourDigits());
+//        System.out.println("   Amount: " + String.format("%.2f", cardPayment.getAmountPayed()) + " PLN");
+//        System.out.println("   Status: " + cardPayment.getStatus() + "\n");
+//
+//        takeawayRequest.confirmRequest();
+//        // TODO: Add startPreparation() method to OrderRequest class
+//        takeawayRequest.startPreparation();
+//        // TODO: Add markAsReady() method to OrderRequest class
+//        takeawayRequest.markAsReady();
+//        takeawayOrder.markAsPickedUp();
+//
+//        System.out.println(">>> Order prepared and picked up");
+//        System.out.println("    Order Status: " + takeawayOrder.getStatus());
+//        System.out.println("    Was Picked Up: " + takeawayOrder.getWasPickedUp() + "\n");
+//
+//        // ================================================================
+//        // 2.5: PAYMENT OPTIONS
+//        // ================================================================
+//        System.out.println("---------------------------------------------------------------");
+//        System.out.println("2.5: PAYMENT OPTIONS");
+//        System.out.println("---------------------------------------------------------------\n");
+//
+//        // TODO: Add calculateTotal() method to Order class
+//        double totalAmount = dineInOrder.calculateTotal();
+//        Cash cashPayment = new Cash(totalAmount, 200.00);
+//        dineInOrder.setPayment(cashPayment);
+//        // TODO: Add processPayment() method to Payment class
+//        cashPayment.processPayment();
+//
+//        System.out.println("CASH PAYMENT:");
+//        System.out.println("   Amount Due: " + String.format("%.2f", totalAmount) + " PLN");
+//        System.out.println("   Amount Tendered: " + String.format("%.2f", cashPayment.getAmountTendered()) + " PLN");
+//        System.out.println("   Change Given: " + String.format("%.2f", cashPayment.getChangeGiven()) + " PLN");
+//        System.out.println("   Status: " + cashPayment.getStatus() + "\n");
+//
+//        dineInOrder.completeOrder();
+//        System.out.println(">>> Order finalized and completed");
+//        System.out.println("    Order Status: " + dineInOrder.getStatus() + "\n");
+//
+//        // ================================================================
+//        // 2.6: INVENTORY MANAGEMENT
+//        // ================================================================
+//        System.out.println("---------------------------------------------------------------");
+//        System.out.println("2.6: INVENTORY MANAGEMENT");
+//        System.out.println("---------------------------------------------------------------\n");
+//
+//        Supplier supplier = new Supplier("Fresh Foods Ltd", "123-456-789", "supplier@freshfoods.com", 4.5);
+//
+//        Ingredient tomato = Ingredient.getAllIngredients().stream()
+//            .filter(i -> i.getName().equals("Tomato"))
+//            .findFirst()
+//            .orElse(Ingredient.getAllIngredients().get(0));
+//
+//        System.out.println("INGREDIENT STATUS (Before Usage):");
+//        System.out.println("   Name: " + tomato.getName());
+//        System.out.println("   Current Stock: " + tomato.getCurrentStock() + " " + tomato.getUnit());
+//        System.out.println("   Reorder Point: " + tomato.getReorderPoint() + " " + tomato.getUnit());
+//        System.out.println("   Cost Per Unit: " + String.format("%.2f", tomato.getCostPerUnit()) + " PLN");
+//        System.out.println("   Needs Reorder: " + (tomato.getNeedsReorder() ? "YES" : "NO") + "\n");
+//
+//        // Simulate usage
+//        // TODO: Add reduceStock() method to Ingredient class
+//        tomato.reduceStock(45.0);
+//        System.out.println("STOCK UPDATE: Usage recorded");
+//        System.out.println("   Stock reduced by: 45.0 kg");
+//        System.out.println("   Current Stock: " + tomato.getCurrentStock() + " " + tomato.getUnit());
+//        System.out.println("   Needs Reorder: " + (tomato.getNeedsReorder() ? "YES [!]" : "NO") + "\n");
+//
+//        // Create supply log and restock
+//        double quantitySupplied = 50.0;
+//        SupplyLog supplyLog = new SupplyLog(
+//            supplier,
+//            tomato,
+//            LocalDate.now(),
+//            tomato.getCostPerUnit() * quantitySupplied,
+//            quantitySupplied
+//        );
+//        // TODO: Add increaseStock() method to Ingredient class
+//        tomato.increaseStock(quantitySupplied);
+//
+//        System.out.println("SUPPLY RECEIVED:");
+//        System.out.println("   Supplier: " + supplier.getName());
+//        System.out.println("   Reliability Rating: " + supplier.getReliabilityRating() + "/5.0");
+//        System.out.println("   Quantity Supplied: " + supplyLog.getQuantitySupplied() + " kg");
+//        System.out.println("   Total Cost: " + String.format("%.2f", supplyLog.getCostAtSupply()) + " PLN");
+//        System.out.println("   Supply Date: " + supplyLog.getSupplyDate());
+//        System.out.println("   Current Stock: " + tomato.getCurrentStock() + " " + tomato.getUnit());
+//        System.out.println("   Needs Reorder: " + (tomato.getNeedsReorder() ? "YES" : "NO") + "\n");
+//
+//        // ================================================================
+//        // 2.7: EMPLOYEE MANAGEMENT
+//        // ================================================================
+//        System.out.println("---------------------------------------------------------------");
+//        System.out.println("2.7: EMPLOYEE MANAGEMENT");
+//        System.out.println("---------------------------------------------------------------\n");
+//
+//        for (Employee emp : employees) {
+//            if (emp instanceof Waiter) {
+//                Waiter waiter = (Waiter) emp;
+//                System.out.println("WAITER PROFILE:");
+//                System.out.println("   Name: " + waiter.getName());
+//                System.out.println("   Email: " + waiter.getEmail());
+//                System.out.println("   Section: " + waiter.getSection());
+//                System.out.println("   Hire Date: " + waiter.getHireDate());
+//                System.out.println("   Hourly Rate: " + String.format("%.2f", waiter.getHourlyRate()) + " PLN");
+//                System.out.println("   Years of Service: " + waiter.getYearsOfService() + " years (derived)");
+//                System.out.println("   Total Tips: " + String.format("%.2f", waiter.getTipTotal()) + " PLN\n");
+//            } else if (emp instanceof Manager) {
+//                Manager manager = (Manager) emp;
+//                System.out.println("MANAGER PROFILE:");
+//                System.out.println("   Name: " + manager.getName());
+//                System.out.println("   Email: " + manager.getEmail());
+//                System.out.println("   Department: " + manager.getDepartment());
+//                System.out.println("   Access Level: " + manager.getAccessLevel());
+//                System.out.println("   Hire Date: " + manager.getHireDate());
+//                System.out.println("   Hourly Rate: " + String.format("%.2f", manager.getHourlyRate()) + " PLN");
+//                System.out.println("   Years of Service: " + manager.getYearsOfService() + " years (derived)");
+//                System.out.println("   Is Experienced: " + (manager.getIsExperienced() ? "Yes (>=5 years)" : "No (<5 years)") + "\n");
+//            }
+//        }
+//
+//        // ================================================================
+//        // FINAL: SAVING ALL CHANGES TO .DAT FILES
+//        // ================================================================
+//        System.out.println("---------------------------------------------------------------");
+//        System.out.println("FINAL: SAVING ALL CHANGES TO .DAT FILES");
+//        System.out.println("---------------------------------------------------------------\n");
+//
+//        try {
+//            // Save all additional extents created during operations
+//            Reservation.saveExtent("reservations.dat");
+//            System.out.println("   [OK] Saved reservations.dat");
+//
+//            Order.saveExtent("orders.dat");
+//            System.out.println("   [OK] Saved orders.dat");
+//
+//            OrderRequest.saveExtent("order_requests.dat");
+//            System.out.println("   [OK] Saved order_requests.dat");
+//
+//            Payment.saveExtent("payments.dat");
+//            System.out.println("   [OK] Saved payments.dat");
+//
+//            Supplier.saveExtent("suppliers.dat");
+//            System.out.println("   [OK] Saved suppliers.dat");
+//
+//            System.out.println("\nFINAL EXTENT STATISTICS:");
+//            System.out.println("   - Orders: " + Order.getAllOrders().size());
+//            System.out.println("   - Order Requests: " + OrderRequest.getAllOrderRequests().size());
+//            System.out.println("   - Reservations: " + Reservation.getAllReservations().size());
+//            System.out.println("   - Payments: " + Payment.getAllPayments().size());
+//            System.out.println("   - Suppliers: " + Supplier.getAllSuppliers().size());
+//            System.out.println("\n>>> All changes persisted to .dat files successfully!");
+//        } catch (Exception e) {
+//            System.out.println("[ERROR] Error saving extents: " + e.getMessage());
+//            e.printStackTrace();
+//        }
+//    }
+//}

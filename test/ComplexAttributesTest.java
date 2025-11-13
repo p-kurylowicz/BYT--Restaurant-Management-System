@@ -4,8 +4,15 @@ import static org.junit.jupiter.api.Assertions.*;
 import java.util.Arrays;
 
 /**
- * Unit tests for Complex Attributes
- * Tests the NutritionalInfo complex attribute in MenuItem
+ * Tests for complex attribute implementation (NutritionalInfo).
+ *
+ * <p>Test categories:
+ * <ul>
+ *   <li>Creation: valid grouped attribute construction</li>
+ *   <li>Validation: negative value checks for all components</li>
+ *   <li>Atomic updates: all components updated together</li>
+ *   <li>Integration: complex attribute used in MenuItem</li>
+ * </ul>
  */
 public class ComplexAttributesTest {
 

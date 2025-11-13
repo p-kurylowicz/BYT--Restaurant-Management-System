@@ -4,8 +4,15 @@ import static org.junit.jupiter.api.Assertions.*;
 import java.time.LocalDate;
 
 /**
- * Unit tests for Derived Attributes
- * Tests Ingredient.needsReorder, Employee.yearsOfService, Employee.isExperienced
+ * Tests for derived attribute implementation (calculated values).
+ *
+ * <p>Test categories:
+ * <ul>
+ *   <li>needsReorder: stock below/above reorder point calculations</li>
+ *   <li>yearsOfService: date-based calculation from hire date</li>
+ *   <li>isExperienced: boolean derived from yearsOfService >= 5</li>
+ *   <li>No setters: derived attributes are read-only</li>
+ * </ul>
  */
 public class DerivedAttributesTest {
 
