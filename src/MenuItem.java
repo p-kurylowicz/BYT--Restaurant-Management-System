@@ -24,25 +24,39 @@ public abstract class MenuItem implements Serializable {
 
     private NutritionalInfo nutritionalInfo;
 
-    
-    private List<Ingredient> ingredients;
 
-    
+    private List<String> allergens;
+
+
     protected MenuItem() {
-        this.ingredients = new ArrayList<>();
+        this.allergens = new ArrayList<>();
     }
 
-    
+
     protected MenuItem(String name, String description, double price, String image,
-                      String nationalOrigin, NutritionalInfo nutritionalInfo, List<Ingredient> ingredients) {
-        this.ingredients = new ArrayList<>();
+                      String nationalOrigin, NutritionalInfo nutritionalInfo) {
+        this.allergens = new ArrayList<>();
         setName(name);
         setDescription(description);
         setPrice(price);
         setImage(image);
         setNationalOrigin(nationalOrigin);
         setNutritionalInfo(nutritionalInfo);
-        setIngredients(ingredients);
+        this.availability = MenuItemAvailability.AVAILABLE;
+
+        addMenuItem(this);
+    }
+
+    protected MenuItem(String name, String description, double price, String image,
+                      String nationalOrigin, NutritionalInfo nutritionalInfo, List<String> allergens) {
+        this.allergens = new ArrayList<>();
+        setName(name);
+        setDescription(description);
+        setPrice(price);
+        setImage(image);
+        setNationalOrigin(nationalOrigin);
+        setNutritionalInfo(nutritionalInfo);
+        setAllergens(allergens);
         this.availability = MenuItemAvailability.AVAILABLE;
 
         addMenuItem(this);
@@ -57,9 +71,8 @@ public abstract class MenuItem implements Serializable {
     public String getNationalOrigin() { return nationalOrigin; }
     public NutritionalInfo getNutritionalInfo() { return nutritionalInfo; }
 
-    
-    public List<Ingredient> getIngredients() {
-        return Collections.unmodifiableList(ingredients);
+    public List<String> getAllergens() {
+        return Collections.unmodifiableList(allergens);
     }
 
     
@@ -113,25 +126,39 @@ public abstract class MenuItem implements Serializable {
         this.nutritionalInfo = nutritionalInfo;
     }
 
-    
-    public void setIngredients(List<Ingredient> ingredients) {
-        if (ingredients == null || ingredients.isEmpty()) {
-            throw new IllegalArgumentException("Menu item must have at least one ingredient");
-        }
-        for (Ingredient ingredient : ingredients) {
-            if (ingredient == null) {
-                throw new IllegalArgumentException("Ingredient list cannot contain null values");
+    // Multi-value allergens management
+    public void setAllergens(List<String> allergens) {
+        // Allergens are optional (0..*), so null or empty list is allowed
+        this.allergens.clear();
+        if (allergens != null && !allergens.isEmpty()) {
+            for (String allergen : allergens) {
+                if (allergen == null || allergen.trim().isEmpty()) {
+                    throw new IllegalArgumentException("Allergen list cannot contain null or empty values");
+                }
+                String trimmed = allergen.trim();
+                if (!this.allergens.contains(trimmed)) {
+                    this.allergens.add(trimmed);
+                }
             }
         }
-        this.ingredients = new ArrayList<>(ingredients);
     }
 
-
-    public void addIngredient(Ingredient ingredient) {
-        if (ingredient == null) {
-            throw new IllegalArgumentException("Ingredient cannot be null");
+    public void addAllergen(String allergen) {
+        if (allergen == null || allergen.trim().isEmpty()) {
+            throw new IllegalArgumentException("Allergen cannot be null or empty");
         }
-        this.ingredients.add(ingredient);
+        String trimmedAllergen = allergen.trim();
+        if (!allergens.contains(trimmedAllergen)) {
+            allergens.add(trimmedAllergen);
+        }
+    }
+
+    public void removeAllergen(String allergen) {
+        allergens.remove(allergen);
+    }
+
+    public void clearAllergens() {
+        allergens.clear();
     }
 
 
@@ -139,23 +166,20 @@ public abstract class MenuItem implements Serializable {
         return price * (1 + TAX_RATE);
     }
 
-
+    /**
+     * Check availability - placeholder for future implementation.
+     * TODO: Implement availability checking logic
+     */
     public boolean checkAvailability() {
-        for (Ingredient ingredient : ingredients) {
-            if (ingredient.getCurrentStock() <= 0) {
-                return false;
-            }
-        }
-        return true;
+        return this.availability == MenuItemAvailability.AVAILABLE;
     }
 
-
+    /**
+     * Recalculate availability - placeholder for future implementation.
+     * TODO: Implement availability recalculation logic
+     */
     public void recalculateAvailability() {
-        if (checkAvailability()) {
-            this.availability = MenuItemAvailability.AVAILABLE;
-        } else {
-            this.availability = MenuItemAvailability.UNAVAILABLE;
-        }
+        // Placeholder - no ingredient-based recalculation for now
     }
 
     public void transitionToPendingUpdate() {
@@ -200,7 +224,7 @@ public abstract class MenuItem implements Serializable {
 
     @Override
     public String toString() {
-        return String.format("MenuItem[%s, price=%.2f PLN (%.2f with tax), origin=%s, availability=%s]",
-            name, price, calculatePriceWithTax(), nationalOrigin, availability);
+        return String.format("MenuItem[%s, price=%.2f PLN (%.2f with tax), origin=%s, availability=%s, allergens=%d]",
+            name, price, calculatePriceWithTax(), nationalOrigin, availability, allergens.size());
     }
 }

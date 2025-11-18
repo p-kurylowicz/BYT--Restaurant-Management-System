@@ -84,7 +84,29 @@ public class Ingredient implements Serializable {
         setCurrentStock(currentStock + quantity);
     }
 
-    
+    /**
+     * Increase stock by specified quantity.
+     * TODO: Implement supply log integration and stock tracking
+     */
+    public void increaseStock(double quantity) {
+        if (quantity <= 0) {
+            throw new IllegalArgumentException("Quantity to increase must be greater than zero");
+        }
+        updateCurrentStock(quantity);
+    }
+
+    /**
+     * Reduce stock by specified quantity.
+     * TODO: Implement usage tracking and automatic reorder alerts
+     */
+    public void reduceStock(double quantity) {
+        if (quantity <= 0) {
+            throw new IllegalArgumentException("Quantity to reduce must be greater than zero");
+        }
+        updateCurrentStock(-quantity);
+    }
+
+
     private static void addIngredient(Ingredient ingredient) {
         if (ingredient == null) {
             throw new IllegalArgumentException("Ingredient cannot be null");

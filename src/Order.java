@@ -11,29 +11,22 @@ public abstract class Order implements Serializable {
 
     
     private static List<Order> allOrders = new ArrayList<>();
+    private static int orderCounter = 0;
 
-    
+
+    private String orderId;
     private OrderStatus status;
     private String items;
     private double total;
     private LocalDate date;
     private LocalTime time;
 
-    
-    private Customer customer;
-    private List<OrderRequest> orderRequests;
-    private Payment payment; 
-    // Discount is not used for now for simplicity
 
-    
-    protected Order() {
-        this.orderRequests = new ArrayList<>();
-    }
+    protected Order() {}
 
-    
-    protected Order(Customer customer) {
-        this.orderRequests = new ArrayList<>();
-        setCustomer(customer);
+
+    protected Order(String orderId) {
+        this.orderId = orderId != null ? orderId : "ORD-" + String.format("%06d", ++orderCounter);
         this.status = OrderStatus.ACTIVE;
         this.date = LocalDate.now();
         this.time = LocalTime.now();
@@ -42,30 +35,20 @@ public abstract class Order implements Serializable {
         addOrder(this);
     }
 
-    
+
+    public String getOrderId() { return orderId; }
     public OrderStatus getStatus() { return status; }
     public String getItems() { return items; }
     public double getTotal() { return total; }
     public LocalDate getDate() { return date; }
     public LocalTime getTime() { return time; }
-    public Customer getCustomer() { return customer; }
-    public Payment getPayment() { return payment; }
 
-    public List<OrderRequest> getOrderRequests() {
-        return Collections.unmodifiableList(orderRequests);
-    }
-
-    
-    public void setCustomer(Customer customer) {
-        if (customer == null) {
-            throw new IllegalArgumentException("Customer cannot be null");
-        }
-        this.customer = customer;
-    }
-
-    public void setPayment(Payment payment) {
-        
-        this.payment = payment;
+    /**
+     * Calculates the total price of the order.
+     * TODO: Implement full business logic for order total calculation
+     */
+    public double calculateTotal() {
+        return calculateFinalPrice();
     }
 
     public void setDate(LocalDate date) {
@@ -83,43 +66,23 @@ public abstract class Order implements Serializable {
     }
 
 
-    public void addOrderRequest(OrderRequest orderRequest) {
-        if (orderRequest == null) {
-            throw new IllegalArgumentException("Order request cannot be null");
+    // Placeholder - no order requests for now
+    public void setItems(String items) {
+        if (items == null) {
+            throw new IllegalArgumentException("Items cannot be null");
         }
-        if (this.status != OrderStatus.ACTIVE) {
-            throw new IllegalStateException("Cannot add order request to non-active order");
-        }
-        orderRequests.add(orderRequest);
-        recalculateTotal();
-        updateItemsDescription();
+        this.items = items;
     }
 
-    // Recalculate total
-    private void recalculateTotal() {
-        this.total = 0.0;
-        for (OrderRequest request : orderRequests) {
-            this.total += request.calculateRequestTotal();
+    public void setTotal(double total) {
+        if (total < 0) {
+            throw new IllegalArgumentException("Total cannot be negative");
         }
-    }
-
-
-    private void updateItemsDescription() {
-        StringBuilder itemsBuilder = new StringBuilder();
-        for (OrderRequest request : orderRequests) {
-            if (!itemsBuilder.isEmpty()) {
-                itemsBuilder.append("; ");
-            }
-            itemsBuilder.append(request.getRequestDetails());
-        }
-        this.items = itemsBuilder.toString();
+        this.total = total;
     }
 
     // Finalize order
     public void finalizeOrder() {
-        if (orderRequests.isEmpty()) {
-            throw new IllegalStateException("Cannot finalize order with no order requests");
-        }
         if (this.status != OrderStatus.ACTIVE) {
             throw new IllegalStateException("Only active orders can be finalized");
         }
@@ -133,8 +96,8 @@ public abstract class Order implements Serializable {
 
     // Complete order (after payment)
     public void completeOrder() {
-        if (this.payment == null || this.payment.getStatus() != PaymentStatus.PAID) {
-            throw new IllegalStateException("Order cannot be completed without confirmed payment");
+        if (this.status != OrderStatus.AWAITING_PAYMENT) {
+            throw new IllegalStateException("Only orders awaiting payment can be completed");
         }
         this.status = OrderStatus.COMPLETED;
     }
@@ -185,7 +148,7 @@ public abstract class Order implements Serializable {
 
     @Override
     public String toString() {
-        return String.format("Order[customer=%s, status=%s, date=%s, time=%s, total=%.2f, requests=%d]",
-            customer.getName(), status, date, time, total, orderRequests.size());
+        return String.format("Order[id=%s, status=%s, date=%s, time=%s, items=%s, total=%.2f]",
+            orderId, status, date, time, items, total);
     }
 }

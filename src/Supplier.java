@@ -10,29 +10,40 @@ public class Supplier implements Serializable {
     
     private static List<Supplier> allSuppliers = new ArrayList<>();
 
-    
-    private String name;
-    private String phone;
-    private String email;
-    private double reliabilityRating;
 
-    
+    private String name;
+    private ContactInfo contactInfo;
+    private double reliabilityRating;
+    private String contactPerson;
+
+
     public Supplier() {}
 
-    
-    public Supplier(String name, String phone, String email, double reliabilityRating) {
+
+    public Supplier(String name, String phone, String email, String address, double reliabilityRating, String contactPerson) {
         setName(name);
-        setPhone(phone);
-        setEmail(email);
+        setContactInfo(new ContactInfo(phone, email, address));
         setReliabilityRating(reliabilityRating);
+        setContactPerson(contactPerson);
         addSupplier(this);
     }
 
-    
+    public Supplier(String name, ContactInfo contactInfo, double reliabilityRating, String contactPerson) {
+        setName(name);
+        setContactInfo(contactInfo);
+        setReliabilityRating(reliabilityRating);
+        setContactPerson(contactPerson);
+        addSupplier(this);
+    }
+
+
     public String getName() { return name; }
-    public String getPhone() { return phone; }
-    public String getEmail() { return email; }
+    public ContactInfo getContactInfo() { return contactInfo; }
+    public String getPhone() { return contactInfo != null ? contactInfo.getPhone() : null; }
+    public String getEmail() { return contactInfo != null ? contactInfo.getEmail() : null; }
+    public String getAddress() { return contactInfo != null ? contactInfo.getAddress() : null; }
     public double getReliabilityRating() { return reliabilityRating; }
+    public String getContactPerson() { return contactPerson; }
 
     
     public void setName(String name) {
@@ -42,21 +53,19 @@ public class Supplier implements Serializable {
         this.name = name.trim();
     }
 
-    public void setPhone(String phone) {
-        if (phone == null || phone.trim().isEmpty()) {
-            throw new IllegalArgumentException("Phone cannot be null or empty");
+    public void setContactInfo(ContactInfo contactInfo) {
+        if (contactInfo == null) {
+            throw new IllegalArgumentException("Contact info cannot be null");
         }
-        this.phone = phone.trim();
+        this.contactInfo = contactInfo;
     }
 
-    public void setEmail(String email) {
-        if (email == null || email.trim().isEmpty()) {
-            throw new IllegalArgumentException("Email cannot be null or empty");
+    public void updateContactInfo(String phone, String email, String address) {
+        if (this.contactInfo == null) {
+            this.contactInfo = new ContactInfo(phone, email, address);
+        } else {
+            this.contactInfo.updateContactInfo(phone, email, address);
         }
-        if (!email.contains("@")) {
-            throw new IllegalArgumentException("Email must contain @ symbol");
-        }
-        this.email = email.trim();
     }
 
     public void setReliabilityRating(double reliabilityRating) {
@@ -66,7 +75,15 @@ public class Supplier implements Serializable {
         this.reliabilityRating = reliabilityRating;
     }
 
-    
+    public void setContactPerson(String contactPerson) {
+        if (contactPerson != null) {
+            this.contactPerson = contactPerson.trim();
+        } else {
+            this.contactPerson = null;
+        }
+    }
+
+
     private static void addSupplier(Supplier supplier) {
         if (supplier == null) {
             throw new IllegalArgumentException("Supplier cannot be null");
@@ -104,7 +121,7 @@ public class Supplier implements Serializable {
 
     @Override
     public String toString() {
-        return String.format("Supplier[%s, email=%s, phone=%s, rating=%.1f]",
-            name, email, phone, reliabilityRating);
+        return String.format("Supplier[%s, contact=%s, contactPerson=%s, rating=%.1f]",
+            name, contactInfo, contactPerson != null ? contactPerson : "N/A", reliabilityRating);
     }
 }

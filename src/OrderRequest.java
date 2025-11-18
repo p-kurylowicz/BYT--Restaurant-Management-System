@@ -16,28 +16,20 @@ public class OrderRequest implements Serializable {
     private OrderRequestStatus status;
     private String requestDetails;
 
-    
-    private List<ItemQuantity> itemQuantities;
 
-    
     public OrderRequest() {
-        this.itemQuantities = new ArrayList<>();
         this.requestId = UUID.randomUUID().toString();
         this.status = OrderRequestStatus.PENDING;
         this.requestDetails = "";
         addOrderRequest(this);
     }
 
-    
+
     public String getRequestId() { return requestId; }
     public OrderRequestStatus getStatus() { return status; }
     public String getRequestDetails() { return requestDetails; }
 
-    public List<ItemQuantity> getItemQuantities() {
-        return Collections.unmodifiableList(itemQuantities);
-    }
 
-    
     public void setRequestId(String requestId) {
         if (requestId == null || requestId.trim().isEmpty()) {
             throw new IllegalArgumentException("Request ID cannot be null or empty");
@@ -53,50 +45,36 @@ public class OrderRequest implements Serializable {
         }
     }
 
-
-    public void addItemQuantity(ItemQuantity itemQuantity) {
-        if (itemQuantity == null) {
-            throw new IllegalArgumentException("Item quantity cannot be null");
-        }
-        itemQuantities.add(itemQuantity);
-        updateRequestDetails();
-    }
-
-
-    private void updateRequestDetails() {
-        StringBuilder details = new StringBuilder();
-        for (ItemQuantity iq : itemQuantities) {
-            if (!details.isEmpty()) {
-                details.append(", ");
-            }
-            details.append(iq.getMenuItem().getName()).append(" x").append(iq.getQuantity());
-        }
-        this.requestDetails = details.toString();
-    }
-
-
-    public double calculateRequestTotal() {
-        double total = 0.0;
-        for (ItemQuantity iq : itemQuantities) {
-            total += iq.getItemTotal();
-        }
-        return total;
-    }
-
     // Confirm request
     public void confirmRequest() {
-        if (itemQuantities.isEmpty()) {
-            throw new IllegalStateException("Cannot confirm request with no items");
+        if (this.status != OrderRequestStatus.PENDING) {
+            throw new IllegalStateException("Only pending requests can be confirmed");
         }
         this.status = OrderRequestStatus.CONFIRMED;
     }
 
+    /**
+     * Start preparation of the order request.
+     * TODO: Implement full kitchen workflow logic
+     */
+    public void startPreparation() {
+        this.status = OrderRequestStatus.IN_PREPARATION;
+    }
+
+    /**
+     * Mark order request as ready for pickup/serving.
+     * TODO: Implement notification logic
+     */
+    public void markAsReady() {
+        this.status = OrderRequestStatus.READY;
+    }
+
     // Mark as served
     public void markAsServed() {
-        this.status = OrderRequestStatus.SERVED;
-        for (ItemQuantity iq : itemQuantities) {
-            iq.markAsServed();
+        if (this.status != OrderRequestStatus.READY) {
+            throw new IllegalStateException("Only ready requests can be marked as served");
         }
+        this.status = OrderRequestStatus.SERVED;
     }
 
     // Change status
@@ -153,7 +131,7 @@ public class OrderRequest implements Serializable {
 
     @Override
     public String toString() {
-        return String.format("OrderRequest[id=%s, status=%s, items=%d, total=%.2f, details=%s]",
-            requestId, status, itemQuantities.size(), calculateRequestTotal(), requestDetails);
+        return String.format("OrderRequest[id=%s, status=%s, details=%s]",
+            requestId, status, requestDetails);
     }
 }

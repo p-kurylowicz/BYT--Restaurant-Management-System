@@ -14,10 +14,10 @@ public class Manager extends Employee {
         super();
     }
 
-    
-    public Manager(String name, String email, String phone, LocalDate hireDate,
+
+    public Manager(String name, String phone, String email, String address, LocalDate hireDate,
                   double hourlyRate, String department, int accessLevel) {
-        super(name, email, phone, hireDate, hourlyRate);
+        super(name, phone, email, address, hireDate, hourlyRate);
         setDepartment(department);
         setAccessLevel(accessLevel);
     }

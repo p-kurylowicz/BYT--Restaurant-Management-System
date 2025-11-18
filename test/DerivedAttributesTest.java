@@ -76,10 +76,10 @@ public class DerivedAttributesTest {
     @Test
     @DisplayName("Employee.yearsOfService calculated correctly")
     void testYearsOfService() {
-        Waiter waiter2Years = new Waiter("Tom", "tom@restaurant.com", "+48111222333",
+        Waiter waiter2Years = new Waiter("Tom", "+48111222333", "tom@restaurant.com", "123 Test St",
             LocalDate.now().minusYears(2), 25.0, "Section A");
 
-        Waiter waiter7Years = new Waiter("Sarah", "sarah@restaurant.com", "+48444555666",
+        Waiter waiter7Years = new Waiter("Sarah", "+48444555666", "sarah@restaurant.com", "456 Test Ave",
             LocalDate.now().minusYears(7), 35.0, "Section B");
 
         assertEquals(2, waiter2Years.getYearsOfService());
@@ -89,7 +89,7 @@ public class DerivedAttributesTest {
     @Test
     @DisplayName("Employee.yearsOfService for newly hired employee")
     void testYearsOfServiceNewHire() {
-        Waiter newWaiter = new Waiter("Mike", "mike@restaurant.com", "+48555666777",
+        Waiter newWaiter = new Waiter("Mike", "+48555666777", "mike@restaurant.com", "789 Test Rd",
             LocalDate.now(), 22.0, "Section C");
 
         assertEquals(0, newWaiter.getYearsOfService(),
@@ -99,7 +99,7 @@ public class DerivedAttributesTest {
     @Test
     @DisplayName("Employee.isExperienced when years < 5")
     void testIsExperiencedFalse() {
-        Waiter newWaiter = new Waiter("Tom", "tom@restaurant.com", "+48111222333",
+        Waiter newWaiter = new Waiter("Tom", "+48111222333", "tom@restaurant.com", "123 Test St",
             LocalDate.now().minusYears(2), 25.0, "Section A");
 
         assertFalse(newWaiter.getIsExperienced(),
@@ -109,7 +109,7 @@ public class DerivedAttributesTest {
     @Test
     @DisplayName("Employee.isExperienced when years >= 5")
     void testIsExperiencedTrue() {
-        Waiter experiencedWaiter = new Waiter("Sarah", "sarah@restaurant.com", "+48444555666",
+        Waiter experiencedWaiter = new Waiter("Sarah", "+48444555666", "sarah@restaurant.com", "456 Test Ave",
             LocalDate.now().minusYears(7), 35.0, "Section B");
 
         assertTrue(experiencedWaiter.getIsExperienced(),
@@ -119,7 +119,7 @@ public class DerivedAttributesTest {
     @Test
     @DisplayName("Employee.isExperienced at exactly 5 years")
     void testIsExperiencedAtThreshold() {
-        Waiter waiterAt5Years = new Waiter("Alex", "alex@restaurant.com", "+48777888999",
+        Waiter waiterAt5Years = new Waiter("Alex", "+48777888999", "alex@restaurant.com", "321 Test Blvd",
             LocalDate.now().minusYears(5), 30.0, "Section D");
 
         assertTrue(waiterAt5Years.getIsExperienced(),
@@ -129,10 +129,10 @@ public class DerivedAttributesTest {
     @Test
     @DisplayName("Manager.isExperienced works the same as Waiter")
     void testIsExperiencedInManager() {
-        Manager experiencedManager = new Manager("Bob", "bob@restaurant.com", "+48111000111",
+        Manager experiencedManager = new Manager("Bob", "+48111000111", "bob@restaurant.com", "100 Manager St",
             LocalDate.now().minusYears(10), 50.0, "Operations", 3);
 
-        Manager newManager = new Manager("Alice", "alice@restaurant.com", "+48222000222",
+        Manager newManager = new Manager("Alice", "+48222000222", "alice@restaurant.com", "200 Manager Ave",
             LocalDate.now().minusYears(3), 45.0, "HR", 2);
 
         assertTrue(experiencedManager.getIsExperienced());
@@ -149,7 +149,7 @@ public class DerivedAttributesTest {
         // We can't directly test for absence of setters, but we verify they work correctly
 
         Ingredient ingredient = new Ingredient("Test", "kg", 15, 20, 1.0);
-        Waiter waiter = new Waiter("Test", "test@restaurant.com", "+48111111111",
+        Waiter waiter = new Waiter("Test", "+48111111111", "test@restaurant.com", "999 Test Ln",
             LocalDate.now().minusYears(3), 25.0, "Section A");
 
         // These should be calculated, not set

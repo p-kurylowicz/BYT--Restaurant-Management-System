@@ -51,7 +51,16 @@ public abstract class Payment implements Serializable {
         this.status = PaymentStatus.IN_TRANSACTION;
     }
 
-    
+    /**
+     * Process payment - convenience method to confirm payment.
+     * TODO: Implement full payment processing logic including validation,
+     * external payment gateway integration, and transaction logging
+     */
+    public void processPayment() {
+        confirmPayment();
+    }
+
+
     private static void addPayment(Payment payment) {
         if (payment == null) {
             throw new IllegalArgumentException("Payment cannot be null");

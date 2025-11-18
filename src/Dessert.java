@@ -13,11 +13,17 @@ public class Dessert extends MenuItem {
         super();
     }
 
-    
+
+    public Dessert(String name, String description, double price, String image,
+                  String nationalOrigin, NutritionalInfo nutritionalInfo, boolean hasNuts) {
+        super(name, description, price, image, nationalOrigin, nutritionalInfo);
+        setHasNuts(hasNuts);
+    }
+
     public Dessert(String name, String description, double price, String image,
                   String nationalOrigin, NutritionalInfo nutritionalInfo,
-                  List<Ingredient> ingredients, boolean hasNuts) {
-        super(name, description, price, image, nationalOrigin, nutritionalInfo, ingredients);
+                  List<String> allergens, boolean hasNuts) {
+        super(name, description, price, image, nationalOrigin, nutritionalInfo, allergens);
         setHasNuts(hasNuts);
     }
 

@@ -11,11 +11,17 @@ public class MainDish extends MenuItem {
         super();
     }
 
-    
+
+    public MainDish(String name, String description, double price, String image,
+                   String nationalOrigin, NutritionalInfo nutritionalInfo, int spiceLevel) {
+        super(name, description, price, image, nationalOrigin, nutritionalInfo);
+        setSpiceLevel(spiceLevel);
+    }
+
     public MainDish(String name, String description, double price, String image,
                    String nationalOrigin, NutritionalInfo nutritionalInfo,
-                   List<Ingredient> ingredients, int spiceLevel) {
-        super(name, description, price, image, nationalOrigin, nutritionalInfo, ingredients);
+                   List<String> allergens, int spiceLevel) {
+        super(name, description, price, image, nationalOrigin, nutritionalInfo, allergens);
         setSpiceLevel(spiceLevel);
     }
 

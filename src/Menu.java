@@ -10,35 +10,25 @@ public class Menu implements Serializable {
     
     private static List<Menu> allMenus = new ArrayList<>();
 
-    
+
     private String name;
     private String season;
 
-    
-    private List<MenuItem> menuItems;
 
-    
-    public Menu() {
-        this.menuItems = new ArrayList<>();
-    }
+    public Menu() {}
 
-    
+
     public Menu(String name, String season) {
-        this.menuItems = new ArrayList<>();
         setName(name);
         setSeason(season);
         addMenu(this);
     }
 
-    
+
     public String getName() { return name; }
     public String getSeason() { return season; }
 
-    public List<MenuItem> getMenuItems() {
-        return Collections.unmodifiableList(menuItems);
-    }
 
-    
     public void setName(String name) {
         if (name == null || name.trim().isEmpty()) {
             throw new IllegalArgumentException("Menu name cannot be null or empty");
@@ -51,21 +41,6 @@ public class Menu implements Serializable {
             throw new IllegalArgumentException("Season cannot be null or empty");
         }
         this.season = season.trim();
-    }
-
-
-    public void addMenuItem(MenuItem menuItem) {
-        if (menuItem == null) {
-            throw new IllegalArgumentException("Menu item cannot be null");
-        }
-        if (!menuItems.contains(menuItem)) {
-            menuItems.add(menuItem);
-        }
-    }
-
-
-    public void removeMenuItem(MenuItem menuItem) {
-        menuItems.remove(menuItem);
     }
 
     
@@ -106,6 +81,6 @@ public class Menu implements Serializable {
 
     @Override
     public String toString() {
-        return String.format("Menu[%s, season=%s, items=%d]", name, season, menuItems.size());
+        return String.format("Menu[%s, season=%s]", name, season);
     }
 }

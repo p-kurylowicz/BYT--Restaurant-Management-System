@@ -6,13 +6,13 @@ import java.time.LocalDateTime;
 import java.time.LocalTime;
 
 /**
- * Tests for optional attribute implementation (nullable fields).
+ * Tests for optional multi-value attribute implementation.
  *
  * <p>Test categories:
  * <ul>
- *   <li>Null defaults: optional attributes can be null initially</li>
- *   <li>Setting values: optional attributes can be assigned non-null values</li>
- *   <li>Validation: non-null values still meet normal constraints</li>
+ *   <li>Empty defaults: optional multi-value attributes can be empty initially</li>
+ *   <li>Adding values: optional multi-value attributes can have values added</li>
+ *   <li>Validation: values still meet normal constraints</li>
  * </ul>
  */
 public class OptionalAttributesTest {
@@ -24,83 +24,86 @@ public class OptionalAttributesTest {
     }
 
     @Test
-    @DisplayName("Optional attribute can be null by default")
-    void testOptionalAttributeDefaultNull() {
+    @DisplayName("Optional multi-value attribute is empty by default")
+    void testOptionalAttributeDefaultEmpty() {
         Customer customer = new Customer("Alice", "Brown", "alice@example.com",
             "+48123123123", LocalDateTime.now().minusYears(1));
 
         Reservation reservation = new Reservation(customer,
             LocalDate.now().plusDays(7), LocalTime.of(18, 30), 2);
 
-        assertNull(reservation.getSpecialRequests(),
-            "Optional attribute should be null by default");
+        assertTrue(reservation.getSpecialRequests().isEmpty(),
+            "Optional multi-value attribute should be empty by default");
     }
 
     @Test
-    @DisplayName("Optional attribute can have a value")
+    @DisplayName("Optional multi-value attribute can have values added")
     void testOptionalAttributeWithValue() {
         Customer customer = new Customer("Alice", "Brown", "alice@example.com",
             "+48123123123", LocalDateTime.now().minusYears(1));
 
         Reservation reservation = new Reservation(customer,
             LocalDate.now().plusDays(7), LocalTime.of(20, 0), 4);
-        reservation.setSpecialRequests("Window seat, birthday celebration");
+        reservation.addSpecialRequest("Window seat");
+        reservation.addSpecialRequest("Birthday celebration");
 
-        assertNotNull(reservation.getSpecialRequests());
-        assertEquals("Window seat, birthday celebration", reservation.getSpecialRequests());
+        assertFalse(reservation.getSpecialRequests().isEmpty());
+        assertEquals(2, reservation.getSpecialRequests().size());
+        assertTrue(reservation.getSpecialRequests().contains("Window seat"));
+        assertTrue(reservation.getSpecialRequests().contains("Birthday celebration"));
     }
 
     @Test
-    @DisplayName("Optional attribute empty string converts to null")
-    void testOptionalAttributeEmptyStringToNull() {
+    @DisplayName("Optional multi-value attribute rejects empty string")
+    void testOptionalAttributeEmptyStringRejected() {
         Customer customer = new Customer("Alice", "Brown", "alice@example.com",
             "+48123123123", LocalDateTime.now().minusYears(1));
 
         Reservation reservation = new Reservation(customer,
             LocalDate.now().plusDays(7), LocalTime.of(20, 0), 4);
 
-        reservation.setSpecialRequests("Some request");
-        assertNotNull(reservation.getSpecialRequests());
+        reservation.addSpecialRequest("Some request");
+        assertEquals(1, reservation.getSpecialRequests().size());
 
-        // Set to empty string
-        reservation.setSpecialRequests("");
-        assertNull(reservation.getSpecialRequests(),
-            "Empty string should convert to null for optional attribute");
+        // Attempt to add empty string
+        assertThrows(IllegalArgumentException.class, () -> {
+            reservation.addSpecialRequest("");
+        }, "Empty string should throw exception");
     }
 
     @Test
-    @DisplayName("Optional attribute whitespace-only string converts to null")
-    void testOptionalAttributeWhitespaceToNull() {
+    @DisplayName("Optional multi-value attribute rejects whitespace-only string")
+    void testOptionalAttributeWhitespaceRejected() {
         Customer customer = new Customer("Alice", "Brown", "alice@example.com",
             "+48123123123", LocalDateTime.now().minusYears(1));
 
         Reservation reservation = new Reservation(customer,
             LocalDate.now().plusDays(7), LocalTime.of(20, 0), 4);
 
-        reservation.setSpecialRequests("   ");
-        assertNull(reservation.getSpecialRequests(),
-            "Whitespace-only string should convert to null");
+        assertThrows(IllegalArgumentException.class, () -> {
+            reservation.addSpecialRequest("   ");
+        }, "Whitespace-only string should throw exception");
     }
 
     @Test
-    @DisplayName("Optional attribute can be explicitly set to null")
-    void testOptionalAttributeExplicitNull() {
+    @DisplayName("Optional multi-value attribute can be cleared")
+    void testOptionalAttributeCleared() {
         Customer customer = new Customer("Alice", "Brown", "alice@example.com",
             "+48123123123", LocalDateTime.now().minusYears(1));
 
         Reservation reservation = new Reservation(customer,
             LocalDate.now().plusDays(7), LocalTime.of(20, 0), 4);
 
-        reservation.setSpecialRequests("Birthday party");
-        assertNotNull(reservation.getSpecialRequests());
+        reservation.addSpecialRequest("Birthday party");
+        assertFalse(reservation.getSpecialRequests().isEmpty());
 
-        // Explicitly set to null
-        reservation.setSpecialRequests(null);
-        assertNull(reservation.getSpecialRequests());
+        // Clear all requests
+        reservation.clearSpecialRequests();
+        assertTrue(reservation.getSpecialRequests().isEmpty());
     }
 
     @Test
-    @DisplayName("Optional attribute with valid value is trimmed")
+    @DisplayName("Optional multi-value attribute values are trimmed")
     void testOptionalAttributeTrimming() {
         Customer customer = new Customer("Alice", "Brown", "alice@example.com",
             "+48123123123", LocalDateTime.now().minusYears(1));
@@ -108,13 +111,13 @@ public class OptionalAttributesTest {
         Reservation reservation = new Reservation(customer,
             LocalDate.now().plusDays(7), LocalTime.of(20, 0), 4);
 
-        reservation.setSpecialRequests("  Window seat  ");
-        assertEquals("Window seat", reservation.getSpecialRequests(),
-            "Optional attribute should be trimmed when set");
+        reservation.addSpecialRequest("  Window seat  ");
+        assertTrue(reservation.getSpecialRequests().contains("Window seat"),
+            "Optional attribute should be trimmed when added");
     }
 
     @Test
-    @DisplayName("Optional attribute can be changed multiple times")
+    @DisplayName("Optional multi-value attribute can be changed multiple times")
     void testOptionalAttributeMultipleChanges() {
         Customer customer = new Customer("Alice", "Brown", "alice@example.com",
             "+48123123123", LocalDateTime.now().minusYears(1));
@@ -122,24 +125,30 @@ public class OptionalAttributesTest {
         Reservation reservation = new Reservation(customer,
             LocalDate.now().plusDays(7), LocalTime.of(20, 0), 4);
 
-        // Initially null
-        assertNull(reservation.getSpecialRequests());
+        // Initially empty
+        assertTrue(reservation.getSpecialRequests().isEmpty());
 
-        // Set to first value
-        reservation.setSpecialRequests("Birthday");
-        assertEquals("Birthday", reservation.getSpecialRequests());
+        // Add first value
+        reservation.addSpecialRequest("Birthday");
+        assertEquals(1, reservation.getSpecialRequests().size());
+        assertTrue(reservation.getSpecialRequests().contains("Birthday"));
 
-        // Change to second value
-        reservation.setSpecialRequests("Anniversary");
-        assertEquals("Anniversary", reservation.getSpecialRequests());
+        // Add second value
+        reservation.addSpecialRequest("Anniversary");
+        assertEquals(2, reservation.getSpecialRequests().size());
 
-        // Clear
-        reservation.setSpecialRequests(null);
-        assertNull(reservation.getSpecialRequests());
+        // Remove first value
+        reservation.removeSpecialRequest("Birthday");
+        assertEquals(1, reservation.getSpecialRequests().size());
+        assertFalse(reservation.getSpecialRequests().contains("Birthday"));
+
+        // Clear all
+        reservation.clearSpecialRequests();
+        assertTrue(reservation.getSpecialRequests().isEmpty());
     }
 
     @Test
-    @DisplayName("Optional attribute doesn't affect mandatory validation")
+    @DisplayName("Optional multi-value attribute doesn't affect mandatory validation")
     void testOptionalAttributeIndependent() {
         Customer customer = new Customer("Alice", "Brown", "alice@example.com",
             "+48123123123", LocalDateTime.now().minusYears(1));
@@ -147,13 +156,13 @@ public class OptionalAttributesTest {
         // Reservation should work fine without special requests
         Reservation reservation1 = new Reservation(customer,
             LocalDate.now().plusDays(7), LocalTime.of(20, 0), 4);
-        assertNull(reservation1.getSpecialRequests());
+        assertTrue(reservation1.getSpecialRequests().isEmpty());
 
         // Reservation should work fine with special requests
         Reservation reservation2 = new Reservation(customer,
             LocalDate.now().plusDays(8), LocalTime.of(19, 0), 2);
-        reservation2.setSpecialRequests("Quiet table");
-        assertNotNull(reservation2.getSpecialRequests());
+        reservation2.addSpecialRequest("Quiet table");
+        assertFalse(reservation2.getSpecialRequests().isEmpty());
 
         // Both reservations are valid
         assertEquals(ReservationStatus.PENDING, reservation1.getStatus());
@@ -161,7 +170,7 @@ public class OptionalAttributesTest {
     }
 
     @Test
-    @DisplayName("Optional attribute with long text")
+    @DisplayName("Optional multi-value attribute with long text")
     void testOptionalAttributeLongText() {
         Customer customer = new Customer("Alice", "Brown", "alice@example.com",
             "+48123123123", LocalDateTime.now().minusYears(1));
@@ -173,12 +182,12 @@ public class OptionalAttributesTest {
             "a window seat with a view. Please also ensure the table is decorated " +
             "and we would like the staff to sing happy birthday at 8:30 PM.";
 
-        reservation.setSpecialRequests(longRequest);
-        assertEquals(longRequest, reservation.getSpecialRequests());
+        reservation.addSpecialRequest(longRequest);
+        assertTrue(reservation.getSpecialRequests().contains(longRequest));
     }
 
     @Test
-    @DisplayName("Optional attribute survives object state changes")
+    @DisplayName("Optional multi-value attribute survives object state changes")
     void testOptionalAttributePersistsThroughStateChanges() {
         Customer customer = new Customer("Alice", "Brown", "alice@example.com",
             "+48123123123", LocalDateTime.now().minusYears(1));
@@ -186,14 +195,60 @@ public class OptionalAttributesTest {
         Reservation reservation = new Reservation(customer,
             LocalDate.now().plusDays(7), LocalTime.of(20, 0), 4);
 
-        reservation.setSpecialRequests("Vegetarian menu");
-        assertEquals("Vegetarian menu", reservation.getSpecialRequests());
+        reservation.addSpecialRequest("Vegetarian menu");
+        assertTrue(reservation.getSpecialRequests().contains("Vegetarian menu"));
 
         // Change status
         reservation.confirmReservation();
         assertEquals(ReservationStatus.CONFIRMED, reservation.getStatus());
 
         // Special request should still be there
-        assertEquals("Vegetarian menu", reservation.getSpecialRequests());
+        assertTrue(reservation.getSpecialRequests().contains("Vegetarian menu"));
+    }
+
+    @Test
+    @DisplayName("Optional multi-value attribute rejects null values")
+    void testOptionalAttributeRejectsNull() {
+        Customer customer = new Customer("Alice", "Brown", "alice@example.com",
+            "+48123123123", LocalDateTime.now().minusYears(1));
+
+        Reservation reservation = new Reservation(customer,
+            LocalDate.now().plusDays(7), LocalTime.of(20, 0), 4);
+
+        assertThrows(IllegalArgumentException.class, () -> {
+            reservation.addSpecialRequest(null);
+        }, "Null value should throw exception");
+    }
+
+    @Test
+    @DisplayName("Optional multi-value attribute prevents duplicate values")
+    void testOptionalAttributePreventsDuplicates() {
+        Customer customer = new Customer("Alice", "Brown", "alice@example.com",
+            "+48123123123", LocalDateTime.now().minusYears(1));
+
+        Reservation reservation = new Reservation(customer,
+            LocalDate.now().plusDays(7), LocalTime.of(20, 0), 4);
+
+        reservation.addSpecialRequest("Window seat");
+        reservation.addSpecialRequest("Window seat");  // Duplicate
+
+        assertEquals(1, reservation.getSpecialRequests().size(),
+            "Duplicate values should not be added");
+    }
+
+    @Test
+    @DisplayName("Optional multi-value attribute returns unmodifiable list")
+    void testOptionalAttributeUnmodifiable() {
+        Customer customer = new Customer("Alice", "Brown", "alice@example.com",
+            "+48123123123", LocalDateTime.now().minusYears(1));
+
+        Reservation reservation = new Reservation(customer,
+            LocalDate.now().plusDays(7), LocalTime.of(20, 0), 4);
+
+        reservation.addSpecialRequest("Window seat");
+
+        assertThrows(UnsupportedOperationException.class, () -> {
+            reservation.getSpecialRequests().add("Hacker attempt");
+        }, "Direct modification of returned list should throw exception");
     }
 }

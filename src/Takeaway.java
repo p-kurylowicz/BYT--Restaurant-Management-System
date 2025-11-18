@@ -14,9 +14,9 @@ public class Takeaway extends Order {
         super();
     }
 
-    
-    public Takeaway(Customer customer, LocalTime collectionTime) {
-        super(customer);
+
+    public Takeaway(String orderId, LocalTime collectionTime) {
+        super(orderId);
         setCollectionTime(collectionTime);
         this.wasPickedUp = false;
     }

@@ -22,21 +22,16 @@ public class Reservation implements Serializable {
     private LocalTime time;
     private int size;
     private ReservationStatus status;
-    private String specialRequests; 
+    private List<String> specialRequests; // Multi-value attribute (optional)
 
-    
-    private Customer customer;
-    private List<Table> tables;
 
-    
     public Reservation() {
-        this.tables = new ArrayList<>();
+        this.specialRequests = new ArrayList<>();
     }
 
-    
-    public Reservation(Customer customer, LocalDate date, LocalTime time, int size) {
-        this.tables = new ArrayList<>();
-        setCustomer(customer);
+
+    public Reservation(LocalDate date, LocalTime time, int size) {
+        this.specialRequests = new ArrayList<>();
         setDate(date);
         setTime(time);
         setSize(size);
@@ -44,24 +39,14 @@ public class Reservation implements Serializable {
         addReservation(this);
     }
 
-    
-    public Customer getCustomer() { return customer; }
+
     public LocalDate getDate() { return date; }
     public LocalTime getTime() { return time; }
     public int getSize() { return size; }
     public ReservationStatus getStatus() { return status; }
-    public String getSpecialRequests() { return specialRequests; }
 
-    public List<Table> getTables() {
-        return Collections.unmodifiableList(tables);
-    }
-
-    
-    public void setCustomer(Customer customer) {
-        if (customer == null) {
-            throw new IllegalArgumentException("Customer cannot be null");
-        }
-        this.customer = customer;
+    public List<String> getSpecialRequests() {
+        return Collections.unmodifiableList(specialRequests);
     }
 
     public void setDate(LocalDate date) {
@@ -88,14 +73,22 @@ public class Reservation implements Serializable {
         this.size = size;
     }
 
-    
-    public void setSpecialRequests(String specialRequests) {
-        
-        if (specialRequests != null && !specialRequests.trim().isEmpty()) {
-            this.specialRequests = specialRequests.trim();
-        } else {
-            this.specialRequests = null;
+
+    public void addSpecialRequest(String request) {
+        if (request == null || request.trim().isEmpty()) {
+            throw new IllegalArgumentException("Special request cannot be null or empty");
         }
+        if (!specialRequests.contains(request.trim())) {
+            specialRequests.add(request.trim());
+        }
+    }
+
+    public void removeSpecialRequest(String request) {
+        specialRequests.remove(request);
+    }
+
+    public void clearSpecialRequests() {
+        specialRequests.clear();
     }
 
 
@@ -115,10 +108,6 @@ public class Reservation implements Serializable {
                 String.format("Cannot cancel reservation within %d hours of scheduled time", CANCELLATION_WINDOW_HOURS));
         }
         this.status = ReservationStatus.CANCELLED;
-        // Free up tables
-        for (Table table : tables) {
-            table.changeStatus(TableStatus.AVAILABLE);
-        }
     }
 
     // Confirm reservation
@@ -138,16 +127,6 @@ public class Reservation implements Serializable {
     }
 
 
-    public void addTable(Table table) {
-        if (table == null) {
-            throw new IllegalArgumentException("Table cannot be null");
-        }
-        if (!tables.contains(table)) {
-            tables.add(table);
-        }
-    }
-
-    
     private static void addReservation(Reservation reservation) {
         if (reservation == null) {
             throw new IllegalArgumentException("Reservation cannot be null");
@@ -185,7 +164,7 @@ public class Reservation implements Serializable {
 
     @Override
     public String toString() {
-        return String.format("Reservation[customer=%s, date=%s, time=%s, size=%d, status=%s, tables=%d]",
-            customer.getName(), date, time, size, status, tables.size());
+        return String.format("Reservation[date=%s, time=%s, size=%d, status=%s, specialRequests=%d]",
+            date, time, size, status, specialRequests.size());
     }
 }

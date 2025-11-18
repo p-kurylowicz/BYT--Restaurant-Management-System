@@ -14,10 +14,10 @@ public class Waiter extends Employee {
         super();
     }
 
-    
-    public Waiter(String name, String email, String phone, LocalDate hireDate,
+
+    public Waiter(String name, String phone, String email, String address, LocalDate hireDate,
                  double hourlyRate, String section) {
-        super(name, email, phone, hireDate, hourlyRate);
+        super(name, phone, email, address, hireDate, hourlyRate);
         setSection(section);
         this.tipTotal = 0.0;
     }

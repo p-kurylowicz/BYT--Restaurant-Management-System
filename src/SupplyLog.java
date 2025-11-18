@@ -9,53 +9,29 @@ public class SupplyLog implements Serializable {
     @Serial
     private static final long serialVersionUID = 1L;
 
-    
+
     private static List<SupplyLog> allSupplyLogs = new ArrayList<>();
 
-    
-    private Supplier supplier;
-    private Ingredient ingredient;
 
-    
     private LocalDate supplyDate;
     private double costAtSupply;
     private double quantitySupplied;
 
-    
+
     public SupplyLog() {}
 
-    
-    public SupplyLog(Supplier supplier, Ingredient ingredient, LocalDate supplyDate,
-                    double costAtSupply, double quantitySupplied) {
-        setSupplier(supplier);
-        setIngredient(ingredient);
+
+    public SupplyLog(LocalDate supplyDate, double costAtSupply, double quantitySupplied) {
         setSupplyDate(supplyDate);
         setCostAtSupply(costAtSupply);
         setQuantitySupplied(quantitySupplied);
         addSupplyLog(this);
     }
 
-    
-    public Supplier getSupplier() { return supplier; }
-    public Ingredient getIngredient() { return ingredient; }
+
     public LocalDate getSupplyDate() { return supplyDate; }
     public double getCostAtSupply() { return costAtSupply; }
     public double getQuantitySupplied() { return quantitySupplied; }
-
-    
-    public void setSupplier(Supplier supplier) {
-        if (supplier == null) {
-            throw new IllegalArgumentException("Supplier cannot be null");
-        }
-        this.supplier = supplier;
-    }
-
-    public void setIngredient(Ingredient ingredient) {
-        if (ingredient == null) {
-            throw new IllegalArgumentException("Ingredient cannot be null");
-        }
-        this.ingredient = ingredient;
-    }
 
     public void setSupplyDate(LocalDate supplyDate) {
         if (supplyDate == null) {
@@ -81,12 +57,7 @@ public class SupplyLog implements Serializable {
         this.quantitySupplied = quantitySupplied;
     }
 
-    // Register delivery - updates ingredient stock
-    public void registerDelivery() {
-        ingredient.updateCurrentStock(quantitySupplied);
-    }
 
-    
     private static void addSupplyLog(SupplyLog supplyLog) {
         if (supplyLog == null) {
             throw new IllegalArgumentException("SupplyLog cannot be null");
@@ -124,8 +95,7 @@ public class SupplyLog implements Serializable {
 
     @Override
     public String toString() {
-        return String.format("SupplyLog[%s supplied %.2f %s of %s on %s at %.2f per unit]",
-            supplier.getName(), quantitySupplied, ingredient.getUnit(),
-            ingredient.getName(), supplyDate, costAtSupply);
+        return String.format("SupplyLog[date=%s, quantity=%.2f, cost=%.2f]",
+            supplyDate, quantitySupplied, costAtSupply);
     }
 }

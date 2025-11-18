@@ -12,30 +12,38 @@ public abstract class Employee implements Serializable {
     
     private static List<Employee> allEmployees = new ArrayList<>();
 
-    
+
     private String name;
-    private String email;
-    private String phone;
+    private ContactInfo contactInfo;
     private LocalDate hireDate;
     private double hourlyRate;
 
     
     protected Employee() {}
 
-    
-    protected Employee(String name, String email, String phone, LocalDate hireDate, double hourlyRate) {
+
+    protected Employee(String name, String phone, String email, String address, LocalDate hireDate, double hourlyRate) {
         setName(name);
-        setEmail(email);
-        setPhone(phone);
+        setContactInfo(new ContactInfo(phone, email, address));
         setHireDate(hireDate);
         setHourlyRate(hourlyRate);
         addEmployee(this);
     }
 
-    
+    protected Employee(String name, ContactInfo contactInfo, LocalDate hireDate, double hourlyRate) {
+        setName(name);
+        setContactInfo(contactInfo);
+        setHireDate(hireDate);
+        setHourlyRate(hourlyRate);
+        addEmployee(this);
+    }
+
+
     public String getName() { return name; }
-    public String getEmail() { return email; }
-    public String getPhone() { return phone; }
+    public ContactInfo getContactInfo() { return contactInfo; }
+    public String getEmail() { return contactInfo != null ? contactInfo.getEmail() : null; }
+    public String getPhone() { return contactInfo != null ? contactInfo.getPhone() : null; }
+    public String getAddress() { return contactInfo != null ? contactInfo.getAddress() : null; }
     public LocalDate getHireDate() { return hireDate; }
     public double getHourlyRate() { return hourlyRate; }
 
@@ -60,21 +68,19 @@ public abstract class Employee implements Serializable {
         this.name = name.trim();
     }
 
-    public void setEmail(String email) {
-        if (email == null || email.trim().isEmpty()) {
-            throw new IllegalArgumentException("Email cannot be null or empty");
+    public void setContactInfo(ContactInfo contactInfo) {
+        if (contactInfo == null) {
+            throw new IllegalArgumentException("Contact info cannot be null");
         }
-        if (!email.contains("@")) {
-            throw new IllegalArgumentException("Email must contain @ symbol");
-        }
-        this.email = email.trim();
+        this.contactInfo = contactInfo;
     }
 
-    public void setPhone(String phone) {
-        if (phone == null || phone.trim().isEmpty()) {
-            throw new IllegalArgumentException("Phone cannot be null or empty");
+    public void updateContactInfo(String phone, String email, String address) {
+        if (this.contactInfo == null) {
+            this.contactInfo = new ContactInfo(phone, email, address);
+        } else {
+            this.contactInfo.updateContactInfo(phone, email, address);
         }
-        this.phone = phone.trim();
     }
 
     public void setHireDate(LocalDate hireDate) {
@@ -135,7 +141,7 @@ public abstract class Employee implements Serializable {
 
     @Override
     public String toString() {
-        return String.format("Employee[%s, email=%s, phone=%s, hired=%s, yearsOfService=%d, experienced=%s, rate=%.2f]",
-            name, email, phone, hireDate, getYearsOfService(), getIsExperienced(), hourlyRate);
+        return String.format("Employee[%s, contact=%s, hired=%s, yearsOfService=%d, experienced=%s, rate=%.2f]",
+            name, contactInfo, hireDate, getYearsOfService(), getIsExperienced(), hourlyRate);
     }
 }

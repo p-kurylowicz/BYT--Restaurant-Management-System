@@ -105,7 +105,7 @@ public class BasicAttributesTest {
     @DisplayName("Future hire date should be rejected")
     void testFutureHireDateValidation() {
         assertThrows(IllegalArgumentException.class, () -> {
-            new Waiter("Tom", "tom@restaurant.com", "+48111222333",
+            new Waiter("Tom", "+48111222333", "tom@restaurant.com", "123 Test St",
                 LocalDate.now().plusDays(1), 25.0, "Section A");
         }, "Future hire date should throw IllegalArgumentException");
     }

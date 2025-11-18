@@ -1,5 +1,4 @@
 import java.io.*;
-import java.time.LocalDateTime;
 
 
 public class ItemQuantity implements Serializable {
@@ -9,36 +8,48 @@ public class ItemQuantity implements Serializable {
     // Association references
     private MenuItem menuItem;
 
-    
+
     private int quantity;
-    private double itemTotal;
     private String specialRequests; 
-    private LocalDateTime servedTimestamp; 
 
     
     public ItemQuantity() {}
 
-    
+
     public ItemQuantity(MenuItem menuItem, int quantity) {
         setMenuItem(menuItem);
         setQuantity(quantity);
-        calculateItemTotal();
     }
 
-    
+
+    public ItemQuantity(MenuItem menuItem, int quantity, String specialRequests) {
+        setMenuItem(menuItem);
+        setQuantity(quantity);
+        setSpecialRequests(specialRequests);
+    }
+
+
     public MenuItem getMenuItem() { return menuItem; }
     public int getQuantity() { return quantity; }
-    public double getItemTotal() { return itemTotal; }
-    public String getSpecialRequests() { return specialRequests; }
-    public LocalDateTime getServedTimestamp() { return servedTimestamp; }
 
-    
+    /**
+     * Derived attribute - calculates item total from menu item price and quantity
+     */
+    public double getItemTotal() {
+        if (menuItem == null) {
+            return 0.0;
+        }
+        return menuItem.calculatePriceWithTax() * quantity;
+    }
+
+    public String getSpecialRequests() { return specialRequests; }
+
+
     public void setMenuItem(MenuItem menuItem) {
         if (menuItem == null) {
             throw new IllegalArgumentException("Menu item cannot be null");
         }
         this.menuItem = menuItem;
-        calculateItemTotal();
     }
 
     public void setQuantity(int quantity) {
@@ -46,39 +57,32 @@ public class ItemQuantity implements Serializable {
             throw new IllegalArgumentException("Quantity must be greater than zero");
         }
         this.quantity = quantity;
-        calculateItemTotal();
     }
 
-    
+
     public void setSpecialRequests(String specialRequests) {
-        if (specialRequests != null && !specialRequests.trim().isEmpty()) {
-            this.specialRequests = specialRequests.trim();
-        } else {
+        if (specialRequests == null) {
             this.specialRequests = null;
+            return;
         }
-    }
-
-    public void setServedTimestamp(LocalDateTime servedTimestamp) {
-        
-        this.servedTimestamp = servedTimestamp;
-    }
-
-
-    private void calculateItemTotal() {
-        if (menuItem != null) {
-            this.itemTotal = menuItem.calculatePriceWithTax() * quantity;
+        if (specialRequests.trim().isEmpty()) {
+            throw new IllegalArgumentException("Special requests cannot be empty or whitespace-only");
         }
+        this.specialRequests = specialRequests.trim();
     }
 
-    // Mark as served
+    /**
+     * Mark as served - placeholder for future implementation.
+     * TODO: Implement served tracking logic
+     */
     public void markAsServed() {
-        this.servedTimestamp = LocalDateTime.now();
+        // Placeholder - no timestamp tracking for now
     }
 
     @Override
     public String toString() {
         return String.format("ItemQuantity[%s x%d = %.2f PLN, specialReqs=%s]",
-            menuItem != null ? menuItem.getName() : "null", quantity, itemTotal,
+            menuItem != null ? menuItem.getName() : "null", quantity, getItemTotal(),
             specialRequests != null ? specialRequests : "none");
     }
 }
