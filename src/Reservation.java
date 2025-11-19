@@ -3,35 +3,33 @@ import java.time.LocalDate;
 import java.time.LocalTime;
 import java.time.LocalDateTime;
 import java.time.temporal.ChronoUnit;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
+import java.util.*;
 
 public class Reservation implements Serializable {
     @Serial
     private static final long serialVersionUID = 1L;
 
-    
+
     public static final int CANCELLATION_WINDOW_HOURS = 4;
 
-    
+
     private static List<Reservation> allReservations = new ArrayList<>();
 
-    
+
     private LocalDate date;
     private LocalTime time;
     private int size;
     private ReservationStatus status;
-    private List<String> specialRequests; // Multi-value attribute (optional)
+    private Set<String> specialRequests; // Multi-value attribute (optional)
 
 
     public Reservation() {
-        this.specialRequests = new ArrayList<>();
+        this.specialRequests = new HashSet<>();
     }
 
 
     public Reservation(LocalDate date, LocalTime time, int size) {
-        this.specialRequests = new ArrayList<>();
+        this.specialRequests = new HashSet<>();
         setDate(date);
         setTime(time);
         setSize(size);
@@ -45,8 +43,8 @@ public class Reservation implements Serializable {
     public int getSize() { return size; }
     public ReservationStatus getStatus() { return status; }
 
-    public List<String> getSpecialRequests() {
-        return Collections.unmodifiableList(specialRequests);
+    public Set<String> getSpecialRequests() {
+        return Collections.unmodifiableSet(specialRequests);
     }
 
     public void setDate(LocalDate date) {
@@ -78,9 +76,7 @@ public class Reservation implements Serializable {
         if (request == null || request.trim().isEmpty()) {
             throw new IllegalArgumentException("Special request cannot be null or empty");
         }
-        if (!specialRequests.contains(request.trim())) {
-            specialRequests.add(request.trim());
-        }
+        specialRequests.add(request.trim());
     }
 
     public void removeSpecialRequest(String request) {

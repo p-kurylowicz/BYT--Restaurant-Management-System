@@ -63,6 +63,30 @@ public class VolumeDiscount extends Discount {
         this.minQuantity = minQuantity;
     }
 
+    // Class extent persistence
+    public static void clearExtent() {
+        allVolumeDiscounts.clear();
+    }
+
+    public static void saveExtent(String filename) throws java.io.IOException {
+        String filepath = PersistenceConfig.getDataFilePath(filename);
+        try (java.io.ObjectOutputStream out = new java.io.ObjectOutputStream(new java.io.FileOutputStream(filepath))) {
+            out.writeObject(allVolumeDiscounts);
+        }
+    }
+
+    @SuppressWarnings("unchecked")
+    public static boolean loadExtent(String filename) {
+        String filepath = PersistenceConfig.getDataFilePath(filename);
+        try (java.io.ObjectInputStream in = new java.io.ObjectInputStream(new java.io.FileInputStream(filepath))) {
+            allVolumeDiscounts = (List<VolumeDiscount>) in.readObject();
+            return true;
+        } catch (java.io.IOException | ClassNotFoundException e) {
+            allVolumeDiscounts.clear();
+            return false;
+        }
+    }
+
     @Override
     public boolean validateDiscount(Order order) {
         // Placeholder implementation

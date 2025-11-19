@@ -77,12 +77,11 @@ public class ComplexAttributesTest {
     @Test
     @DisplayName("Complex attribute updated as atomic unit")
     void testComplexAttributeAtomicUpdate() {
-        Ingredient ing = new Ingredient("Test", "kg", 10, 5, 1.0);
         NutritionalInfo nutrition1 = new NutritionalInfo(100, 10, 20, 5, 2);
         NutritionalInfo nutrition2 = new NutritionalInfo(200, 20, 40, 10, 4);
 
         MainDish dish = new MainDish("Test Dish", "Description", 10.0, "/img.jpg",
-            "Italian", nutrition1, Arrays.asList(ing), 1);
+            "Italian", nutrition1,  1);
 
         assertEquals(100, dish.getNutritionalInfo().getCalories());
 
@@ -98,11 +97,10 @@ public class ComplexAttributesTest {
     @Test
     @DisplayName("MenuItem cannot be created without NutritionalInfo")
     void testNutritionalInfoRequired() {
-        Ingredient ing = new Ingredient("Test", "kg", 10, 5, 1.0);
 
         assertThrows(IllegalArgumentException.class, () -> {
             new MainDish("Test Dish", "Description", 10.0, "/img.jpg",
-                "Italian", null, Arrays.asList(ing), 1);
+                "Italian", null,  1);
         }, "MenuItem should require NutritionalInfo");
     }
 
@@ -121,22 +119,21 @@ public class ComplexAttributesTest {
     @Test
     @DisplayName("NutritionalInfo in all MenuItem subclasses")
     void testNutritionalInfoInSubclasses() {
-        Ingredient ing = new Ingredient("Test", "kg", 10, 5, 1.0);
         NutritionalInfo nutrition = new NutritionalInfo(300, 15, 30, 10, 3);
 
         // MainDish
         MainDish mainDish = new MainDish("Pasta", "Description", 20.0, "/img.jpg",
-            "Italian", nutrition, Arrays.asList(ing), 2);
+            "Italian", nutrition,  2);
         assertNotNull(mainDish.getNutritionalInfo());
 
         // Beverage
         Beverage beverage = new Beverage("Juice", "Description", 5.0, "/img.jpg",
-            "USA", nutrition, Arrays.asList(ing), 0.0);
+            "USA", nutrition,  0.0);
         assertNotNull(beverage.getNutritionalInfo());
 
         // Dessert
         Dessert dessert = new Dessert("Cake", "Description", 15.0, "/img.jpg",
-            "French", nutrition, Arrays.asList(ing), true);
+            "French", nutrition,  true);
         assertNotNull(dessert.getNutritionalInfo());
     }
 }

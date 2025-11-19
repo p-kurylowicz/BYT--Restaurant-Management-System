@@ -131,13 +131,12 @@ public class ClassExtentTest {
     @Test
     @DisplayName("Extent works with inheritance (abstract MenuItem)")
     void testExtentWithInheritance() {
-        Ingredient ing = new Ingredient("Test", "kg", 100, 10, 1.0);
         NutritionalInfo nutrition = new NutritionalInfo(300, 15, 30, 10, 3);
 
         MainDish mainDish = new MainDish("Pasta", "Italian pasta", 25.0, "/img.jpg",
-            "Italian", nutrition, java.util.Arrays.asList(ing), 1);
+            "Italian", nutrition, 1);
         Beverage beverage = new Beverage("Water", "Mineral water", 3.0, "/img.jpg",
-            "Poland", nutrition, java.util.Arrays.asList(ing), 0.0);
+            "Poland", nutrition, 0.0);
 
         // Both should be in MenuItem extent
         assertEquals(2, MenuItem.getAllMenuItems().size());

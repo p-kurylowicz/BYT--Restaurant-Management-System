@@ -9,14 +9,15 @@ public class Takeaway extends Order {
     private LocalTime collectionTime;
     private boolean wasPickedUp;
 
-    
+
     public Takeaway() {
         super();
+        this.wasPickedUp = false;
     }
 
 
-    public Takeaway(String orderId, LocalTime collectionTime) {
-        super(orderId);
+    public Takeaway(LocalTime collectionTime) {
+        super();
         setCollectionTime(collectionTime);
         this.wasPickedUp = false;
     }

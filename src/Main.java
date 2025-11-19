@@ -1,8 +1,8 @@
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
-import java.util.Arrays;
 import java.util.List;
+import java.util.Set;
 
 /**
  * Main demonstration class for the Restaurant Management System.
@@ -237,7 +237,7 @@ public class Main {
 
         System.out.println("[MULTI-VALUE ATTRIBUTE] Allergens:");
         System.out.println("   Item: " + pizza.getName());
-        List<String> allergens = pizza.getAllergens();
+        Set<String> allergens = pizza.getAllergens();
         if (allergens.isEmpty()) {
             System.out.println("   No allergens listed\n");
         } else {
@@ -293,110 +293,83 @@ public class Main {
         System.out.println("    New Status: " + reservation.getStatus() + "\n");
 
         // ================================================================
-        // 2.3: DINE-IN ORDER (PROGRESSIVE ORDERING)
+        // 2.3: DINE-IN ORDER (SIMPLIFIED)
         // ================================================================
         System.out.println("---------------------------------------------------------------");
-        System.out.println("2.3: DINE-IN ORDER (Progressive Ordering)");
+        System.out.println("2.3: DINE-IN ORDER (Simplified)");
         System.out.println("---------------------------------------------------------------\n");
 
-        DineIn dineInOrder = new DineIn(customer);
+        // Note: Order associations simplified - using basic order tracking
+        DineIn dineInOrder = new DineIn();
 
         System.out.println("DINE-IN ORDER CREATED:");
-        // TODO: Add getOrderId() method to Order class
-        System.out.println("   Order ID: " + dineInOrder.getOrderId());
-        System.out.println("   Type: Dine-In (supports multiple order requests)");
-        System.out.println("   Customer: " + customer.getName() + " " + customer.getSurname());
+        System.out.println("   Type: Dine-In");
         System.out.println("   Status: " + dineInOrder.getStatus());
         System.out.println("   Date: " + dineInOrder.getDate());
         System.out.println("   Time: " + dineInOrder.getTime() + "\n");
 
-        // First order request (appetizers)
+        // Get menu item for demonstration
         MenuItem pizza1 = menuItems.stream()
             .filter(m -> m instanceof MainDish)
             .findFirst()
             .orElse(menuItems.get(0));
 
-        OrderRequest request1 = new OrderRequest();
-        ItemQuantity item1 = new ItemQuantity(pizza1, 2);
-        item1.setSpecialRequests("Extra crispy");
-        request1.addItemQuantity(item1);
-        dineInOrder.addOrderRequest(request1);
+        double itemPrice = pizza1.calculatePriceWithTax() * 2;
 
-        System.out.println("ORDER REQUEST #1 (First Course):");
+        System.out.println("ORDER ITEM:");
+        System.out.println("   Item: " + pizza1.getName() + " x2");
+        System.out.println("   Price: " + String.format("%.2f", itemPrice) + " PLN\n");
+
+        // Create standalone order request for demonstration
+        OrderRequest request1 = new OrderRequest();
+        request1.setRequestDetails(pizza1.getName() + " x2, Extra crispy");
+
+        System.out.println("ORDER REQUEST CREATED:");
         System.out.println("   Request ID: " + request1.getRequestId());
         System.out.println("   Status: " + request1.getStatus());
-        System.out.println("   Items: " + pizza1.getName() + " x2");
-        System.out.println("   Special Requests: " + item1.getSpecialRequests());
-        System.out.println("   Request Total: " + String.format("%.2f", request1.calculateRequestTotal()) + " PLN\n");
+        System.out.println("   Details: " + request1.getRequestDetails() + "\n");
 
         request1.confirmRequest();
         System.out.println("   [OK] Request confirmed: " + request1.getStatus());
 
-        // TODO: Add startPreparation() method to OrderRequest class
         request1.startPreparation();
         System.out.println("   [OK] Kitchen preparing: " + request1.getStatus() + "\n");
 
-        // Second order request (main course)
-        OrderRequest request2 = new OrderRequest();
-        ItemQuantity item2 = new ItemQuantity(pizza1, 1);
-        item2.setSpecialRequests("Well done");
-        request2.addItemQuantity(item2);
-        dineInOrder.addOrderRequest(request2);
-
-        System.out.println("ORDER REQUEST #2 (Main Course):");
-        System.out.println("   Request ID: " + request2.getRequestId());
-        System.out.println("   Status: " + request2.getStatus());
-        System.out.println("   Items: " + pizza1.getName() + " x1");
-        System.out.println("   Request Total: " + String.format("%.2f", request2.calculateRequestTotal()) + " PLN\n");
-
-        // TODO: Add markAsReady() method to OrderRequest class
         request1.markAsReady();
         request1.markAsServed();
-        System.out.println(">>> Request #1 completed and served");
+        System.out.println(">>> Request completed and served");
         System.out.println("    Final Status: " + request1.getStatus() + "\n");
 
-        System.out.println("ORDER SUMMARY:");
-        // TODO: Add calculateTotal() method to Order class (or use calculateFinalPrice())
-        System.out.println("   Total Order Amount: " + String.format("%.2f", dineInOrder.calculateTotal()) + " PLN");
-        System.out.println("   Order Requests: " + dineInOrder.getOrderRequests().size() + "\n");
+        dineInOrder.finalizeOrder();
+        System.out.println("ORDER FINALIZED:");
+        System.out.println("   Status: " + dineInOrder.getStatus());
+        System.out.println("   Total: " + String.format("%.2f", dineInOrder.getTotalAmount()) + " PLN\n");
 
         // ================================================================
-        // 2.4: TAKEAWAY ORDER
+        // 2.4: TAKEAWAY ORDER (SIMPLIFIED)
         // ================================================================
         System.out.println("---------------------------------------------------------------");
-        System.out.println("2.4: TAKEAWAY ORDER (Single Batch)");
+        System.out.println("2.4: TAKEAWAY ORDER (Simplified)");
         System.out.println("---------------------------------------------------------------\n");
 
-        Customer customer2 = customers.size() > 1 ? customers.get(1) : customer;
         LocalTime collectionTime = LocalTime.now().plusHours(1);
-        Takeaway takeawayOrder = new Takeaway(customer2, collectionTime);
+        Takeaway takeawayOrder = new Takeaway(collectionTime);
 
         MenuItem beverage = menuItems.stream()
             .filter(m -> m instanceof Beverage)
             .findFirst()
             .orElse(menuItems.get(0));
 
-        OrderRequest takeawayRequest = new OrderRequest();
-        ItemQuantity takeawayItem = new ItemQuantity(beverage, 3);
-        takeawayItem.setSpecialRequests("No ice");
-        takeawayRequest.addItemQuantity(takeawayItem);
-        takeawayOrder.addOrderRequest(takeawayRequest);
+        double beverageTotal = beverage.calculatePriceWithTax() * 3;
 
         System.out.println("TAKEAWAY ORDER CREATED:");
-        // TODO: Add getOrderId() method to Order class
-        System.out.println("   Order ID: " + takeawayOrder.getOrderId());
-        System.out.println("   Customer: " + customer2.getName() + " " + customer2.getSurname());
         System.out.println("   Collection Time: " + collectionTime);
-        System.out.println("   Items: " + beverage.getName() + " x3");
-        // TODO: Add calculateTotal() method to Order class
-        System.out.println("   Total: " + String.format("%.2f", takeawayOrder.calculateTotal()) + " PLN");
-        System.out.println("   Payment Required: Upfront (Card only)\n");
+        System.out.println("   Status: " + takeawayOrder.getStatus());
+        System.out.println("   Item: " + beverage.getName() + " x3");
+        System.out.println("   Price: " + String.format("%.2f", beverageTotal) + " PLN\n");
 
-        // Create card payment for takeaway
-        // TODO: Add calculateTotal() method to Order class
-        Card cardPayment = new Card(takeawayOrder.calculateTotal(), "4532", "Visa");
-        takeawayOrder.setPayment(cardPayment);
-        // TODO: Add processPayment() method to Payment class
+        // Create standalone payment (no longer associated with order)
+        Card cardPayment = new Card(beverageTotal, "4532", "Visa");
         cardPayment.processPayment();
 
         System.out.println("PAYMENT PROCESSED:");
@@ -405,11 +378,7 @@ public class Main {
         System.out.println("   Amount: " + String.format("%.2f", cardPayment.getAmountPayed()) + " PLN");
         System.out.println("   Status: " + cardPayment.getStatus() + "\n");
 
-        takeawayRequest.confirmRequest();
-        // TODO: Add startPreparation() method to OrderRequest class
-        takeawayRequest.startPreparation();
-        // TODO: Add markAsReady() method to OrderRequest class
-        takeawayRequest.markAsReady();
+        takeawayOrder.finalizeOrder();
         takeawayOrder.completeOrder();
         takeawayOrder.markAsPickedUp();
 
@@ -424,21 +393,19 @@ public class Main {
         System.out.println("2.5: PAYMENT OPTIONS");
         System.out.println("---------------------------------------------------------------\n");
 
-        // TODO: Add calculateTotal() method to Order class
-        double totalAmount = dineInOrder.calculateTotal();
-        Cash cashPayment = new Cash(totalAmount, 200.00);
-        dineInOrder.setPayment(cashPayment);
-        // TODO: Add processPayment() method to Payment class
+        // Create standalone cash payment (no longer associated with order)
+        // Using the pizza price calculated earlier
+        Cash cashPayment = new Cash(itemPrice, 200.00);
         cashPayment.processPayment();
 
         System.out.println("CASH PAYMENT:");
-        System.out.println("   Amount Due: " + String.format("%.2f", totalAmount) + " PLN");
+        System.out.println("   Amount Due: " + String.format("%.2f", itemPrice) + " PLN");
         System.out.println("   Amount Tendered: " + String.format("%.2f", cashPayment.getAmountTendered()) + " PLN");
         System.out.println("   Change Given: " + String.format("%.2f", cashPayment.getChangeGiven()) + " PLN");
         System.out.println("   Status: " + cashPayment.getStatus() + "\n");
 
         dineInOrder.completeOrder();
-        System.out.println(">>> Order finalized and completed");
+        System.out.println(">>> Order completed");
         System.out.println("    Order Status: " + dineInOrder.getStatus() + "\n");
 
         // ================================================================
@@ -448,7 +415,14 @@ public class Main {
         System.out.println("2.6: INVENTORY MANAGEMENT");
         System.out.println("---------------------------------------------------------------\n");
 
-        Supplier supplier = new Supplier("Fresh Foods Ltd", "123-456-789", "supplier@freshfoods.com", "789 Supply Road", 4.5);
+        // Create supplier with contactPerson
+        Supplier supplier = new Supplier("Fresh Foods Ltd", "123-456-789", "supplier@freshfoods.com",
+                                        "789 Supply Road", 4.5, "John Smith");
+
+        System.out.println("SUPPLIER CREATED:");
+        System.out.println("   Name: " + supplier.getName());
+        System.out.println("   Contact Person: " + supplier.getContactPerson());
+        System.out.println("   Reliability Rating: " + supplier.getReliabilityRating() + "/5.0\n");
 
         Ingredient tomato = Ingredient.getAllIngredients().stream()
             .filter(i -> i.getName().equals("Tomato"))
@@ -463,28 +437,21 @@ public class Main {
         System.out.println("   Needs Reorder: " + (tomato.getNeedsReorder() ? "YES" : "NO") + "\n");
 
         // Simulate usage
-        // TODO: Add reduceStock() method to Ingredient class
         tomato.reduceStock(45.0);
         System.out.println("STOCK UPDATE: Usage recorded");
         System.out.println("   Stock reduced by: 45.0 kg");
         System.out.println("   Current Stock: " + tomato.getCurrentStock() + " " + tomato.getUnit());
         System.out.println("   Needs Reorder: " + (tomato.getNeedsReorder() ? "YES [!]" : "NO") + "\n");
 
-        // Create supply log and restock
+        // Create supply log (simplified - no supplier/ingredient associations)
         double quantitySupplied = 50.0;
-        SupplyLog supplyLog = new SupplyLog(
-            supplier,
-            tomato,
-            LocalDate.now(),
-            tomato.getCostPerUnit() * quantitySupplied,
-            quantitySupplied
-        );
-        // TODO: Add increaseStock() method to Ingredient class
+        double supplyCost = tomato.getCostPerUnit() * quantitySupplied;
+        SupplyLog supplyLog = new SupplyLog(LocalDate.now(), supplyCost, quantitySupplied);
+
+        // Restock
         tomato.increaseStock(quantitySupplied);
 
         System.out.println("SUPPLY RECEIVED:");
-        System.out.println("   Supplier: " + supplier.getName());
-        System.out.println("   Reliability Rating: " + supplier.getReliabilityRating() + "/5.0");
         System.out.println("   Quantity Supplied: " + supplyLog.getQuantitySupplied() + " kg");
         System.out.println("   Total Cost: " + String.format("%.2f", supplyLog.getCostAtSupply()) + " PLN");
         System.out.println("   Supply Date: " + supplyLog.getSupplyDate());

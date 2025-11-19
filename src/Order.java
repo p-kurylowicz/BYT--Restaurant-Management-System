@@ -9,46 +9,34 @@ public abstract class Order implements Serializable {
     @Serial
     private static final long serialVersionUID = 1L;
 
-    
+
     private static List<Order> allOrders = new ArrayList<>();
-    private static int orderCounter = 0;
 
 
-    private String orderId;
     private OrderStatus status;
-    private String items;
-    private double total;
     private LocalDate date;
     private LocalTime time;
 
 
-    protected Order() {}
-
-
-    protected Order(String orderId) {
-        this.orderId = orderId != null ? orderId : "ORD-" + String.format("%06d", ++orderCounter);
+    protected Order() {
         this.status = OrderStatus.ACTIVE;
         this.date = LocalDate.now();
         this.time = LocalTime.now();
-        this.items = "";
-        this.total = 0.0;
         addOrder(this);
     }
 
 
-    public String getOrderId() { return orderId; }
     public OrderStatus getStatus() { return status; }
-    public String getItems() { return items; }
-    public double getTotal() { return total; }
     public LocalDate getDate() { return date; }
     public LocalTime getTime() { return time; }
 
     /**
      * Calculates the total price of the order.
-     * TODO: Implement full business logic for order total calculation
+     * TODO: Implement when we have inheritance
      */
-    public double calculateTotal() {
-        return calculateFinalPrice();
+    public double getTotalAmount() {
+        // Placeholder
+        return 0.0;
     }
 
     public void setDate(LocalDate date) {
@@ -65,22 +53,6 @@ public abstract class Order implements Serializable {
         this.time = time;
     }
 
-
-    // Placeholder - no order requests for now
-    public void setItems(String items) {
-        if (items == null) {
-            throw new IllegalArgumentException("Items cannot be null");
-        }
-        this.items = items;
-    }
-
-    public void setTotal(double total) {
-        if (total < 0) {
-            throw new IllegalArgumentException("Total cannot be negative");
-        }
-        this.total = total;
-    }
-
     // Finalize order
     public void finalizeOrder() {
         if (this.status != OrderStatus.ACTIVE) {
@@ -90,9 +62,6 @@ public abstract class Order implements Serializable {
     }
 
 
-    public double calculateFinalPrice() {
-        return this.total;
-    }
 
     // Complete order (after payment)
     public void completeOrder() {
@@ -148,7 +117,7 @@ public abstract class Order implements Serializable {
 
     @Override
     public String toString() {
-        return String.format("Order[id=%s, status=%s, date=%s, time=%s, items=%s, total=%.2f]",
-            orderId, status, date, time, items, total);
+        return String.format("Order[status=%s, date=%s, time=%s]",
+            status, date, time);
     }
 }

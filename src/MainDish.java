@@ -1,4 +1,4 @@
-import java.util.List;
+import java.util.Set;
 
 public class MainDish extends MenuItem {
     private static final long serialVersionUID = 1L;
@@ -6,7 +6,7 @@ public class MainDish extends MenuItem {
 
     private int spiceLevel;
 
-    
+
     public MainDish() {
         super();
     }
@@ -20,7 +20,7 @@ public class MainDish extends MenuItem {
 
     public MainDish(String name, String description, double price, String image,
                    String nationalOrigin, NutritionalInfo nutritionalInfo,
-                   List<String> allergens, int spiceLevel) {
+                   Set<String> allergens, int spiceLevel) {
         super(name, description, price, image, nationalOrigin, nutritionalInfo, allergens);
         setSpiceLevel(spiceLevel);
     }

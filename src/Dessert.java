@@ -1,5 +1,5 @@
 import java.io.Serial;
-import java.util.List;
+import java.util.Set;
 
 public class Dessert extends MenuItem {
     @Serial
@@ -8,7 +8,7 @@ public class Dessert extends MenuItem {
 
     private boolean hasNuts;
 
-    
+
     public Dessert() {
         super();
     }
@@ -22,7 +22,7 @@ public class Dessert extends MenuItem {
 
     public Dessert(String name, String description, double price, String image,
                   String nationalOrigin, NutritionalInfo nutritionalInfo,
-                  List<String> allergens, boolean hasNuts) {
+                  Set<String> allergens, boolean hasNuts) {
         super(name, description, price, image, nationalOrigin, nutritionalInfo, allergens);
         setHasNuts(hasNuts);
     }

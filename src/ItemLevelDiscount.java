@@ -1,7 +1,5 @@
 import java.io.Serial;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
+import java.util.*;
 
 /**
  * Discount applied to specific menu items.
@@ -14,17 +12,17 @@ public class ItemLevelDiscount extends Discount {
     private static List<ItemLevelDiscount> allItemLevelDiscounts = new ArrayList<>();
 
     // Multi-value attribute
-    private List<String> applicableItems;
+    private Set<String> applicableItems;
 
     // Constructors
     protected ItemLevelDiscount() {
         super();
-        this.applicableItems = new ArrayList<>();
+        this.applicableItems = new HashSet<>();
     }
 
-    public ItemLevelDiscount(String code, List<String> applicableItems) {
+    public ItemLevelDiscount(String code, Set<String> applicableItems) {
         super(code);
-        this.applicableItems = new ArrayList<>();
+        this.applicableItems = new HashSet<>();
         if (applicableItems != null) {
             for (String item : applicableItems) {
                 addApplicableItem(item);
@@ -45,21 +43,43 @@ public class ItemLevelDiscount extends Discount {
     }
 
     // Multi-value attribute management
-    public List<String> getApplicableItems() {
-        return Collections.unmodifiableList(applicableItems);
+    public Set<String> getApplicableItems() {
+        return Collections.unmodifiableSet(applicableItems);
     }
 
     public void addApplicableItem(String item) {
         if (item == null || item.trim().isEmpty()) {
             throw new IllegalArgumentException("Applicable item cannot be null or empty");
         }
-        if (!applicableItems.contains(item.trim())) {
-            applicableItems.add(item.trim());
-        }
+        applicableItems.add(item.trim());
     }
 
     public void removeApplicableItem(String item) {
         applicableItems.remove(item);
+    }
+
+    // Class extent persistence
+    public static void clearExtent() {
+        allItemLevelDiscounts.clear();
+    }
+
+    public static void saveExtent(String filename) throws java.io.IOException {
+        String filepath = PersistenceConfig.getDataFilePath(filename);
+        try (java.io.ObjectOutputStream out = new java.io.ObjectOutputStream(new java.io.FileOutputStream(filepath))) {
+            out.writeObject(allItemLevelDiscounts);
+        }
+    }
+
+    @SuppressWarnings("unchecked")
+    public static boolean loadExtent(String filename) {
+        String filepath = PersistenceConfig.getDataFilePath(filename);
+        try (java.io.ObjectInputStream in = new java.io.ObjectInputStream(new java.io.FileInputStream(filepath))) {
+            allItemLevelDiscounts = (List<ItemLevelDiscount>) in.readObject();
+            return true;
+        } catch (java.io.IOException | ClassNotFoundException e) {
+            allItemLevelDiscounts.clear();
+            return false;
+        }
     }
 
     @Override

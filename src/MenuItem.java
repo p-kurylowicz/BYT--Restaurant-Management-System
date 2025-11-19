@@ -1,19 +1,17 @@
 import java.io.*;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
+import java.util.*;
 
 public abstract class MenuItem implements Serializable {
     @Serial
     private static final long serialVersionUID = 1L;
 
-    
+
     public static final double TAX_RATE = 0.23;
 
-    
+
     private static List<MenuItem> allMenuItems = new ArrayList<>();
 
-    
+
     private String name;
     private String description;
     private double price;
@@ -25,17 +23,17 @@ public abstract class MenuItem implements Serializable {
     private NutritionalInfo nutritionalInfo;
 
 
-    private List<String> allergens;
+    private Set<String> allergens;
 
 
     protected MenuItem() {
-        this.allergens = new ArrayList<>();
+        this.allergens = new HashSet<>();
     }
 
 
     protected MenuItem(String name, String description, double price, String image,
                       String nationalOrigin, NutritionalInfo nutritionalInfo) {
-        this.allergens = new ArrayList<>();
+        this.allergens = new HashSet<>();
         setName(name);
         setDescription(description);
         setPrice(price);
@@ -48,8 +46,8 @@ public abstract class MenuItem implements Serializable {
     }
 
     protected MenuItem(String name, String description, double price, String image,
-                      String nationalOrigin, NutritionalInfo nutritionalInfo, List<String> allergens) {
-        this.allergens = new ArrayList<>();
+                      String nationalOrigin, NutritionalInfo nutritionalInfo, Set<String> allergens) {
+        this.allergens = new HashSet<>();
         setName(name);
         setDescription(description);
         setPrice(price);
@@ -71,8 +69,8 @@ public abstract class MenuItem implements Serializable {
     public String getNationalOrigin() { return nationalOrigin; }
     public NutritionalInfo getNutritionalInfo() { return nutritionalInfo; }
 
-    public List<String> getAllergens() {
-        return Collections.unmodifiableList(allergens);
+    public Set<String> getAllergens() {
+        return Collections.unmodifiableSet(allergens);
     }
 
     
@@ -127,18 +125,15 @@ public abstract class MenuItem implements Serializable {
     }
 
     // Multi-value allergens management
-    public void setAllergens(List<String> allergens) {
-        // Allergens are optional (0..*), so null or empty list is allowed
+    public void setAllergens(Set<String> allergens) {
+        // Allergens are optional (0..*), so null or empty set is allowed
         this.allergens.clear();
         if (allergens != null && !allergens.isEmpty()) {
             for (String allergen : allergens) {
                 if (allergen == null || allergen.trim().isEmpty()) {
-                    throw new IllegalArgumentException("Allergen list cannot contain null or empty values");
+                    throw new IllegalArgumentException("Allergen set cannot contain null or empty values");
                 }
-                String trimmed = allergen.trim();
-                if (!this.allergens.contains(trimmed)) {
-                    this.allergens.add(trimmed);
-                }
+                this.allergens.add(allergen.trim());
             }
         }
     }
@@ -147,10 +142,7 @@ public abstract class MenuItem implements Serializable {
         if (allergen == null || allergen.trim().isEmpty()) {
             throw new IllegalArgumentException("Allergen cannot be null or empty");
         }
-        String trimmedAllergen = allergen.trim();
-        if (!allergens.contains(trimmedAllergen)) {
-            allergens.add(trimmedAllergen);
-        }
+        allergens.add(allergen.trim());
     }
 
     public void removeAllergen(String allergen) {

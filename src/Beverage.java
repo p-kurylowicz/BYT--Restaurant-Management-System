@@ -1,5 +1,5 @@
 import java.io.Serial;
-import java.util.List;
+import java.util.Set;
 
 public class Beverage extends MenuItem {
     @Serial
@@ -21,7 +21,7 @@ public class Beverage extends MenuItem {
 
     public Beverage(String name, String description, double price, String image,
                    String nationalOrigin, NutritionalInfo nutritionalInfo,
-                   List<String> allergens, Double alcoholPercentage) {
+                   Set<String> allergens, Double alcoholPercentage) {
         super(name, description, price, image, nationalOrigin, nutritionalInfo, allergens);
         setAlcoholPercentage(alcoholPercentage);
     }

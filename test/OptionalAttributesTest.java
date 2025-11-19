@@ -29,7 +29,7 @@ public class OptionalAttributesTest {
         Customer customer = new Customer("Alice", "Brown", "alice@example.com",
             "+48123123123", LocalDateTime.now().minusYears(1));
 
-        Reservation reservation = new Reservation(customer,
+        Reservation reservation = new Reservation(
             LocalDate.now().plusDays(7), LocalTime.of(18, 30), 2);
 
         assertTrue(reservation.getSpecialRequests().isEmpty(),
@@ -42,7 +42,7 @@ public class OptionalAttributesTest {
         Customer customer = new Customer("Alice", "Brown", "alice@example.com",
             "+48123123123", LocalDateTime.now().minusYears(1));
 
-        Reservation reservation = new Reservation(customer,
+        Reservation reservation = new Reservation(
             LocalDate.now().plusDays(7), LocalTime.of(20, 0), 4);
         reservation.addSpecialRequest("Window seat");
         reservation.addSpecialRequest("Birthday celebration");
@@ -59,7 +59,7 @@ public class OptionalAttributesTest {
         Customer customer = new Customer("Alice", "Brown", "alice@example.com",
             "+48123123123", LocalDateTime.now().minusYears(1));
 
-        Reservation reservation = new Reservation(customer,
+        Reservation reservation = new Reservation(
             LocalDate.now().plusDays(7), LocalTime.of(20, 0), 4);
 
         reservation.addSpecialRequest("Some request");
@@ -77,7 +77,7 @@ public class OptionalAttributesTest {
         Customer customer = new Customer("Alice", "Brown", "alice@example.com",
             "+48123123123", LocalDateTime.now().minusYears(1));
 
-        Reservation reservation = new Reservation(customer,
+        Reservation reservation = new Reservation(
             LocalDate.now().plusDays(7), LocalTime.of(20, 0), 4);
 
         assertThrows(IllegalArgumentException.class, () -> {
@@ -91,7 +91,7 @@ public class OptionalAttributesTest {
         Customer customer = new Customer("Alice", "Brown", "alice@example.com",
             "+48123123123", LocalDateTime.now().minusYears(1));
 
-        Reservation reservation = new Reservation(customer,
+        Reservation reservation = new Reservation(
             LocalDate.now().plusDays(7), LocalTime.of(20, 0), 4);
 
         reservation.addSpecialRequest("Birthday party");
@@ -108,7 +108,7 @@ public class OptionalAttributesTest {
         Customer customer = new Customer("Alice", "Brown", "alice@example.com",
             "+48123123123", LocalDateTime.now().minusYears(1));
 
-        Reservation reservation = new Reservation(customer,
+        Reservation reservation = new Reservation(
             LocalDate.now().plusDays(7), LocalTime.of(20, 0), 4);
 
         reservation.addSpecialRequest("  Window seat  ");
@@ -122,7 +122,7 @@ public class OptionalAttributesTest {
         Customer customer = new Customer("Alice", "Brown", "alice@example.com",
             "+48123123123", LocalDateTime.now().minusYears(1));
 
-        Reservation reservation = new Reservation(customer,
+        Reservation reservation = new Reservation(
             LocalDate.now().plusDays(7), LocalTime.of(20, 0), 4);
 
         // Initially empty
@@ -154,12 +154,12 @@ public class OptionalAttributesTest {
             "+48123123123", LocalDateTime.now().minusYears(1));
 
         // Reservation should work fine without special requests
-        Reservation reservation1 = new Reservation(customer,
+        Reservation reservation1 = new Reservation(
             LocalDate.now().plusDays(7), LocalTime.of(20, 0), 4);
         assertTrue(reservation1.getSpecialRequests().isEmpty());
 
         // Reservation should work fine with special requests
-        Reservation reservation2 = new Reservation(customer,
+        Reservation reservation2 = new Reservation(
             LocalDate.now().plusDays(8), LocalTime.of(19, 0), 2);
         reservation2.addSpecialRequest("Quiet table");
         assertFalse(reservation2.getSpecialRequests().isEmpty());
@@ -175,7 +175,7 @@ public class OptionalAttributesTest {
         Customer customer = new Customer("Alice", "Brown", "alice@example.com",
             "+48123123123", LocalDateTime.now().minusYears(1));
 
-        Reservation reservation = new Reservation(customer,
+        Reservation reservation = new Reservation(
             LocalDate.now().plusDays(7), LocalTime.of(20, 0), 4);
 
         String longRequest = "We are celebrating a special birthday and would appreciate " +
@@ -192,7 +192,7 @@ public class OptionalAttributesTest {
         Customer customer = new Customer("Alice", "Brown", "alice@example.com",
             "+48123123123", LocalDateTime.now().minusYears(1));
 
-        Reservation reservation = new Reservation(customer,
+        Reservation reservation = new Reservation(
             LocalDate.now().plusDays(7), LocalTime.of(20, 0), 4);
 
         reservation.addSpecialRequest("Vegetarian menu");
@@ -212,7 +212,7 @@ public class OptionalAttributesTest {
         Customer customer = new Customer("Alice", "Brown", "alice@example.com",
             "+48123123123", LocalDateTime.now().minusYears(1));
 
-        Reservation reservation = new Reservation(customer,
+        Reservation reservation = new Reservation(
             LocalDate.now().plusDays(7), LocalTime.of(20, 0), 4);
 
         assertThrows(IllegalArgumentException.class, () -> {
@@ -226,7 +226,7 @@ public class OptionalAttributesTest {
         Customer customer = new Customer("Alice", "Brown", "alice@example.com",
             "+48123123123", LocalDateTime.now().minusYears(1));
 
-        Reservation reservation = new Reservation(customer,
+        Reservation reservation = new Reservation(
             LocalDate.now().plusDays(7), LocalTime.of(20, 0), 4);
 
         reservation.addSpecialRequest("Window seat");
@@ -242,7 +242,7 @@ public class OptionalAttributesTest {
         Customer customer = new Customer("Alice", "Brown", "alice@example.com",
             "+48123123123", LocalDateTime.now().minusYears(1));
 
-        Reservation reservation = new Reservation(customer,
+        Reservation reservation = new Reservation(
             LocalDate.now().plusDays(7), LocalTime.of(20, 0), 4);
 
         reservation.addSpecialRequest("Window seat");

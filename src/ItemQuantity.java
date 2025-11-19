@@ -5,52 +5,38 @@ public class ItemQuantity implements Serializable {
     @Serial
     private static final long serialVersionUID = 1L;
 
-    // Association references
-    private MenuItem menuItem;
-
-
     private int quantity;
     private String specialRequests; 
 
-    
+
     public ItemQuantity() {}
 
 
-    public ItemQuantity(MenuItem menuItem, int quantity) {
-        setMenuItem(menuItem);
+    public ItemQuantity(int quantity) {
         setQuantity(quantity);
     }
 
 
-    public ItemQuantity(MenuItem menuItem, int quantity, String specialRequests) {
-        setMenuItem(menuItem);
+    public ItemQuantity(int quantity, String specialRequests) {
         setQuantity(quantity);
         setSpecialRequests(specialRequests);
     }
 
 
-    public MenuItem getMenuItem() { return menuItem; }
     public int getQuantity() { return quantity; }
 
+
     /**
-     * Derived attribute - calculates item total from menu item price and quantity
+     * Calculates the total for the request
+     * TODO: Implement when OrderRequest association is added
      */
-    public double getItemTotal() {
-        if (menuItem == null) {
-            return 0.0;
-        }
-        return menuItem.calculatePriceWithTax() * quantity;
+    public double getRequestTotal() {
+        // Placeholder
+        return 0.0;
     }
 
     public String getSpecialRequests() { return specialRequests; }
 
-
-    public void setMenuItem(MenuItem menuItem) {
-        if (menuItem == null) {
-            throw new IllegalArgumentException("Menu item cannot be null");
-        }
-        this.menuItem = menuItem;
-    }
 
     public void setQuantity(int quantity) {
         if (quantity <= 0) {
@@ -81,8 +67,8 @@ public class ItemQuantity implements Serializable {
 
     @Override
     public String toString() {
-        return String.format("ItemQuantity[%s x%d = %.2f PLN, specialReqs=%s]",
-            menuItem != null ? menuItem.getName() : "null", quantity, getItemTotal(),
+        return String.format("ItemQuantity[quantity=%d, total=%.2f PLN, specialReqs=%s]",
+            quantity, getRequestTotal(),
             specialRequests != null ? specialRequests : "none");
     }
 }

@@ -50,6 +50,30 @@ public class OrderLevelDiscount extends Discount {
         this.discountPercentage = discountPercentage;
     }
 
+    // Class extent persistence
+    public static void clearExtent() {
+        allOrderLevelDiscounts.clear();
+    }
+
+    public static void saveExtent(String filename) throws java.io.IOException {
+        String filepath = PersistenceConfig.getDataFilePath(filename);
+        try (java.io.ObjectOutputStream out = new java.io.ObjectOutputStream(new java.io.FileOutputStream(filepath))) {
+            out.writeObject(allOrderLevelDiscounts);
+        }
+    }
+
+    @SuppressWarnings("unchecked")
+    public static boolean loadExtent(String filename) {
+        String filepath = PersistenceConfig.getDataFilePath(filename);
+        try (java.io.ObjectInputStream in = new java.io.ObjectInputStream(new java.io.FileInputStream(filepath))) {
+            allOrderLevelDiscounts = (List<OrderLevelDiscount>) in.readObject();
+            return true;
+        } catch (java.io.IOException | ClassNotFoundException e) {
+            allOrderLevelDiscounts.clear();
+            return false;
+        }
+    }
+
     @Override
     public boolean validateDiscount(Order order) {
         // Placeholder implementation

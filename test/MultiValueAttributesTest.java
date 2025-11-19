@@ -2,8 +2,8 @@ import org.junit.jupiter.api.*;
 import static org.junit.jupiter.api.Assertions.*;
 
 import java.util.Arrays;
-import java.util.ArrayList;
-import java.util.List;
+import java.util.HashSet;
+import java.util.Set;
 
 /**
  * Tests for multi-value attribute implementation (collections).
@@ -20,140 +20,169 @@ public class MultiValueAttributesTest {
 
     @BeforeEach
     void clearExtents() {
-        Ingredient.clearExtent();
         MenuItem.clearExtent();
     }
 
     @Test
-    @DisplayName("MenuItem with multiple ingredients")
-    void testMultipleIngredients() {
-        Ingredient ing1 = new Ingredient("Tomato", "kg", 50, 10, 2.5);
-        Ingredient ing2 = new Ingredient("Cheese", "kg", 30, 5, 8.0);
-        Ingredient ing3 = new Ingredient("Basil", "bunch", 20, 3, 1.5);
-
+    @DisplayName("MenuItem with multiple allergens")
+    void testMultipleAllergens() {
         NutritionalInfo nutrition = new NutritionalInfo(350, 15.0, 40.0, 12.0, 3.0);
-        List<Ingredient> ingredients = Arrays.asList(ing1, ing2, ing3);
+        Set<String> allergens = new HashSet<>(Arrays.asList("Gluten", "Dairy", "Eggs"));
 
         MainDish pizza = new MainDish("Margherita Pizza", "Classic Italian pizza",
-            35.0, "/images/pizza.jpg", "Italian", nutrition, ingredients, 2);
+            35.0, "/images/pizza.jpg", "Italian", nutrition, allergens, 2);
 
-        assertEquals(3, pizza.getIngredients().size());
-        assertTrue(pizza.getIngredients().contains(ing1));
-        assertTrue(pizza.getIngredients().contains(ing2));
-        assertTrue(pizza.getIngredients().contains(ing3));
+        assertEquals(3, pizza.getAllergens().size());
+        assertTrue(pizza.getAllergens().contains("Gluten"));
+        assertTrue(pizza.getAllergens().contains("Dairy"));
+        assertTrue(pizza.getAllergens().contains("Eggs"));
     }
 
     @Test
     @DisplayName("Multi-value attribute returns unmodifiable collection")
     void testMultiValueAttributeEncapsulation() {
-        Ingredient ing1 = new Ingredient("Tomato", "kg", 50, 10, 2.5);
         NutritionalInfo nutrition = new NutritionalInfo(350, 15.0, 40.0, 12.0, 3.0);
 
         MainDish pizza = new MainDish("Pizza", "Description", 35.0, "/img.jpg",
-            "Italian", nutrition, Arrays.asList(ing1), 2);
+            "Italian", nutrition, new HashSet<>(Arrays.asList("Gluten")), 2);
 
         assertThrows(UnsupportedOperationException.class, () -> {
-            pizza.getIngredients().add(new Ingredient("Oregano", "g", 100, 10, 0.5));
-        }, "Should not be able to modify ingredient list directly");
+            pizza.getAllergens().add("Dairy");
+        }, "Should not be able to modify allergen list directly");
     }
 
     @Test
-    @DisplayName("MenuItem requires at least one ingredient")
-    void testMinimumIngredientConstraint() {
-        NutritionalInfo nutrition = new NutritionalInfo(350, 15.0, 40.0, 12.0, 3.0);
-
-        assertThrows(IllegalArgumentException.class, () -> {
-            new MainDish("Empty Pizza", "No ingredients", 35.0, "/img.jpg",
-                "Italian", nutrition, new ArrayList<>(), 2);
-        }, "Should require at least one ingredient");
-    }
-
-    @Test
-    @DisplayName("Null ingredient list should throw exception")
-    void testNullIngredientList() {
-        NutritionalInfo nutrition = new NutritionalInfo(350, 15.0, 40.0, 12.0, 3.0);
-
-        assertThrows(IllegalArgumentException.class, () -> {
-            new MainDish("Pizza", "Description", 35.0, "/img.jpg",
-                "Italian", nutrition, null, 2);
-        }, "Null ingredient list should throw exception");
-    }
-
-    @Test
-    @DisplayName("Adding single ingredient to MenuItem")
-    void testAddSingleIngredient() {
-        Ingredient ing1 = new Ingredient("Tomato", "kg", 50, 10, 2.5);
-        Ingredient ing2 = new Ingredient("Cheese", "kg", 30, 5, 8.0);
+    @DisplayName("MenuItem with empty allergen set is valid (optional)")
+    void testEmptyAllergenList() {
         NutritionalInfo nutrition = new NutritionalInfo(350, 15.0, 40.0, 12.0, 3.0);
 
         MainDish pizza = new MainDish("Pizza", "Description", 35.0, "/img.jpg",
-            "Italian", nutrition, Arrays.asList(ing1), 2);
+            "Italian", nutrition, new HashSet<>(), 2);
 
-        assertEquals(1, pizza.getIngredients().size());
-
-        pizza.addIngredient(ing2);
-        assertEquals(2, pizza.getIngredients().size());
-        assertTrue(pizza.getIngredients().contains(ing2));
+        assertEquals(0, pizza.getAllergens().size());
     }
 
     @Test
-    @DisplayName("Cannot add null ingredient")
-    void testAddNullIngredient() {
-        Ingredient ing1 = new Ingredient("Tomato", "kg", 50, 10, 2.5);
+    @DisplayName("MenuItem with null allergen set creates empty set")
+    void testNullAllergenList() {
         NutritionalInfo nutrition = new NutritionalInfo(350, 15.0, 40.0, 12.0, 3.0);
 
         MainDish pizza = new MainDish("Pizza", "Description", 35.0, "/img.jpg",
-            "Italian", nutrition, Arrays.asList(ing1), 2);
+            "Italian", nutrition, 2);
 
-        assertThrows(IllegalArgumentException.class, () -> {
-            pizza.addIngredient(null);
-        }, "Cannot add null ingredient");
+        assertNotNull(pizza.getAllergens());
+        assertEquals(0, pizza.getAllergens().size());
     }
 
     @Test
-    @DisplayName("Ingredient list cannot contain null values")
-    void testIngredientListWithNullElement() {
-        Ingredient ing1 = new Ingredient("Tomato", "kg", 50, 10, 2.5);
+    @DisplayName("Adding single allergen to MenuItem")
+    void testAddSingleAllergen() {
         NutritionalInfo nutrition = new NutritionalInfo(350, 15.0, 40.0, 12.0, 3.0);
-        List<Ingredient> ingredients = Arrays.asList(ing1, null);
+
+        MainDish pizza = new MainDish("Pizza", "Description", 35.0, "/img.jpg",
+            "Italian", nutrition, new HashSet<>(Arrays.asList("Gluten")), 2);
+
+        assertEquals(1, pizza.getAllergens().size());
+
+        pizza.addAllergen("Dairy");
+        assertEquals(2, pizza.getAllergens().size());
+        assertTrue(pizza.getAllergens().contains("Dairy"));
+    }
+
+    @Test
+    @DisplayName("Cannot add null allergen")
+    void testAddNullAllergen() {
+        NutritionalInfo nutrition = new NutritionalInfo(350, 15.0, 40.0, 12.0, 3.0);
+
+        MainDish pizza = new MainDish("Pizza", "Description", 35.0, "/img.jpg",
+            "Italian", nutrition, new HashSet<>(Arrays.asList("Gluten")), 2);
+
+        assertThrows(IllegalArgumentException.class, () -> {
+            pizza.addAllergen(null);
+        }, "Cannot add null allergen");
+    }
+
+    @Test
+    @DisplayName("Cannot add empty string allergen")
+    void testAddEmptyAllergen() {
+        NutritionalInfo nutrition = new NutritionalInfo(350, 15.0, 40.0, 12.0, 3.0);
+
+        MainDish pizza = new MainDish("Pizza", "Description", 35.0, "/img.jpg",
+            "Italian", nutrition, new HashSet<>(Arrays.asList("Gluten")), 2);
+
+        assertThrows(IllegalArgumentException.class, () -> {
+            pizza.addAllergen("");
+        }, "Cannot add empty string allergen");
+    }
+
+    @Test
+    @DisplayName("Allergen set cannot contain null values")
+    void testAllergenListWithNullElement() {
+        NutritionalInfo nutrition = new NutritionalInfo(350, 15.0, 40.0, 12.0, 3.0);
+        Set<String> allergens = new HashSet<>(Arrays.asList("Gluten", null));
 
         assertThrows(IllegalArgumentException.class, () -> {
             new MainDish("Pizza", "Description", 35.0, "/img.jpg",
-                "Italian", nutrition, ingredients, 2);
-        }, "Ingredient list with null element should throw exception");
+                "Italian", nutrition, allergens, 2);
+        }, "Allergen set with null element should throw exception");
     }
 
     @Test
-    @DisplayName("MenuItem with single ingredient is valid")
-    void testSingleIngredient() {
-        Ingredient ing = new Ingredient("Tomato", "kg", 50, 10, 2.5);
+    @DisplayName("MenuItem with single allergen is valid")
+    void testSingleAllergen() {
         NutritionalInfo nutrition = new NutritionalInfo(350, 15.0, 40.0, 12.0, 3.0);
 
         MainDish dish = new MainDish("Tomato Salad", "Simple salad", 15.0, "/img.jpg",
-            "Mediterranean", nutrition, Arrays.asList(ing), 0);
+            "Mediterranean", nutrition, new HashSet<>(Arrays.asList("Tomato")), 0);
 
-        assertEquals(1, dish.getIngredients().size());
-        assertEquals(ing, dish.getIngredients().get(0));
+        assertEquals(1, dish.getAllergens().size());
+        assertTrue(dish.getAllergens().contains("Tomato"));
     }
 
     @Test
-    @DisplayName("Setting new ingredient list replaces old one")
-    void testSetIngredients() {
-        Ingredient ing1 = new Ingredient("Tomato", "kg", 50, 10, 2.5);
-        Ingredient ing2 = new Ingredient("Cheese", "kg", 30, 5, 8.0);
-        Ingredient ing3 = new Ingredient("Basil", "bunch", 20, 3, 1.5);
-
+    @DisplayName("Setting new allergen set replaces old one")
+    void testSetAllergens() {
         NutritionalInfo nutrition = new NutritionalInfo(350, 15.0, 40.0, 12.0, 3.0);
 
         MainDish pizza = new MainDish("Pizza", "Description", 35.0, "/img.jpg",
-            "Italian", nutrition, Arrays.asList(ing1), 2);
+            "Italian", nutrition, new HashSet<>(Arrays.asList("Gluten")), 2);
 
-        assertEquals(1, pizza.getIngredients().size());
+        assertEquals(1, pizza.getAllergens().size());
 
-        pizza.setIngredients(Arrays.asList(ing2, ing3));
-        assertEquals(2, pizza.getIngredients().size());
-        assertTrue(pizza.getIngredients().contains(ing2));
-        assertTrue(pizza.getIngredients().contains(ing3));
-        assertFalse(pizza.getIngredients().contains(ing1));
+        pizza.setAllergens(new HashSet<>(Arrays.asList("Dairy", "Eggs")));
+        assertEquals(2, pizza.getAllergens().size());
+        assertTrue(pizza.getAllergens().contains("Dairy"));
+        assertTrue(pizza.getAllergens().contains("Eggs"));
+        assertFalse(pizza.getAllergens().contains("Gluten"));
+    }
+
+    @Test
+    @DisplayName("Removing allergen from MenuItem")
+    void testRemoveAllergen() {
+        NutritionalInfo nutrition = new NutritionalInfo(350, 15.0, 40.0, 12.0, 3.0);
+
+        MainDish pizza = new MainDish("Pizza", "Description", 35.0, "/img.jpg",
+            "Italian", nutrition, new HashSet<>(Arrays.asList("Gluten", "Dairy")), 2);
+
+        assertEquals(2, pizza.getAllergens().size());
+
+        pizza.removeAllergen("Gluten");
+        assertEquals(1, pizza.getAllergens().size());
+        assertFalse(pizza.getAllergens().contains("Gluten"));
+        assertTrue(pizza.getAllergens().contains("Dairy"));
+    }
+
+    @Test
+    @DisplayName("Clearing all allergens from MenuItem")
+    void testClearAllergens() {
+        NutritionalInfo nutrition = new NutritionalInfo(350, 15.0, 40.0, 12.0, 3.0);
+
+        MainDish pizza = new MainDish("Pizza", "Description", 35.0, "/img.jpg",
+            "Italian", nutrition, new HashSet<>(Arrays.asList("Gluten", "Dairy", "Eggs")), 2);
+
+        assertEquals(3, pizza.getAllergens().size());
+
+        pizza.clearAllergens();
+        assertEquals(0, pizza.getAllergens().size());
     }
 }
