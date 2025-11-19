@@ -3,21 +3,19 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
-/**
- * Discount based on minimum order amount or quantity.
- */
+
 public class VolumeDiscount extends Discount {
     @Serial
     private static final long serialVersionUID = 1L;
 
-    // Class extent
+
     private static List<VolumeDiscount> allVolumeDiscounts = new ArrayList<>();
 
-    // Attributes
+
     private double minAmount;
     private int minQuantity;
 
-    // Constructors
+
     protected VolumeDiscount() {
         super();
     }
@@ -29,7 +27,7 @@ public class VolumeDiscount extends Discount {
         addToExtent(this);
     }
 
-    // Class extent management
+
     private static void addToExtent(VolumeDiscount discount) {
         if (discount != null) {
             allVolumeDiscounts.add(discount);
@@ -40,7 +38,7 @@ public class VolumeDiscount extends Discount {
         return Collections.unmodifiableList(allVolumeDiscounts);
     }
 
-    // Getters and setters
+
     public double getMinAmount() {
         return minAmount;
     }

@@ -1,20 +1,18 @@
 import java.io.Serial;
 import java.util.*;
 
-/**
- * Discount applied to specific menu items.
- */
+
 public class ItemLevelDiscount extends Discount {
     @Serial
     private static final long serialVersionUID = 1L;
 
-    // Class extent
+
     private static List<ItemLevelDiscount> allItemLevelDiscounts = new ArrayList<>();
 
     // Multi-value attribute
-    private Set<String> applicableItems;
+    private final Set<String> applicableItems;
 
-    // Constructors
+
     protected ItemLevelDiscount() {
         super();
         this.applicableItems = new HashSet<>();
@@ -31,7 +29,7 @@ public class ItemLevelDiscount extends Discount {
         addToExtent(this);
     }
 
-    // Class extent management
+
     private static void addToExtent(ItemLevelDiscount discount) {
         if (discount != null) {
             allItemLevelDiscounts.add(discount);
@@ -42,7 +40,7 @@ public class ItemLevelDiscount extends Discount {
         return Collections.unmodifiableList(allItemLevelDiscounts);
     }
 
-    // Multi-value attribute management
+
     public Set<String> getApplicableItems() {
         return Collections.unmodifiableSet(applicableItems);
     }
@@ -58,7 +56,7 @@ public class ItemLevelDiscount extends Discount {
         applicableItems.remove(item);
     }
 
-    // Class extent persistence
+
     public static void clearExtent() {
         allItemLevelDiscounts.clear();
     }

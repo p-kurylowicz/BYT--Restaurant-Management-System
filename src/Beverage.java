@@ -5,7 +5,7 @@ public class Beverage extends MenuItem {
     @Serial
     private static final long serialVersionUID = 1L;
 
-
+    // Optional attribute
     private Double alcoholPercentage;
 
 

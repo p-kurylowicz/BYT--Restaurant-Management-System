@@ -5,21 +5,19 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
-/**
- * Discount valid only at specific dates and times.
- */
+
 public class TimeBasedDiscount extends Discount {
     @Serial
     private static final long serialVersionUID = 1L;
 
-    // Class extent
+
     private static List<TimeBasedDiscount> allTimeBasedDiscounts = new ArrayList<>();
 
-    // Attributes
+
     private LocalDate date;
     private LocalTime time;
 
-    // Constructors
+
     protected TimeBasedDiscount() {
         super();
     }
@@ -31,7 +29,7 @@ public class TimeBasedDiscount extends Discount {
         addToExtent(this);
     }
 
-    // Class extent management
+
     private static void addToExtent(TimeBasedDiscount discount) {
         if (discount != null) {
             allTimeBasedDiscounts.add(discount);
@@ -42,7 +40,7 @@ public class TimeBasedDiscount extends Discount {
         return Collections.unmodifiableList(allTimeBasedDiscounts);
     }
 
-    // Getters and setters
+
     public LocalDate getDate() {
         return date;
     }

@@ -45,7 +45,7 @@ public class OrderRequest implements Serializable {
         }
     }
 
-    // Confirm request
+
     public void confirmRequest() {
         if (this.status != OrderRequestStatus.PENDING) {
             throw new IllegalStateException("Only pending requests can be confirmed");
@@ -77,7 +77,7 @@ public class OrderRequest implements Serializable {
         this.status = OrderRequestStatus.SERVED;
     }
 
-    // Change status
+
     public void changeStatus(OrderRequestStatus newStatus) {
         if (newStatus == null) {
             throw new IllegalArgumentException("Status cannot be null");

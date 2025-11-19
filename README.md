@@ -21,6 +21,14 @@ mvn test
 - **Comprehensive validation** and exception handling
 - **100% test coverage** with JUnit 5
 
+## Attributes
+
+- Complex attribute - NutritionalInfo, ContactInfo
+- Multi-value attribute - Reservation, ApplicableItems, Allergens
+- Static attribute - Menu Item, Reservation
+- Derived attribute - Ingredient, Employee, Order
+- Optional attribute - Beverage, ItemQuantity
+
 ## Key Classes
 
 | Class | Highlights |

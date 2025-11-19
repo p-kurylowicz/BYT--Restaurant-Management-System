@@ -34,6 +34,7 @@ public abstract class Order implements Serializable {
      * Calculates the total price of the order.
      * TODO: Implement when we have inheritance
      */
+    // Derived attribute
     public double getTotalAmount() {
         // Placeholder
         return 0.0;

@@ -3,20 +3,18 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
-/**
- * Discount applied at the order level based on a percentage.
- */
+
 public class OrderLevelDiscount extends Discount {
     @Serial
     private static final long serialVersionUID = 1L;
 
-    // Class extent
+
     private static List<OrderLevelDiscount> allOrderLevelDiscounts = new ArrayList<>();
 
-    // Attributes
+
     private double discountPercentage;
 
-    // Constructors
+
     protected OrderLevelDiscount() {
         super();
     }
@@ -27,7 +25,7 @@ public class OrderLevelDiscount extends Discount {
         addToExtent(this);
     }
 
-    // Class extent management
+
     private static void addToExtent(OrderLevelDiscount discount) {
         if (discount != null) {
             allOrderLevelDiscounts.add(discount);
@@ -38,7 +36,7 @@ public class OrderLevelDiscount extends Discount {
         return Collections.unmodifiableList(allOrderLevelDiscounts);
     }
 
-    // Getters and setters
+
     public double getDiscountPercentage() {
         return discountPercentage;
     }
@@ -50,7 +48,7 @@ public class OrderLevelDiscount extends Discount {
         this.discountPercentage = discountPercentage;
     }
 
-    // Class extent persistence
+
     public static void clearExtent() {
         allOrderLevelDiscounts.clear();
     }

@@ -22,8 +22,8 @@ public abstract class MenuItem implements Serializable {
 
     private NutritionalInfo nutritionalInfo;
 
-
-    private Set<String> allergens;
+    // Multi-value attribute (optional)
+    private final Set<String> allergens;
 
 
     protected MenuItem() {

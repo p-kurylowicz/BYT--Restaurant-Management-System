@@ -20,7 +20,7 @@ public class Reservation implements Serializable {
     private LocalTime time;
     private int size;
     private ReservationStatus status;
-    private Set<String> specialRequests; // Multi-value attribute (optional)
+    private final Set<String> specialRequests; // Multi-value attribute (optional)
 
 
     public Reservation() {

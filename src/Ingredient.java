@@ -38,7 +38,7 @@ public class Ingredient implements Serializable {
     public double getReorderPoint() { return reorderPoint; }
     public double getCostPerUnit() { return costPerUnit; }
 
-    
+    // Derived attribute
     public boolean getNeedsReorder() {
         return currentStock < reorderPoint;
     }

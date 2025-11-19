@@ -47,7 +47,7 @@ public abstract class Employee implements Serializable {
     public LocalDate getHireDate() { return hireDate; }
     public double getHourlyRate() { return hourlyRate; }
 
-    
+    // Derived attribute
     public int getYearsOfService() {
         if (hireDate == null) {
             return 0;
@@ -55,7 +55,7 @@ public abstract class Employee implements Serializable {
         return Period.between(hireDate, LocalDate.now()).getYears();
     }
 
-    
+    // Derived attribute
     public boolean getIsExperienced() {
         return getYearsOfService() >= 5;
     }
