@@ -34,9 +34,3 @@ mvn test
 
 - Java 21
 - Maven 3.9+
-
-## Documentation
-
-- `CLAUDE.md` - Development guide
-- `PROJECT_SUMMARY.md` - Complete implementation details
-- `Documents/` - Assignment specifications and class diagrams
