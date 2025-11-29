@@ -15,24 +15,26 @@ public class Feedback implements Serializable {
     private LocalDateTime editedAt;
     private Set<String> keywords = new HashSet<>();
     private MenuItem menuItem;
+    private Customer author;
 
 
     public Feedback() {}
 
-    public Feedback(MenuItem menuItem,String title, String description, int rating,
-                    Sensory sensoryFeedback, LocalDateTime editedAt,
-                    Set<String> keywords) {
-
+    public Feedback(MenuItem menuItem, Customer author, String title, String description, int rating,
+        Sensory sensoryFeedback, LocalDateTime editedAt,
+        Set<String> keywords) {
+        setAuthor(author);
+        setMenuItem(menuItem); 
         setTitle(title);
         setDescription(description);
         setRating(rating);
         setSensoryFeedback(sensoryFeedback);
         setEditedAt(editedAt);
         setKeywords(keywords);
-        setMenuItem(menuItem); 
-
+    
         addFeedback(this);
     }
+
 
     public String getTitle() { return title; }
     public String getDescription() { return description; }
@@ -41,6 +43,9 @@ public class Feedback implements Serializable {
     public LocalDateTime getEditedAt() { return editedAt; }
     public Set<String> getKeywords() { return Collections.unmodifiableSet(keywords); }
     public MenuItem getMenuItem() { return menuItem; } 
+    public Customer getAuthor() {
+        return author;
+    }
 
 
     public void setTitle(String title) {
@@ -53,6 +58,10 @@ public class Feedback implements Serializable {
         if (description == null || description.trim().isEmpty())
             throw new IllegalArgumentException("Description cannot be null or empty");
         this.description = description.trim();
+    }
+
+    public Customer getAuthor() {
+        return author;
     }
 
     public void setRating(int rating) {
@@ -108,12 +117,20 @@ public class Feedback implements Serializable {
         String path = PersistenceConfig.getDataFilePath(filename);
         try (ObjectInputStream in = new ObjectInputStream(new FileInputStream(path))) {
             allFeedback = (List<Feedback>) in.readObject();
+    
+            for (Feedback f : allFeedback) {
+                if (f.getAuthor() != null) {
+                    f.getAuthor().addFeedback(f);
+                }
+            }
+    
             return true;
         } catch (IOException | ClassNotFoundException e) {
             allFeedback.clear();
             return false;
         }
     }
+
 
     @Override
     public String toString() {
