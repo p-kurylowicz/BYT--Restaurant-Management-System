@@ -15,6 +15,8 @@ public class Customer implements Serializable {
     private String email;
     private String phone;
     private LocalDateTime registrationDate;
+    private List<Feedback> feedbacks = new ArrayList<>();
+
 
     public Customer() {}
 
@@ -32,12 +34,22 @@ public class Customer implements Serializable {
     public String getEmail() { return email; }
     public String getPhone() { return phone; }
     public LocalDateTime getRegistrationDate() { return registrationDate; }
+    public List<Feedback> getFeedbacks() {
+        return Collections.unmodifiableList(feedbacks);
+    }
+
+    
     public void setName(String name) {
         if (name == null || name.trim().isEmpty()) {
             throw new IllegalArgumentException("Name cannot be null or empty");
         }
         this.name = name.trim();
     }
+
+    public List<Feedback> getFeedbacks() {
+        return Collections.unmodifiableList(feedbacks);
+    }
+
 
     public void setSurname(String surname) {
         if (surname == null || surname.trim().isEmpty()) {
