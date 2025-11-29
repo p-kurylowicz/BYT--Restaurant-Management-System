@@ -18,6 +18,7 @@ public abstract class MenuItem implements Serializable {
     private String image;
     private MenuItemAvailability availability;
     private String nationalOrigin;
+    private final List<Review> reviews = new ArrayList<>();
 
 
     private NutritionalInfo nutritionalInfo;
@@ -68,6 +69,9 @@ public abstract class MenuItem implements Serializable {
     public MenuItemAvailability getAvailability() { return availability; }
     public String getNationalOrigin() { return nationalOrigin; }
     public NutritionalInfo getNutritionalInfo() { return nutritionalInfo; }
+    public List<Review> getReviews() {
+        return Collections.unmodifiableList(reviews);
+    }
 
     public Set<String> getAllergens() {
         return Collections.unmodifiableSet(allergens);
@@ -116,12 +120,23 @@ public abstract class MenuItem implements Serializable {
         this.availability = availability;
     }
 
+    public void addReview(Review review) {
+        if (review == null) throw new IllegalArgumentException("Review cannot be null");
+        if (review.getMenuItem() != this) review.setMenuItem(this);
+        reviews.add(review);
+    }
+
 
     public void setNutritionalInfo(NutritionalInfo nutritionalInfo) {
         if (nutritionalInfo == null) {
             throw new IllegalArgumentException("Nutritional info cannot be null");
         }
         this.nutritionalInfo = nutritionalInfo;
+    }
+
+    public void removeReview(Review review) {
+        if (review == null) return;
+        reviews.remove(review);
     }
 
     // Multi-value allergens management
