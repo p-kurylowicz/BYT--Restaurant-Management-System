@@ -7,43 +7,49 @@ public class Ingredient implements Serializable {
     @Serial
     private static final long serialVersionUID = 1L;
 
-    
     private static List<Ingredient> allIngredients = new ArrayList<>();
 
-    
     private String name;
     private String unit;
     private double currentStock;
     private double reorderPoint;
     private double costPerUnit;
-
     
-    public Ingredient() {}
+    // ============ AGGREGATION START ============
+    // Aggregation: Ingredient -> Supplier (1..*)
+    // Ingredient must have at least one supplier
+    // Suppliers can exist without this ingredient
+    private List<Supplier> suppliers;
+    // ============ AGGREGATION END ============
 
-    
+    public Ingredient() {
+        this.suppliers = new ArrayList<>();
+    }
+
     public Ingredient(String name, String unit, double currentStock, double reorderPoint, double costPerUnit) {
+        this.suppliers = new ArrayList<>();
         setName(name);
         setUnit(unit);
         setCurrentStock(currentStock);
         setReorderPoint(reorderPoint);
         setCostPerUnit(costPerUnit);
-
         addIngredient(this);
     }
 
-    
     public String getName() { return name; }
     public String getUnit() { return unit; }
     public double getCurrentStock() { return currentStock; }
     public double getReorderPoint() { return reorderPoint; }
     public double getCostPerUnit() { return costPerUnit; }
-
-    // Derived attribute
+    
+    public List<Supplier> getSuppliers() {
+        return Collections.unmodifiableList(suppliers);
+    }
+    
     public boolean getNeedsReorder() {
         return currentStock < reorderPoint;
     }
 
-    
     public void setName(String name) {
         if (name == null || name.trim().isEmpty()) {
             throw new IllegalArgumentException("Ingredient name cannot be null or empty");
@@ -79,15 +85,85 @@ public class Ingredient implements Serializable {
         this.costPerUnit = costPerUnit;
     }
 
+    public void addSupplier(Supplier supplier) {
+        if (supplier == null) {
+            throw new IllegalArgumentException("Supplier cannot be null");
+        }
+        
+        if (suppliers.contains(supplier)) {
+            throw new IllegalStateException("This supplier is already associated with this ingredient");
+        }
+        
+        suppliers.add(supplier);
+        
+        // Reverse connection: add this ingredient to the supplier
+        if (!supplier.getIngredients().contains(this)) {
+            supplier.addIngredient(this);
+        }
+    }
+    
+    public void removeSupplier(Supplier supplier) {
+        if (supplier == null) {
+            throw new IllegalArgumentException("Supplier cannot be null");
+        }
+        
+        // Check minimum multiplicity (1..*)
+        if (suppliers.size() <= 1) {
+            throw new IllegalStateException(
+                "Cannot remove supplier: ingredient must have at least one supplier");
+        }
+        
+        if (!suppliers.contains(supplier)) {
+            throw new IllegalArgumentException("This supplier is not associated with this ingredient");
+        }
+        
+        suppliers.remove(supplier);
+        
+        if (supplier.getIngredients().contains(this)) {
+            supplier.removeIngredient(this);
+        }
+    }
+    
+    public void replaceSupplier(Supplier oldSupplier, Supplier newSupplier) {
+        if (oldSupplier == null || newSupplier == null) {
+            throw new IllegalArgumentException("Suppliers cannot be null");
+        }
+        
+        if (!suppliers.contains(oldSupplier)) {
+            throw new IllegalArgumentException("Old supplier is not associated with this ingredient");
+        }
+        
+        if (suppliers.contains(newSupplier)) {
+            throw new IllegalStateException("New supplier is already associated with this ingredient");
+        }
+        
+        addSupplier(newSupplier);
+        
+        suppliers.remove(oldSupplier);
+        if (oldSupplier.getIngredients().contains(this)) {
+            oldSupplier.removeIngredient(this);
+        }
+    }
+    
+    public Supplier getPrimarySupplier() {
+        if (suppliers.isEmpty()) {
+            return null;
+        }
+        
+        Supplier primary = suppliers.get(0);
+        for (Supplier supplier : suppliers) {
+            if (supplier.getReliabilityRating() > primary.getReliabilityRating()) {
+                primary = supplier;
+            }
+        }
+        return primary;
+    }
+    // ============ AGGREGATION END ============
 
     public void updateCurrentStock(double quantity) {
         setCurrentStock(currentStock + quantity);
     }
 
-    /**
-     * Increase stock by specified quantity.
-     * TODO: Implement supply log integration and stock tracking
-     */
     public void increaseStock(double quantity) {
         if (quantity <= 0) {
             throw new IllegalArgumentException("Quantity to increase must be greater than zero");
@@ -95,17 +171,12 @@ public class Ingredient implements Serializable {
         updateCurrentStock(quantity);
     }
 
-    /**
-     * Reduce stock by specified quantity.
-     * TODO: Implement usage tracking and automatic reorder alerts
-     */
     public void reduceStock(double quantity) {
         if (quantity <= 0) {
             throw new IllegalArgumentException("Quantity to reduce must be greater than zero");
         }
         updateCurrentStock(-quantity);
     }
-
 
     private static void addIngredient(Ingredient ingredient) {
         if (ingredient == null) {
@@ -122,7 +193,6 @@ public class Ingredient implements Serializable {
         allIngredients.clear();
     }
 
-    
     public static void saveExtent(String filename) throws IOException {
         String filepath = PersistenceConfig.getDataFilePath(filename);
         try (ObjectOutputStream out = new ObjectOutputStream(new FileOutputStream(filepath))) {
@@ -144,7 +214,7 @@ public class Ingredient implements Serializable {
 
     @Override
     public String toString() {
-        return String.format("Ingredient[%s, stock=%.2f %s, reorderPoint=%.2f, needsReorder=%s, cost=%.2f]",
-            name, currentStock, unit, reorderPoint, getNeedsReorder(), costPerUnit);
+        return String.format("Ingredient[%s, stock=%.2f %s, reorderPoint=%.2f, needsReorder=%s, cost=%.2f, suppliers=%d]",
+            name, currentStock, unit, reorderPoint, getNeedsReorder(), costPerUnit, suppliers.size());
     }
 }
