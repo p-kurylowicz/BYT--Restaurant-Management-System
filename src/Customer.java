@@ -46,11 +46,6 @@ public class Customer implements Serializable {
         this.name = name.trim();
     }
 
-    public List<Feedback> getFeedbacks() {
-        return Collections.unmodifiableList(feedbacks);
-    }
-
-
     public void setSurname(String surname) {
         if (surname == null || surname.trim().isEmpty()) {
             throw new IllegalArgumentException("Surname cannot be null or empty");
@@ -90,6 +85,11 @@ public class Customer implements Serializable {
             throw new IllegalArgumentException("Customer cannot be null");
         }
         allCustomers.add(customer);
+    }
+
+    void addFeedback(Feedback feedback) {
+        if (feedback == null) throw new IllegalArgumentException("Feedback cannot be null");
+        feedbacks.add(feedback);
     }
 
     public static List<Customer> getAllCustomers() {
