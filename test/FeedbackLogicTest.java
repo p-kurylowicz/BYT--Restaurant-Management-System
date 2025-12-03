@@ -3,118 +3,148 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.DisplayName;
 import static org.junit.jupiter.api.Assertions.*;
 
-import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.time.LocalTime;
 import java.util.HashSet;
 import java.util.Set;
 
-@DisplayName("Review Business Logic Tests")
-class ReviewTest {
+@DisplayName("Feedback Tests")
+class FeedbackLogicTest {
 
     private Customer customer;
     private MenuItem menuItem;
-    private Order order;
 
     @BeforeEach
     void setUp() {
-        Customer.getAllCustomers().clear();
-        MenuItem.getAllMenuItems().clear();
-        Order.getAllOrders().clear();
-        Review.getAllReviews().clear();
+        Customer.clearExtent();
+        MenuItem.clearExtent();
+        Feedback.clearExtent();
 
-
-        customer = new Customer("Ivan", "Petrov", "ivan@test.com", "+123456789", 
+        customer = new Customer("Ivan", "Petrov", "ivan@test.com", "+123456789",
                                LocalDateTime.now().minusDays(30));
 
-        NutritionalInfo nutritionalInfo = new NutritionalInfo(500, 20, 30, 40);
-        menuItem = new Dish("Test Dish", "Delicious test dish", 25.50, "test.jpg", 
-                           "Polish", nutritionalInfo, DishType.MAIN_COURSE);
-
-        order = new DineInOrder();
-        order.setCustomer(customer);
-        order.addMenuItem(menuItem);
-        order.completeOrder();
+        NutritionalInfo nutritionalInfo = new NutritionalInfo(500, 20, 30, 40, 10);
+        menuItem = new MainDish("Test Dish", "Delicious test dish", 25.50, "test.jpg",
+                           "Polish", nutritionalInfo, 2);
     }
 
     @Test
-    @DisplayName("Should not allow review without completed order")
-    void testCannotCreateReviewWithoutOrder() {
-        Customer customerWithoutOrder = new Customer("Anna", "Kowalska", "anna@test.com", 
-                                                     "+987654321", LocalDateTime.now());
+    @DisplayName("Should create feedback with valid data")
+    void testCreateFeedback() {
+        Feedback feedback = new Feedback(menuItem, customer, "Great!", "Very tasty", 5, null, null, null);
 
-        assertThrows(IllegalStateException.class, () -> {
-            new Review(menuItem, customerWithoutOrder, "Great!", "Very tasty", 5, null, null);
-        }, "Should throw exception when customer has no completed orders for this menu item");
+        assertNotNull(feedback);
+        assertEquals("Great!", feedback.getTitle());
+        assertEquals("Very tasty", feedback.getDescription());
+        assertEquals(5, feedback.getRating());
+        assertEquals(customer, feedback.getAuthor());
+        assertEquals(menuItem, feedback.getMenuItem());
     }
 
     @Test
-    @DisplayName("Should not allow review when order is not completed")
-    void testCannotCreateReviewWithActiveOrder() {
-        Customer newCustomer = new Customer("Maria", "Nowak", "maria@test.com", 
-                                           "+111222333", LocalDateTime.now());
-        Order activeOrder = new DineInOrder();
-        activeOrder.setCustomer(newCustomer);
-        activeOrder.addMenuItem(menuItem);
-
-        assertThrows(IllegalStateException.class, () -> {
-            new Review(menuItem, newCustomer, "Great!", "Very tasty", 5, null, null);
-        }, "Should throw exception when order is not completed");
-    }
-
-    @Test
-    @DisplayName("Should allow review when customer has completed order")
-    void testCanCreateReviewWithCompletedOrder() {
-        assertDoesNotThrow(() -> {
-            Review review = new Review(menuItem, customer, "Excellent", "Best dish ever", 5, null, null);
-            assertNotNull(review);
-            assertEquals(customer, review.getCustomer());
-            assertEquals(menuItem, review.getMenuItem());
+    @DisplayName("Should not allow null customer")
+    void testNullCustomer() {
+        assertThrows(IllegalArgumentException.class, () -> {
+            new Feedback(menuItem, null, "Great!", "Very tasty", 5, null, null, null);
         });
     }
 
     @Test
-    @DisplayName("Should allow customer to review same menu item only once per order")
-    void testOneReviewPerOrderPerMenuItem() {
-        Review firstReview = new Review(menuItem, customer, "First", "First review", 5, null, null);
-        assertNotNull(firstReview);
-
-        assertThrows(IllegalStateException.class, () -> {
-            new Review(menuItem, customer, "Second", "Second review", 4, null, null);
-        }, "Should not allow multiple reviews for same menu item from same customer without new order");
+    @DisplayName("Should not allow null menu item")
+    void testNullMenuItem() {
+        assertThrows(IllegalArgumentException.class, () -> {
+            new Feedback(null, customer, "Great!", "Very tasty", 5, null, null, null);
+        });
     }
 
     @Test
-    @DisplayName("Should allow customer to review different menu items in same order")
-    void testMultipleReviewsForDifferentMenuItems() {
-        MenuItem menuItem2 = new Dish("Second Dish", "Another dish", 20.0, "dish2.jpg",
-                                     "Polish", new NutritionalInfo(400, 15, 25, 30), 
-                                     DishType.APPETIZER);
-        order.addMenuItem(menuItem2);
-
-        assertDoesNotThrow(() -> {
-            Review review1 = new Review(menuItem, customer, "Good", "Nice", 4, null, null);
-            Review review2 = new Review(menuItem2, customer, "Great", "Excellent", 5, null, null);
-            
-            assertNotNull(review1);
-            assertNotNull(review2);
-        }, "Should allow reviews for different menu items in same order");
+    @DisplayName("Should not allow empty title")
+    void testEmptyTitle() {
+        assertThrows(IllegalArgumentException.class, () -> {
+            new Feedback(menuItem, customer, "", "Very tasty", 5, null, null, null);
+        });
     }
 
     @Test
-    @DisplayName("Should allow new review after new completed order")
-    void testCanReviewAfterNewOrder() {
-        Review firstReview = new Review(menuItem, customer, "First", "First review", 5, null, null);
-        assertNotNull(firstReview);
+    @DisplayName("Should not allow empty description")
+    void testEmptyDescription() {
+        assertThrows(IllegalArgumentException.class, () -> {
+            new Feedback(menuItem, customer, "Great!", "", 5, null, null, null);
+        });
+    }
 
-        Order newOrder = new DineInOrder();
-        newOrder.setCustomer(customer);
-        newOrder.addMenuItem(menuItem);
-        newOrder.completeOrder();
+    @Test
+    @DisplayName("Should not allow rating below 0")
+    void testRatingTooLow() {
+        assertThrows(IllegalArgumentException.class, () -> {
+            new Feedback(menuItem, customer, "Bad", "Terrible", -1, null, null, null);
+        });
+    }
 
+    @Test
+    @DisplayName("Should not allow rating above 5")
+    void testRatingTooHigh() {
+        assertThrows(IllegalArgumentException.class, () -> {
+            new Feedback(menuItem, customer, "Amazing", "Best ever", 6, null, null, null);
+        });
+    }
+
+    @Test
+    @DisplayName("Should allow rating from 0 to 5")
+    void testValidRatings() {
+        for (int rating = 0; rating <= 5; rating++) {
+            final int r = rating;
+            assertDoesNotThrow(() -> {
+                new Feedback(menuItem, customer, "Test", "Test feedback", r, null, null, null);
+            });
+        }
+    }
+
+    @Test
+    @DisplayName("Should set keywords correctly")
+    void testKeywords() {
+        Set<String> keywords = new HashSet<>();
+        keywords.add("delicious");
+        keywords.add("spicy");
+        keywords.add("authentic");
+
+        Feedback feedback = new Feedback(menuItem, customer, "Excellent", "Amazing food", 5, null, null, keywords);
+
+        assertEquals(3, feedback.getKeywords().size());
+        assertTrue(feedback.getKeywords().contains("delicious"));
+        assertTrue(feedback.getKeywords().contains("spicy"));
+        assertTrue(feedback.getKeywords().contains("authentic"));
+    }
+
+    @Test
+    @DisplayName("Should set edited timestamp")
+    void testEditedTimestamp() {
+        LocalDateTime editedTime = LocalDateTime.now();
+        Feedback feedback = new Feedback(menuItem, customer, "Good", "Nice dish", 4, null, editedTime, null);
+
+        assertEquals(editedTime, feedback.getEditedAt());
+    }
+
+    @Test
+    @DisplayName("Should allow null sensory feedback")
+    void testNullSensoryFeedback() {
         assertDoesNotThrow(() -> {
-            Review secondReview = new Review(menuItem, customer, "Second", "Second review after new order", 4, null, null);
-            assertNotNull(secondReview);
-        }, "Should allow review after new completed order");
+            new Feedback(menuItem, customer, "Good", "Nice", 4, null, null, null);
+        });
+    }
+
+    @Test
+    @DisplayName("Should establish reverse connection with customer")
+    void testCustomerReverseConnection() {
+        Feedback feedback = new Feedback(menuItem, customer, "Great", "Loved it", 5, null, null, null);
+
+        assertTrue(customer.getFeedbacks().contains(feedback));
+    }
+
+    @Test
+    @DisplayName("Should establish reverse connection with menu item")
+    void testMenuItemReverseConnection() {
+        Feedback feedback = new Feedback(menuItem, customer, "Great", "Loved it", 5, null, null, null);
+
+        assertTrue(menuItem.getReviews().contains(feedback));
     }
 }

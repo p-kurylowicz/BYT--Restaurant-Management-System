@@ -21,6 +21,7 @@ public class ClassExtentTest {
         Customer.clearExtent();
         Ingredient.clearExtent();
         Table.clearExtent();
+        MenuItem.clearExtent();
     }
 
     @Test

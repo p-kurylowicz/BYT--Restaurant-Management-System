@@ -3,13 +3,15 @@ import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.Set;
 import java.util.UUID;
 
 public class Invoice implements Serializable {
     @Serial private static final long serialVersionUID = 1L;
 
     private static List<Invoice> allInvoices = new ArrayList<>();
-    
+    private static final Set<String> APPROVED_BILLING_REGIONS = Set.of("PL", "DE", "CZ", "SK");
+
 
     // Basic Attribute
     private final String invoiceNumber;
@@ -88,6 +90,9 @@ public class Invoice implements Serializable {
     public void setBillingAddress(Address billingAddress) {
         if (billingAddress == null) {
             throw new IllegalArgumentException("Billing address cannot be null");
+        }
+        if (!APPROVED_BILLING_REGIONS.contains(billingAddress.getCountry())) {
+            throw new IllegalArgumentException("Country " + billingAddress.getCountry() + " is not an approved billing region");
         }
         this.billingAddress = billingAddress;
     }

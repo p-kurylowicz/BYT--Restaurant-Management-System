@@ -15,19 +15,19 @@ public class Ingredient implements Serializable {
     private double reorderPoint;
     private double costPerUnit;
     
-    // ============ AGGREGATION START ============
     // Aggregation: Ingredient -> Supplier (1..*)
-    // Ingredient must have at least one supplier
-    // Suppliers can exist without this ingredient
     private List<Supplier> suppliers;
-    // ============ AGGREGATION END ============
+    // {Bag} Association: Ingredient -> SupplyLog (0..*)
+    private List<SupplyLog> supplyLogs;
 
     public Ingredient() {
         this.suppliers = new ArrayList<>();
+        this.supplyLogs = new ArrayList<>();
     }
 
     public Ingredient(String name, String unit, double currentStock, double reorderPoint, double costPerUnit) {
         this.suppliers = new ArrayList<>();
+        this.supplyLogs = new ArrayList<>();
         setName(name);
         setUnit(unit);
         setCurrentStock(currentStock);
@@ -45,7 +45,24 @@ public class Ingredient implements Serializable {
     public List<Supplier> getSuppliers() {
         return Collections.unmodifiableList(suppliers);
     }
-    
+
+    public List<SupplyLog> getSupplyLogs() {
+        return Collections.unmodifiableList(supplyLogs);
+    }
+
+    void addSupplyLog(SupplyLog supplyLog) {
+        if (supplyLog == null) {
+            throw new IllegalArgumentException("SupplyLog cannot be null");
+        }
+        supplyLogs.add(supplyLog);
+    }
+
+    void removeSupplyLog(SupplyLog supplyLog) {
+        if (supplyLog != null) {
+            supplyLogs.remove(supplyLog);
+        }
+    }
+
     public boolean getNeedsReorder() {
         return currentStock < reorderPoint;
     }

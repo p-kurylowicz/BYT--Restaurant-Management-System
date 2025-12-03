@@ -2,7 +2,9 @@ import java.io.*;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 public class Customer implements Serializable {
     @Serial
@@ -17,10 +19,15 @@ public class Customer implements Serializable {
     private LocalDateTime registrationDate;
     private List<Feedback> feedbacks = new ArrayList<>();
 
+    // Basic Association: Customer -> Order (0..*)
+    private Set<Order> orders = new HashSet<>();
 
-    public Customer() {}
+    public Customer() {
+        this.orders = new HashSet<>();
+    }
 
     public Customer(String name, String surname, String email, String phone, LocalDateTime registrationDate) {
+        this.orders = new HashSet<>();
         setName(name);
         setSurname(surname);
         setEmail(email);

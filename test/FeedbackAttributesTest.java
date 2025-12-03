@@ -8,24 +8,22 @@ import java.util.HashSet;
 import java.util.Set;
 
 @DisplayName("Feedback Attribute Tests")
-class FeedbackTest {
+class FeedbackAttributesTest {
 
     private Customer customer;
     private MenuItem menuItem;
 
     @BeforeEach
     void setUp() {
-        // Clear extents
-        Customer.getAllCustomers().clear();
-        MenuItem.getAllMenuItems().clear();
-        Feedback.getAllFeedback().clear();
+        Customer.clearExtent();
+        MenuItem.clearExtent();
+        Feedback.clearExtent();
 
-
-        customer = new Customer("Ivan", "Petrov", "ivan@test.com", "+123456789", 
+        customer = new Customer("Ivan", "Petrov", "ivan@test.com", "+123456789",
                                LocalDateTime.now().minusDays(30));
-        NutritionalInfo nutritionalInfo = new NutritionalInfo(500, 20, 30, 40);
-        menuItem = new Dish("Test Dish", "Delicious test dish", 25.50, "test.jpg", 
-                           "Polish", nutritionalInfo, DishType.MAIN_COURSE);
+        NutritionalInfo nutritionalInfo = new NutritionalInfo(500, 20, 30, 40, 10);
+        menuItem = new MainDish("Test Dish", "Delicious test dish", 25.50, "test.jpg",
+                           "Polish", nutritionalInfo, 2);
     }
 
     @Test
@@ -35,7 +33,7 @@ class FeedbackTest {
         Set<String> keywords = new HashSet<>();
         keywords.add("delicious");
 
-        Feedback feedback = new Feedback(menuItem, customer, "Great dish", "Very tasty", 
+        Feedback feedback = new Feedback(menuItem, customer, "Great dish", "Very tasty",
                                          5, sensory, null, keywords);
 
         assertEquals("Great dish", feedback.getTitle());
@@ -47,7 +45,7 @@ class FeedbackTest {
         Sensory sensory = new Sensory(65.0, "Sweet", "Aromatic");
         Set<String> keywords = new HashSet<>();
 
-        Feedback feedback = new Feedback(menuItem, customer, "Title", "Very tasty and well cooked", 
+        Feedback feedback = new Feedback(menuItem, customer, "Title", "Very tasty and well cooked",
                                          5, sensory, null, keywords);
 
         assertEquals("Very tasty and well cooked", feedback.getDescription());
@@ -59,7 +57,7 @@ class FeedbackTest {
         Sensory sensory = new Sensory(65.0, "Sweet", "Aromatic");
         Set<String> keywords = new HashSet<>();
 
-        Feedback feedback = new Feedback(menuItem, customer, "Title", "Description", 
+        Feedback feedback = new Feedback(menuItem, customer, "Title", "Description",
                                          4, sensory, null, keywords);
 
         assertEquals(4, feedback.getRating());
@@ -71,7 +69,7 @@ class FeedbackTest {
         Sensory sensory = new Sensory(65.0, "Sweet", "Aromatic");
         Set<String> keywords = new HashSet<>();
 
-        Feedback feedback = new Feedback(menuItem, customer, "Title", "Description", 
+        Feedback feedback = new Feedback(menuItem, customer, "Title", "Description",
                                          5, sensory, null, keywords);
 
         assertNotNull(feedback.getSensoryFeedback());
@@ -87,7 +85,7 @@ class FeedbackTest {
         Sensory sensory = new Sensory(65.0, "Sweet", "Aromatic");
         Set<String> keywords = new HashSet<>();
 
-        Feedback feedback = new Feedback(menuItem, customer, "Title", "Description", 
+        Feedback feedback = new Feedback(menuItem, customer, "Title", "Description",
                                          5, sensory, null, keywords);
 
         assertNull(feedback.getEditedAt(), "EditedAt should be null initially");
@@ -106,7 +104,7 @@ class FeedbackTest {
         keywords.add("spicy");
         keywords.add("fresh");
 
-        Feedback feedback = new Feedback(menuItem, customer, "Title", "Description", 
+        Feedback feedback = new Feedback(menuItem, customer, "Title", "Description",
                                          5, sensory, null, keywords);
 
         assertEquals(3, feedback.getKeywords().size());
@@ -121,7 +119,7 @@ class FeedbackTest {
         Sensory sensory = new Sensory(65.0, "Sweet", "Aromatic");
         Set<String> keywords = new HashSet<>();
 
-        Feedback feedback = new Feedback(menuItem, customer, "Title", "Description", 
+        Feedback feedback = new Feedback(menuItem, customer, "Title", "Description",
                                          5, sensory, null, keywords);
 
         assertEquals(menuItem, feedback.getMenuItem());
@@ -133,7 +131,7 @@ class FeedbackTest {
         Sensory sensory = new Sensory(65.0, "Sweet", "Aromatic");
         Set<String> keywords = new HashSet<>();
 
-        Feedback feedback = new Feedback(menuItem, customer, "Title", "Description", 
+        Feedback feedback = new Feedback(menuItem, customer, "Title", "Description",
                                          5, sensory, null, keywords);
 
         assertEquals(customer, feedback.getAuthor());

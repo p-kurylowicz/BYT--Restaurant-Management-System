@@ -14,18 +14,19 @@ public class Supplier implements Serializable {
     private double reliabilityRating;
     private String contactPerson;
     
-    // ============ AGGREGATION START ============
     // Aggregation: Supplier -> Ingredient (0..*)
-    // Supplier can exist without ingredients
     private List<Ingredient> ingredients;
-    // ============ AGGREGATION END ============
+    // {Bag} Association: Supplier -> SupplyLog (0..*)
+    private List<SupplyLog> supplyLogs;
 
     public Supplier() {
         this.ingredients = new ArrayList<>();
+        this.supplyLogs = new ArrayList<>();
     }
 
     public Supplier(String name, String phone, String email, String address, double reliabilityRating, String contactPerson) {
         this.ingredients = new ArrayList<>();
+        this.supplyLogs = new ArrayList<>();
         setName(name);
         setContactInfo(new ContactInfo(phone, email, address));
         setReliabilityRating(reliabilityRating);
@@ -35,6 +36,7 @@ public class Supplier implements Serializable {
 
     public Supplier(String name, ContactInfo contactInfo, double reliabilityRating, String contactPerson) {
         this.ingredients = new ArrayList<>();
+        this.supplyLogs = new ArrayList<>();
         setName(name);
         setContactInfo(contactInfo);
         setReliabilityRating(reliabilityRating);
@@ -50,12 +52,26 @@ public class Supplier implements Serializable {
     public double getReliabilityRating() { return reliabilityRating; }
     public String getContactPerson() { return contactPerson; }
     
-    // ============ AGGREGATION START ============
-    // Return unmodifiable list to prevent external modification
     public List<Ingredient> getIngredients() {
         return Collections.unmodifiableList(ingredients);
     }
-    // ============ AGGREGATION END ============
+
+    public List<SupplyLog> getSupplyLogs() {
+        return Collections.unmodifiableList(supplyLogs);
+    }
+
+    void addSupplyLog(SupplyLog supplyLog) {
+        if (supplyLog == null) {
+            throw new IllegalArgumentException("SupplyLog cannot be null");
+        }
+        supplyLogs.add(supplyLog);
+    }
+
+    void removeSupplyLog(SupplyLog supplyLog) {
+        if (supplyLog != null) {
+            supplyLogs.remove(supplyLog);
+        }
+    }
 
     public void setName(String name) {
         if (name == null || name.trim().isEmpty()) {

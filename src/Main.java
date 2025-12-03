@@ -443,10 +443,10 @@ public class Main {
         System.out.println("   Current Stock: " + tomato.getCurrentStock() + " " + tomato.getUnit());
         System.out.println("   Needs Reorder: " + (tomato.getNeedsReorder() ? "YES [!]" : "NO") + "\n");
 
-        // Create supply log (simplified - no supplier/ingredient associations)
+        // Create supply log using {Bag} association class
         double quantitySupplied = 50.0;
         double supplyCost = tomato.getCostPerUnit() * quantitySupplied;
-        SupplyLog supplyLog = new SupplyLog(LocalDate.now(), supplyCost, quantitySupplied);
+        SupplyLog supplyLog = SupplyLog.create(supplier, tomato, LocalDate.now(), supplyCost, quantitySupplied);
 
         // Restock
         tomato.increaseStock(quantitySupplied);

@@ -4,31 +4,47 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
-
+// {Bag} Association Class: tracks supply history (allows multiple logs for same Supplier-Ingredient pair)
 public class SupplyLog implements Serializable {
     @Serial
     private static final long serialVersionUID = 1L;
 
-
     private static List<SupplyLog> allSupplyLogs = new ArrayList<>();
 
-
+    private Supplier supplier;
+    private Ingredient ingredient;
     private LocalDate supplyDate;
     private double costAtSupply;
     private double quantitySupplied;
 
+    private SupplyLog(Supplier supplier, Ingredient ingredient, LocalDate supplyDate,
+                     double costAtSupply, double quantitySupplied) {
+        if (supplier == null) {
+            throw new IllegalArgumentException("Supplier cannot be null");
+        }
+        if (ingredient == null) {
+            throw new IllegalArgumentException("Ingredient cannot be null");
+        }
 
-    public SupplyLog() {}
-
-
-    public SupplyLog(LocalDate supplyDate, double costAtSupply, double quantitySupplied) {
+        this.supplier = supplier;
+        this.ingredient = ingredient;
         setSupplyDate(supplyDate);
         setCostAtSupply(costAtSupply);
         setQuantitySupplied(quantitySupplied);
-        addSupplyLog(this);
+        allSupplyLogs.add(this);
     }
 
+    // {Bag} - allows multiple logs for same pair (no duplicate checking)
+    public static SupplyLog create(Supplier supplier, Ingredient ingredient, LocalDate supplyDate,
+                                   double costAtSupply, double quantitySupplied) {
+        SupplyLog supplyLog = new SupplyLog(supplier, ingredient, supplyDate, costAtSupply, quantitySupplied);
+        supplier.addSupplyLog(supplyLog);
+        ingredient.addSupplyLog(supplyLog);
+        return supplyLog;
+    }
 
+    public Supplier getSupplier() { return supplier; }
+    public Ingredient getIngredient() { return ingredient; }
     public LocalDate getSupplyDate() { return supplyDate; }
     public double getCostAtSupply() { return costAtSupply; }
     public double getQuantitySupplied() { return quantitySupplied; }
@@ -57,12 +73,16 @@ public class SupplyLog implements Serializable {
         this.quantitySupplied = quantitySupplied;
     }
 
-
-    private static void addSupplyLog(SupplyLog supplyLog) {
-        if (supplyLog == null) {
-            throw new IllegalArgumentException("SupplyLog cannot be null");
+    public void delete() {
+        if (supplier != null) {
+            supplier.removeSupplyLog(this);
         }
-        allSupplyLogs.add(supplyLog);
+        if (ingredient != null) {
+            ingredient.removeSupplyLog(this);
+        }
+        allSupplyLogs.remove(this);
+        this.supplier = null;
+        this.ingredient = null;
     }
 
     public static List<SupplyLog> getAllSupplyLogs() {
@@ -95,7 +115,9 @@ public class SupplyLog implements Serializable {
 
     @Override
     public String toString() {
-        return String.format("SupplyLog[date=%s, quantity=%.2f, cost=%.2f]",
-            supplyDate, quantitySupplied, costAtSupply);
+        String supplierName = supplier != null ? supplier.getName() : "Unknown";
+        String ingredientName = ingredient != null ? ingredient.getName() : "Unknown";
+        return String.format("SupplyLog[supplier=%s, ingredient=%s, date=%s, quantity=%.2f, cost=%.2f]",
+            supplierName, ingredientName, supplyDate, quantitySupplied, costAtSupply);
     }
 }
