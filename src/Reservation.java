@@ -67,6 +67,14 @@ public class Reservation implements Serializable {
         if (date.isBefore(LocalDate.now())) {
             throw new IllegalArgumentException("Reservation date cannot be in the past");
         }
+
+        // Handle qualifier update in the Customer's map
+        if (this.customer != null && this.date != null && !date.equals(this.date)) {
+            LocalDateTime oldKey = LocalDateTime.of(this.date, this.time);
+            LocalDateTime newKey = LocalDateTime.of(date, this.time);
+            this.customer.updateReservationKey(this, oldKey, newKey);
+        }
+
         this.date = date;
     }
 
@@ -74,6 +82,14 @@ public class Reservation implements Serializable {
         if (time == null) {
             throw new IllegalArgumentException("Time cannot be null");
         }
+
+        // Handle qualifier update in the Customer's map
+        if (this.customer != null && this.time != null && !time.equals(this.time)) {
+            LocalDateTime oldKey = LocalDateTime.of(this.date, this.time);
+            LocalDateTime newKey = LocalDateTime.of(this.date, time);
+            this.customer.updateReservationKey(this, oldKey, newKey);
+        }
+
         this.time = time;
     }
 

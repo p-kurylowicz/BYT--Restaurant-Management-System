@@ -97,6 +97,26 @@ public class Customer implements Serializable {
         }
     }
 
+    /**
+     * Updates the key for a reservation in the map when the qualifier (date/time) changes.
+     * This method handles re-keying without triggering reverse connections.
+     *
+     * @param reservation The reservation whose key needs updating
+     * @param oldKey The old LocalDateTime key
+     * @param newKey The new LocalDateTime key
+     */
+    void updateReservationKey(Reservation reservation, LocalDateTime oldKey, LocalDateTime newKey) {
+        if (reservation == null || oldKey == null || newKey == null) {
+            throw new IllegalArgumentException("Reservation and keys cannot be null");
+        }
+
+        // Remove old key and add with new key without triggering setCustomer
+        if (reservations.containsKey(oldKey)) {
+            reservations.remove(oldKey);
+            reservations.put(newKey, reservation);
+        }
+    }
+
     public String getName() { return name; }
     public String getSurname() { return surname; }
     public String getEmail() { return email; }
