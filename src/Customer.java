@@ -22,6 +22,8 @@ public class Customer implements Serializable {
     // Basic Association: Customer -> Order (0..*)
     private Set<Order> orders = new HashSet<>();
 
+    private Map<LocalDateTime, Reservation> reservations = new HashMap<>();
+    
     public Customer() {
         this.orders = new HashSet<>();
     }
@@ -57,6 +59,39 @@ public class Customer implements Serializable {
         if (orders.contains(order)) {
             orders.remove(order);
             order.removeCustomer();
+        }
+    }
+
+
+    public Map<LocalDateTime, Reservation> getReservations() {
+        return Collections.unmodifiableMap(reservations);
+    }
+
+    public void addReservation(Reservation reservation) {
+        if (reservation == null) {
+            throw new IllegalArgumentException("Reservation cannot be null");
+        }
+        
+        LocalDateTime key = LocalDateTime.of(reservation.getDate(), reservation.getTime());
+
+        if (!reservations.containsKey(key)) {
+            reservations.put(key, reservation);
+            reservation.setCustomer(this);
+        }
+    }
+
+    public Reservation getReservation(LocalDateTime dateAndTime) {
+        if (dateAndTime == null) return null;
+        return reservations.get(dateAndTime);
+    }
+
+    public void removeReservation(Reservation reservation) {
+        if (reservation != null) {
+            LocalDateTime key = LocalDateTime.of(reservation.getDate(), reservation.getTime());
+            if (reservations.containsKey(key)) {
+                reservations.remove(key);
+                reservation.setCustomer(null);
+            }
         }
     }
 
