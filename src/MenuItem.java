@@ -26,14 +26,18 @@ public abstract class MenuItem implements Serializable {
 
     private final List<ItemQuantity> itemQuantities = new ArrayList<>();
 
+    private List<Menu> menus;
+
     protected MenuItem() {
         this.allergens = new HashSet<>();
+        this.menus = new ArrayList<>();
     }
 
 
     protected MenuItem(String name, String description, double price, String image,
                       String nationalOrigin, NutritionalInfo nutritionalInfo) {
         this.allergens = new HashSet<>();
+        this.menus = new ArrayList<>();
         setName(name);
         setDescription(description);
         setPrice(price);
@@ -48,6 +52,7 @@ public abstract class MenuItem implements Serializable {
     protected MenuItem(String name, String description, double price, String image,
                       String nationalOrigin, NutritionalInfo nutritionalInfo, Set<String> allergens) {
         this.allergens = new HashSet<>();
+        this.menus = new ArrayList<>();
         setName(name);
         setDescription(description);
         setPrice(price);
@@ -76,7 +81,10 @@ public abstract class MenuItem implements Serializable {
         return Collections.unmodifiableSet(allergens);
     }
 
-    
+    public List<Menu> getMenus() {
+        return Collections.unmodifiableList(menus);
+    }
+
     public void setName(String name) {
         if (name == null || name.trim().isEmpty()) {
             throw new IllegalArgumentException("Menu item name cannot be null or empty");
@@ -187,6 +195,38 @@ public abstract class MenuItem implements Serializable {
         }
     }
 
+    void addMenu(Menu menu) {
+        if (menu == null) {
+            throw new IllegalArgumentException("Menu cannot be null");
+        }
+
+        if (menus.contains(menu)) {
+            throw new IllegalStateException("This menu item is already in this menu");
+        }
+
+        menus.add(menu);
+
+        if (!menu.getMenuItems().contains(this)) {
+            menu.addMenuItem(this);
+        }
+    }
+
+    void removeMenu(Menu menu) {
+        if (menu == null) {
+            throw new IllegalArgumentException("Menu cannot be null");
+        }
+
+        if (!menus.contains(menu)) {
+            throw new IllegalArgumentException("This menu item is not in this menu");
+        }
+
+        menus.remove(menu);
+
+        if (menu.getMenuItems().contains(this)) {
+            menu.removeMenuItem(this);
+        }
+    }
+
     public double calculatePriceWithTax() {
         return price * (1 + TAX_RATE);
     }
@@ -249,7 +289,7 @@ public abstract class MenuItem implements Serializable {
 
     @Override
     public String toString() {
-        return String.format("MenuItem[%s, price=%.2f PLN (%.2f with tax), origin=%s, availability=%s, allergens=%d]",
-            name, price, calculatePriceWithTax(), nationalOrigin, availability, allergens.size());
+        return String.format("MenuItem[%s, price=%.2f PLN (%.2f with tax), origin=%s, availability=%s, allergens=%d, menus=%d]",
+            name, price, calculatePriceWithTax(), nationalOrigin, availability, allergens.size(), menus.size());
     }
 }
