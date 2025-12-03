@@ -11,10 +11,12 @@ public class OrderRequest implements Serializable {
     
     private static List<OrderRequest> allOrderRequests = new ArrayList<>();
 
-    
+
     private String requestId;
     private OrderRequestStatus status;
     private String requestDetails;
+
+    private List<ItemQuantity> itemQuantities = new ArrayList<>();
 
 
     public OrderRequest() {
@@ -90,7 +92,32 @@ public class OrderRequest implements Serializable {
         if (this.status == OrderRequestStatus.IN_PREPARATION) {
             throw new IllegalStateException("Cannot cancel order request that is already in preparation");
         }
-        // Additional cancellation logic would go here
+    }
+
+    public List<ItemQuantity> getItemQuantities() {
+        return Collections.unmodifiableList(itemQuantities);
+    }
+
+    void addItemQuantity(ItemQuantity itemQuantity) {
+        if (itemQuantity == null) {
+            throw new IllegalArgumentException("ItemQuantity cannot be null");
+        }
+        if (itemQuantities.contains(itemQuantity)) {
+            return;
+        }
+        itemQuantities.add(itemQuantity);
+    }
+
+    void removeItemQuantity(ItemQuantity itemQuantity) {
+        if (itemQuantity != null) {
+            itemQuantities.remove(itemQuantity);
+        }
+    }
+
+    public double calculateRequestTotal() {
+        return itemQuantities.stream()
+            .mapToDouble(ItemQuantity::getRequestTotal)
+            .sum();
     }
 
     

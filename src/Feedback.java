@@ -60,8 +60,12 @@ public class Feedback implements Serializable {
         this.description = description.trim();
     }
 
-    public Customer getAuthor() {
-        return author;
+    public void setAuthor(Customer author) {
+        if (author == null) {
+            throw new IllegalArgumentException("Author cannot be null for feedback");
+        }
+        this.author = author;
+        author.addFeedback(this);
     }
 
     public void setRating(int rating) {

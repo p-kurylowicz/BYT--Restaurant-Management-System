@@ -10,9 +10,12 @@ public abstract class Payment implements Serializable {
     
     private static List<Payment> allPayments = new ArrayList<>();
 
-    
+
     private PaymentStatus status;
     private double amountPayed;
+
+    // Composition: Payment <-> Order (1 to 1, mandatory both sides)
+    private Order order;
 
     
     protected Payment() {}
@@ -34,6 +37,42 @@ public abstract class Payment implements Serializable {
             throw new IllegalArgumentException("Amount payed must be greater than zero");
         }
         this.amountPayed = amountPayed;
+    }
+
+    // Composition: Payment <-> Order (1 to 1, mandatory)
+    public Order getOrder() {
+        return order;
+    }
+
+    /**
+     * Sets the order for this payment and establishes the reverse connection.
+     * This is a mandatory 1:1 relationship - once set, it cannot be removed.
+     * @param order The order to associate with this payment
+     * @throws IllegalArgumentException if order is null
+     * @throws IllegalStateException if order is already set or if payment already has a different order
+     */
+    public void setOrder(Order order) {
+        if (order == null) {
+            throw new IllegalArgumentException("Order cannot be null - Payment must have an Order (mandatory 1:1 relationship)");
+        }
+
+        // Prevent duplicate assignment
+        if (this.order == order) {
+            return; // Already connected
+        }
+
+        // Prevent changing order once set (cannot remove association)
+        if (this.order != null && this.order != order) {
+            throw new IllegalStateException("Order is already set and cannot be changed - association cannot be removed once established");
+        }
+
+        // Set the order
+        this.order = order;
+
+        // Establish reverse connection if not already set
+        if (order.getPayment() != this) {
+            order.setPayment(this);
+        }
     }
 
     // Confirm payment

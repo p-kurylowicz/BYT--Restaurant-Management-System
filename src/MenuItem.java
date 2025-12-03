@@ -18,13 +18,13 @@ public abstract class MenuItem implements Serializable {
     private String image;
     private MenuItemAvailability availability;
     private String nationalOrigin;
-    private final List<Review> reviews = new ArrayList<>();
-
+    private final List<Feedback> reviews = new ArrayList<>();
 
     private NutritionalInfo nutritionalInfo;
 
-    // Multi-value attribute (optional)
     private final Set<String> allergens;
+
+    private final List<ItemQuantity> itemQuantities = new ArrayList<>();
 
 
     protected MenuItem() {
@@ -69,7 +69,7 @@ public abstract class MenuItem implements Serializable {
     public MenuItemAvailability getAvailability() { return availability; }
     public String getNationalOrigin() { return nationalOrigin; }
     public NutritionalInfo getNutritionalInfo() { return nutritionalInfo; }
-    public List<Review> getReviews() {
+    public List<Feedback> getReviews() {
         return Collections.unmodifiableList(reviews);
     }
 
@@ -120,7 +120,7 @@ public abstract class MenuItem implements Serializable {
         this.availability = availability;
     }
 
-    public void addReview(Review review) {
+    public void addReview(Feedback review) {
         if (review == null) throw new IllegalArgumentException("Review cannot be null");
         if (review.getMenuItem() != this) review.setMenuItem(this);
         reviews.add(review);
@@ -134,7 +134,7 @@ public abstract class MenuItem implements Serializable {
         this.nutritionalInfo = nutritionalInfo;
     }
 
-    public void removeReview(Review review) {
+    public void removeReview(Feedback review) {
         if (review == null) return;
         reviews.remove(review);
     }
@@ -168,6 +168,25 @@ public abstract class MenuItem implements Serializable {
         allergens.clear();
     }
 
+    public List<ItemQuantity> getItemQuantities() {
+        return Collections.unmodifiableList(itemQuantities);
+    }
+
+    void addItemQuantity(ItemQuantity itemQuantity) {
+        if (itemQuantity == null) {
+            throw new IllegalArgumentException("ItemQuantity cannot be null");
+        }
+        if (itemQuantities.contains(itemQuantity)) {
+            return;
+        }
+        itemQuantities.add(itemQuantity);
+    }
+
+    void removeItemQuantity(ItemQuantity itemQuantity) {
+        if (itemQuantity != null) {
+            itemQuantities.remove(itemQuantity);
+        }
+    }
 
     public double calculatePriceWithTax() {
         return price * (1 + TAX_RATE);
