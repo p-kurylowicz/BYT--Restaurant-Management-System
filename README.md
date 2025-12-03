@@ -39,9 +39,9 @@ All 6 required association types implemented with reverse connections and compre
 |-----------------|---------|--------------|--------------|
 | **Basic (1..\*)** | `Customer` ↔ `Order` | 0..1 ↔ 0..* | Reverse connections, duplicate prevention |
 | **Composition** | `Order` ↔ `Payment` | 1 ↔ 1 | Mandatory both sides, immutable once set |
-| **Aggregation** | `Ingredient` ↔ `Supplier` | 1..* ↔ 0..* | Min multiplicity enforcement, shared parts |
+| **Aggregation** | `Menu` ↔ `MenuItem` | 0..* ↔ 0..* | Bidirectional, shared parts, reverse connections |
 | **Reflexive** | `Manager` ↔ `Manager` | 0..1 ↔ 0..* | Cycle detection, self-reference prevention |
-| **Qualified** | `Menu` ↔ `MenuItem` | 0..1 ↔ 0..* | Map-based, qualifier = `name` |
+| **Qualified** | `Customer` ↔ `Reservation` | 0..1 ↔ 0..* | Map-based, qualifier = `LocalDateTime` |
 | **Association Class** | `ItemQuantity` | OrderRequest ↔ MenuItem | Factory pattern, delete removes 4 refs |
 | **{Bag} Association** | `SupplyLog` | Supplier ↔ Ingredient | Allows duplicates, tracks history |
 
