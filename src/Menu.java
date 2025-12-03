@@ -14,6 +14,7 @@ public class Menu implements Serializable {
     private String name;
     private String season;
 
+    private Map<String, MenuItem> items = new HashMap<>();
 
     public Menu() {}
 
@@ -22,6 +23,32 @@ public class Menu implements Serializable {
         setName(name);
         setSeason(season);
         addMenu(this);
+    }
+
+    public void addMenuItem(MenuItem item) {
+        if (item == null) {
+            throw new IllegalArgumentException("MenuItem cannot be null");
+        }
+        if (!items.containsKey(item.getName())) {
+            items.put(item.getName(), item);
+            item.setMenu(this);
+        }
+    }
+
+    public MenuItem getMenuItem(String name) {
+        if (name == null) return null;
+        return items.get(name);
+    }
+
+    public void removeMenuItem(MenuItem item) {
+        if (item != null && items.containsKey(item.getName())) {
+            items.remove(item.getName());
+            item.setMenu(null);
+        }
+    }
+    
+    public Map<String, MenuItem> getItems() {
+        return Collections.unmodifiableMap(items);
     }
 
 
