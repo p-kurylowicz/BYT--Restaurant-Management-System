@@ -21,6 +21,7 @@ public class Reservation implements Serializable {
     
     // Aggregation: Reservation -> Table (0..1)
     private Table assignedTable;
+    private Customer customer;
 
     public Reservation() {
         this.specialRequests = new HashSet<>();
@@ -33,6 +34,20 @@ public class Reservation implements Serializable {
         setSize(size);
         this.status = ReservationStatus.PENDING;
         addReservation(this);
+    }
+
+    public Customer getCustomer() { return customer; }
+
+    public void setCustomer(Customer newCustomer) {
+        if (this.customer != newCustomer) {
+            if (this.customer != null) {
+                this.customer.removeReservation(this);
+            }
+            this.customer = newCustomer;
+            if (newCustomer != null) {
+                newCustomer.addReservation(this);
+            }
+        }
     }
 
     public LocalDate getDate() { return date; }
