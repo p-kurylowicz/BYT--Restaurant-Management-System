@@ -2,6 +2,8 @@ import java.io.*;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.Set;
+import java.util.HashSet;
 
 public class Ingredient implements Serializable {
     @Serial
@@ -17,12 +19,17 @@ public class Ingredient implements Serializable {
 
     private List<SupplyLog> supplyLogs;
 
+    // Basic Association: Ingredient -> MenuItem (1..*)
+    private Set<MenuItem> menuItems;
+
     public Ingredient() {
         this.supplyLogs = new ArrayList<>();
+        this.menuItems = new HashSet<>();
     }
 
     public Ingredient(String name, String unit, double currentStock, double reorderPoint, double costPerUnit) {
         this.supplyLogs = new ArrayList<>();
+        this.menuItems = new HashSet<>();
         setName(name);
         setUnit(unit);
         setCurrentStock(currentStock);
@@ -41,6 +48,10 @@ public class Ingredient implements Serializable {
         return Collections.unmodifiableList(supplyLogs);
     }
 
+    public Set<MenuItem> getMenuItems() {
+        return Collections.unmodifiableSet(menuItems);
+    }
+
     void addSupplyLog(SupplyLog supplyLog) {
         if (supplyLog == null) {
             throw new IllegalArgumentException("SupplyLog cannot be null");
@@ -52,6 +63,52 @@ public class Ingredient implements Serializable {
         if (supplyLog != null) {
             supplyLogs.remove(supplyLog);
         }
+    }
+
+    // Basic Association: Ingredient -> MenuItem (1..*)
+    public void addMenuItem(MenuItem menuItem) {
+        if (menuItem == null) {
+            throw new IllegalArgumentException("MenuItem cannot be null");
+        }
+
+        if (menuItems.contains(menuItem)) {
+            return; // Already added, avoid duplicate
+        }
+
+        menuItems.add(menuItem);
+
+        // Establish reverse connection
+        if (!menuItem.getIngredients().contains(this)) {
+            menuItem.addIngredient(this);
+        }
+    }
+
+    public void removeMenuItem(MenuItem menuItem) {
+        if (menuItem == null) {
+            throw new IllegalArgumentException("MenuItem cannot be null");
+        }
+
+        // Check if menu item exists first
+        if (!menuItems.contains(menuItem)) {
+            throw new IllegalArgumentException("This ingredient is not part of this menu item");
+        }
+
+        // Enforce 1..* multiplicity: cannot remove last menu item
+        if (menuItems.size() <= 1) {
+            throw new IllegalStateException("Cannot remove the last menu item. Ingredient must be used in at least one menu item (1..*)");
+        }
+
+        menuItems.remove(menuItem);
+
+        // Remove reverse connection directly to avoid constraint check
+        if (menuItem.getIngredients().contains(this)) {
+            menuItem.removeIngredientDirect(this);
+        }
+    }
+
+    // Package-private method to directly remove without constraint check
+    void removeMenuItemDirect(MenuItem menuItem) {
+        menuItems.remove(menuItem);
     }
 
     public boolean getNeedsReorder() {

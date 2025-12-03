@@ -28,9 +28,13 @@ public abstract class MenuItem implements Serializable {
 
     private List<Menu> menus;
 
+    // Basic Association: MenuItem -> Ingredient (1..*)
+    private Set<Ingredient> ingredients;
+
     protected MenuItem() {
         this.allergens = new HashSet<>();
         this.menus = new ArrayList<>();
+        this.ingredients = new HashSet<>();
     }
 
 
@@ -38,6 +42,7 @@ public abstract class MenuItem implements Serializable {
                       String nationalOrigin, NutritionalInfo nutritionalInfo) {
         this.allergens = new HashSet<>();
         this.menus = new ArrayList<>();
+        this.ingredients = new HashSet<>();
         setName(name);
         setDescription(description);
         setPrice(price);
@@ -53,6 +58,7 @@ public abstract class MenuItem implements Serializable {
                       String nationalOrigin, NutritionalInfo nutritionalInfo, Set<String> allergens) {
         this.allergens = new HashSet<>();
         this.menus = new ArrayList<>();
+        this.ingredients = new HashSet<>();
         setName(name);
         setDescription(description);
         setPrice(price);
@@ -83,6 +89,10 @@ public abstract class MenuItem implements Serializable {
 
     public List<Menu> getMenus() {
         return Collections.unmodifiableList(menus);
+    }
+
+    public Set<Ingredient> getIngredients() {
+        return Collections.unmodifiableSet(ingredients);
     }
 
     public void setName(String name) {
@@ -225,6 +235,52 @@ public abstract class MenuItem implements Serializable {
         if (menu.getMenuItems().contains(this)) {
             menu.removeMenuItem(this);
         }
+    }
+
+    // Basic Association: MenuItem -> Ingredient (1..*)
+    public void addIngredient(Ingredient ingredient) {
+        if (ingredient == null) {
+            throw new IllegalArgumentException("Ingredient cannot be null");
+        }
+
+        if (ingredients.contains(ingredient)) {
+            return; // Already added, avoid duplicate
+        }
+
+        ingredients.add(ingredient);
+
+        // Establish reverse connection
+        if (!ingredient.getMenuItems().contains(this)) {
+            ingredient.addMenuItem(this);
+        }
+    }
+
+    public void removeIngredient(Ingredient ingredient) {
+        if (ingredient == null) {
+            throw new IllegalArgumentException("Ingredient cannot be null");
+        }
+
+        // Check if ingredient exists first
+        if (!ingredients.contains(ingredient)) {
+            throw new IllegalArgumentException("This ingredient is not part of this menu item");
+        }
+
+        // Enforce 1..* multiplicity: cannot remove last ingredient
+        if (ingredients.size() <= 1) {
+            throw new IllegalStateException("Cannot remove the last ingredient. MenuItem must have at least one ingredient (1..*)");
+        }
+
+        ingredients.remove(ingredient);
+
+        // Remove reverse connection directly to avoid constraint check
+        if (ingredient.getMenuItems().contains(this)) {
+            ingredient.removeMenuItemDirect(this);
+        }
+    }
+
+    // Package-private method to directly remove without constraint check
+    void removeIngredientDirect(Ingredient ingredient) {
+        ingredients.remove(ingredient);
     }
 
     public double calculatePriceWithTax() {

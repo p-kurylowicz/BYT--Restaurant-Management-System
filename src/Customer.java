@@ -25,7 +25,7 @@ public class Customer implements Serializable {
     private Set<Order> orders = new HashSet<>();
 
     private Map<LocalDateTime, Reservation> reservations = new HashMap<>();
-    
+
     public Customer() {
         this.orders = new HashSet<>();
     }

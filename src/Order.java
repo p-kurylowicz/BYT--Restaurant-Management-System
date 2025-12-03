@@ -20,9 +20,9 @@ public abstract class Order implements Serializable {
     // Composition: Order <-> Payment (1 to 1, mandatory both sides)
     private Payment payment;
 
-
+    // Basic Association: Order -> Customer (0..1 to 0..*)
     private Customer customer;
-    
+
     protected Order() {
         this.status = OrderStatus.ACTIVE;
         this.date = LocalDate.now();

@@ -9,7 +9,7 @@ Java implementation of a restaurant management system demonstrating all attribut
 mvn clean compile
 mvn exec:java -Dexec.mainClass="Main"
 
-# Run tests (266 tests, all passing)
+# Run tests (285 tests, all passing)
 mvn test
 ```
 
@@ -21,7 +21,7 @@ mvn test
 - **Class extent** with persistence (serialization)
 - **32 domain classes**: Customer, MenuItem, Order, Employee, Reservation, Payment, etc.
 - **Comprehensive validation** and exception handling
-- **266 tests passing** with JUnit 5 (53 association-specific tests)
+- **285 tests passing** with JUnit 5 (69 association-specific tests)
 
 ## Attributes
 
@@ -33,17 +33,18 @@ mvn test
 
 ## Associations (Task 6)
 
-All 6 required association types implemented with reverse connections and comprehensive test coverage (53 tests).
+All 6 required association types implemented with reverse connections and comprehensive test coverage (69 tests).
 
-| Association Type | Classes | Multiplicity | Key Features |
-|-----------------|---------|--------------|--------------|
-| **Basic (1..\*)** | `Customer` ↔ `Order` | 0..1 ↔ 0..* | Reverse connections, duplicate prevention |
-| **Composition** | `Order` ↔ `Payment` | 1 ↔ 1 | Mandatory both sides, immutable once set |
-| **Aggregation** | `Menu` ↔ `MenuItem` | 0..* ↔ 0..* | Bidirectional, shared parts, reverse connections |
-| **Reflexive** | `Manager` ↔ `Manager` | 0..1 ↔ 0..* | Cycle detection, self-reference prevention |
-| **Qualified** | `Customer` ↔ `Reservation` | 0..1 ↔ 0..* | Map-based, qualifier = `LocalDateTime` |
-| **Association Class** | `ItemQuantity` | OrderRequest ↔ MenuItem | Factory pattern, delete removes 4 refs |
-| **{Bag} Association** | `SupplyLog` | Supplier ↔ Ingredient | Allows duplicates, tracks history |
+| Association Type | Classes |
+|-----------------|---------|
+| **Basic (0..\*)** | `Customer` ↔ `Order` |
+| **Basic (1..\*)** | `Ingredient` ↔ `MenuItem` |
+| **Composition** | `Order` ↔ `Payment` |
+| **Aggregation** | `Menu` ↔ `MenuItem` |
+| **Reflexive** | `Manager` ↔ `Manager` |
+| **Qualified** | `Customer` ↔ `Reservation` |
+| **Association Class** | `ItemQuantity` (OrderRequest ↔ MenuItem) |
+| **{Bag} Association** | `SupplyLog` (Supplier ↔ Ingredient) |
 
 ## Key Classes
 
