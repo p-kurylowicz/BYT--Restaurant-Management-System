@@ -1,66 +1,77 @@
 import org.junit.jupiter.api.*;
 import static org.junit.jupiter.api.Assertions.*;
+import java.time.LocalDate;
+import java.time.LocalTime;
+import java.time.LocalDateTime;
 
 public class QualifiedAssociationTest {
 
     @BeforeEach
     void setup() {
-        Menu.clearExtent();
-        MenuItem.clearExtent();
+        Customer.clearExtent();
+        Reservation.clearExtent();
     }
 
     @Test
-    @DisplayName("Qualified Association: Add item to menu (Reverse Connection)")
-    void testAddItemToMenu() {
-        Menu menu = new Menu("Summer Menu", "Summer");
-        NutritionalInfo nutrition = new NutritionalInfo(100, 10, 10, 10, 10);
-        MenuItem item = new MainDish("Pasta", "Desc", 20.0, "img", "Italy", nutrition, 1);
+    @DisplayName("Qualified Association: Add reservation to customer (Reverse Connection)")
+    void testAddReservationToCustomer() {
+        Customer customer = new Customer("John", "Doe", "john@test.com", "123456", LocalDateTime.now());
+        LocalDate date = LocalDate.now().plusDays(1);
+        LocalTime time = LocalTime.of(19, 0);
+        Reservation reservation = new Reservation(date, time, 4);
 
-        menu.addMenuItem(item);
+        customer.addReservation(reservation);
 
-        assertEquals(item, menu.getMenuItem("Pasta"));
-        assertEquals(menu, item.getMenu());
+        LocalDateTime key = LocalDateTime.of(date, time);
+        assertEquals(reservation, customer.getReservation(key));
+        assertEquals(customer, reservation.getCustomer());
     }
 
     @Test
-    @DisplayName("Qualified Association: Set menu for item (Reverse Connection)")
-    void testSetMenuForItem() {
-        Menu menu = new Menu("Winter Menu", "Winter");
-        NutritionalInfo nutrition = new NutritionalInfo(100, 10, 10, 10, 10);
-        MenuItem item = new MainDish("Soup", "Desc", 15.0, "img", "Poland", nutrition, 1);
+    @DisplayName("Qualified Association: Set customer for reservation (Reverse Connection)")
+    void testSetCustomerForReservation() {
+        Customer customer = new Customer("Jane", "Doe", "jane@test.com", "654321", LocalDateTime.now());
+        LocalDate date = LocalDate.now().plusDays(2);
+        LocalTime time = LocalTime.of(20, 0);
+        Reservation reservation = new Reservation(date, time, 2);
 
-        item.setMenu(menu);
+        reservation.setCustomer(customer);
 
-        assertEquals(menu, item.getMenu());
-        assertEquals(item, menu.getMenuItem("Soup"));
+        assertEquals(customer, reservation.getCustomer());
+        assertEquals(reservation, customer.getReservation(LocalDateTime.of(date, time)));
     }
 
     @Test
-    @DisplayName("Qualified Association: Remove item from menu")
-    void testRemoveItem() {
-        Menu menu = new Menu("Summer Menu", "Summer");
-        NutritionalInfo nutrition = new NutritionalInfo(100, 10, 10, 10, 10);
-        MenuItem item = new MainDish("Pasta", "Desc", 20.0, "img", "Italy", nutrition, 1);
-        menu.addMenuItem(item);
-
-        menu.removeMenuItem(item);
-
-        assertNull(menu.getMenuItem("Pasta"));
-        assertNull(item.getMenu());
-    }
-
-    @Test
-    @DisplayName("Qualified Association: Duplicate qualifier logic")
+    @DisplayName("Qualified Association: Duplicate Qualifier Restriction")
     void testDuplicateQualifier() {
-        Menu menu = new Menu("Summer Menu", "Summer");
-        NutritionalInfo nutrition = new NutritionalInfo(100, 10, 10, 10, 10);
-        MenuItem item1 = new MainDish("Pasta", "Desc", 20.0, "img", "Italy", nutrition, 1);
-        MenuItem item2 = new MainDish("Pasta", "Desc2", 25.0, "img", "Italy", nutrition, 1);
-
-        menu.addMenuItem(item1);
-        menu.addMenuItem(item2); 
+        Customer customer = new Customer("John", "Doe", "john@test.com", "123456", LocalDateTime.now());
+        LocalDate date = LocalDate.now().plusDays(1);
+        LocalTime time = LocalTime.of(19, 0);
         
-        assertEquals(item1, menu.getMenuItem("Pasta"));
-        assertNotEquals(item2, menu.getMenuItem("Pasta"));
+        Reservation res1 = new Reservation(date, time, 4);
+        Reservation res2 = new Reservation(date, time, 2);
+
+        customer.addReservation(res1);
+        
+        customer.addReservation(res2);
+
+        assertEquals(res1, customer.getReservation(LocalDateTime.of(date, time)));
+        assertNotEquals(res2, customer.getReservation(LocalDateTime.of(date, time)));
+    }
+    
+    @Test
+    @DisplayName("Qualified Association: Remove reservation")
+    void testRemoveReservation() {
+        Customer customer = new Customer("John", "Doe", "john@test.com", "123456", LocalDateTime.now());
+        LocalDate date = LocalDate.now().plusDays(1);
+        LocalTime time = LocalTime.of(19, 0);
+        Reservation reservation = new Reservation(date, time, 4);
+        
+        customer.addReservation(reservation);
+        
+        customer.removeReservation(reservation);
+        
+        assertNull(customer.getReservation(LocalDateTime.of(date, time)));
+        assertNull(reservation.getCustomer());
     }
 }
