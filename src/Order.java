@@ -17,7 +17,8 @@ public abstract class Order implements Serializable {
     private LocalDate date;
     private LocalTime time;
 
-
+    private Customer customer;
+    
     protected Order() {
         this.status = OrderStatus.ACTIVE;
         this.date = LocalDate.now();
@@ -25,6 +26,29 @@ public abstract class Order implements Serializable {
         addOrder(this);
     }
 
+    public Customer getCustomer() {
+        return customer;
+    }
+
+    public void setCustomer(Customer newCustomer) {
+        if (this.customer != newCustomer) {
+            if (this.customer != null) {
+                this.customer.removeOrder(this);
+            }
+            this.customer = newCustomer;
+            if (newCustomer != null) {
+                newCustomer.addOrder(this);
+            }
+        }
+    }
+
+    public void removeCustomer() {
+        if (this.customer != null) {
+            Customer oldCustomer = this.customer;
+            this.customer = null;
+            oldCustomer.removeOrder(this);
+        }
+    }
 
     public OrderStatus getStatus() { return status; }
     public LocalDate getDate() { return date; }
