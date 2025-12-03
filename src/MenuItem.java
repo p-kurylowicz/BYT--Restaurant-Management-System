@@ -26,6 +26,7 @@ public abstract class MenuItem implements Serializable {
 
     private final List<ItemQuantity> itemQuantities = new ArrayList<>();
 
+    private Menu menu;
 
     protected MenuItem() {
         this.allergens = new HashSet<>();
@@ -59,6 +60,22 @@ public abstract class MenuItem implements Serializable {
         this.availability = MenuItemAvailability.AVAILABLE;
 
         addMenuItem(this);
+    }
+
+    public Menu getMenu() { return menu; }
+
+    public void setMenu(Menu newMenu) {
+        if (this.menu != newMenu) {
+            if (this.menu != null) {
+                // Reverse: remove from old menu
+                this.menu.removeMenuItem(this);
+            }
+            this.menu = newMenu;
+            if (newMenu != null) {
+                // Reverse: add to new menu
+                newMenu.addMenuItem(this);
+            }
+        }
     }
 
     

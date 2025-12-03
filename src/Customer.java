@@ -29,6 +29,30 @@ public class Customer implements Serializable {
         addCustomer(this);
     }
 
+    public Set<Order> getOrders() {
+        return Collections.unmodifiableSet(orders);
+    }
+
+    public void addOrder(Order order) {
+        if (order == null) {
+            throw new IllegalArgumentException("Order cannot be null");
+        }
+        if (!orders.contains(order)) {
+            orders.add(order);
+            order.setCustomer(this);
+        }
+    }
+
+    public void removeOrder(Order order) {
+        if (order == null) {
+            throw new IllegalArgumentException("Order cannot be null");
+        }
+        if (orders.contains(order)) {
+            orders.remove(order);
+            order.removeCustomer();
+        }
+    }
+
     public String getName() { return name; }
     public String getSurname() { return surname; }
     public String getEmail() { return email; }
