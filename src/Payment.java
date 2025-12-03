@@ -14,7 +14,7 @@ public abstract class Payment implements Serializable {
     private PaymentStatus status;
     private double amountPayed;
 
-    // Composition: Payment <-> Order (1 to 1, mandatory both sides)
+    // Composition
     private Order order;
 
     
@@ -39,18 +39,12 @@ public abstract class Payment implements Serializable {
         this.amountPayed = amountPayed;
     }
 
-    // Composition: Payment <-> Order (1 to 1, mandatory)
+
     public Order getOrder() {
         return order;
     }
 
-    /**
-     * Sets the order for this payment and establishes the reverse connection.
-     * This is a mandatory 1:1 relationship - once set, it cannot be removed.
-     * @param order The order to associate with this payment
-     * @throws IllegalArgumentException if order is null
-     * @throws IllegalStateException if order is already set or if payment already has a different order
-     */
+
     public void setOrder(Order order) {
         if (order == null) {
             throw new IllegalArgumentException("Order cannot be null - Payment must have an Order (mandatory 1:1 relationship)");
@@ -90,11 +84,7 @@ public abstract class Payment implements Serializable {
         this.status = PaymentStatus.IN_TRANSACTION;
     }
 
-    /**
-     * Process payment - convenience method to confirm payment.
-     * TODO: Implement full payment processing logic including validation,
-     * external payment gateway integration, and transaction logging
-     */
+
     public void processPayment() {
         confirmPayment();
     }

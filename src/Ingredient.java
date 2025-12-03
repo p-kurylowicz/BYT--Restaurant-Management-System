@@ -72,12 +72,12 @@ public class Ingredient implements Serializable {
         }
 
         if (menuItems.contains(menuItem)) {
-            return; // Already added, avoid duplicate
+            return;
         }
 
         menuItems.add(menuItem);
 
-        // Establish reverse connection
+
         if (!menuItem.getIngredients().contains(this)) {
             menuItem.addIngredient(this);
         }
@@ -88,7 +88,7 @@ public class Ingredient implements Serializable {
             throw new IllegalArgumentException("MenuItem cannot be null");
         }
 
-        // Check if menu item exists first
+
         if (!menuItems.contains(menuItem)) {
             throw new IllegalArgumentException("This ingredient is not part of this menu item");
         }
@@ -100,16 +100,12 @@ public class Ingredient implements Serializable {
 
         menuItems.remove(menuItem);
 
-        // Remove reverse connection directly to avoid constraint check
+
         if (menuItem.getIngredients().contains(this)) {
             menuItem.removeIngredientDirect(this);
         }
     }
 
-    // Package-private method to directly remove without constraint check
-    void removeMenuItemDirect(MenuItem menuItem) {
-        menuItems.remove(menuItem);
-    }
 
     public boolean getNeedsReorder() {
         return currentStock < reorderPoint;
@@ -173,6 +169,11 @@ public class Ingredient implements Serializable {
             throw new IllegalArgumentException("Ingredient cannot be null");
         }
         allIngredients.add(ingredient);
+    }
+
+    // Package-private method to directly remove without constraint check
+    void removeMenuItemDirect(MenuItem menuItem) {
+        menuItems.remove(menuItem);
     }
 
     public static List<Ingredient> getAllIngredients() {

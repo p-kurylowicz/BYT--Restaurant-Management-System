@@ -17,7 +17,7 @@ public abstract class Order implements Serializable {
     private LocalDate date;
     private LocalTime time;
 
-    // Composition: Order <-> Payment (1 to 1, mandatory both sides)
+    // Composition
     private Payment payment;
 
     // Basic Association: Order -> Customer (0..1 to 0..*)
@@ -87,32 +87,26 @@ public abstract class Order implements Serializable {
         return payment;
     }
 
-    /**
-     * Sets the payment for this order and establishes the reverse connection.
-     * This is a mandatory 1:1 relationship - once set, it cannot be removed.
-     * @param payment The payment to associate with this order
-     * @throws IllegalArgumentException if payment is null
-     * @throws IllegalStateException if payment is already set or if order already has a different payment
-     */
+
     public void setPayment(Payment payment) {
         if (payment == null) {
             throw new IllegalArgumentException("Payment cannot be null - Order must have a Payment (mandatory 1:1 relationship)");
         }
 
-        // Prevent duplicate assignment
+
         if (this.payment == payment) {
             return; // Already connected
         }
 
-        // Prevent changing payment once set (cannot remove association)
+
         if (this.payment != null && this.payment != payment) {
             throw new IllegalStateException("Payment is already set and cannot be changed - association cannot be removed once established");
         }
 
-        // Set the payment
+
         this.payment = payment;
 
-        // Establish reverse connection if not already set
+
         if (payment.getOrder() != this) {
             payment.setOrder(this);
         }

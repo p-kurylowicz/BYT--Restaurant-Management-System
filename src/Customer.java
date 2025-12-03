@@ -21,7 +21,7 @@ public class Customer implements Serializable {
     private LocalDateTime registrationDate;
     private List<Feedback> feedbacks = new ArrayList<>();
 
-    // Basic Association: Customer -> Order (0..*)
+    // Basic Association
     private Set<Order> orders = new HashSet<>();
 
     private Map<LocalDateTime, Reservation> reservations = new HashMap<>();

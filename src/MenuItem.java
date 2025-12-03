@@ -244,12 +244,12 @@ public abstract class MenuItem implements Serializable {
         }
 
         if (ingredients.contains(ingredient)) {
-            return; // Already added, avoid duplicate
+            return;
         }
 
         ingredients.add(ingredient);
 
-        // Establish reverse connection
+
         if (!ingredient.getMenuItems().contains(this)) {
             ingredient.addMenuItem(this);
         }
@@ -260,7 +260,7 @@ public abstract class MenuItem implements Serializable {
             throw new IllegalArgumentException("Ingredient cannot be null");
         }
 
-        // Check if ingredient exists first
+
         if (!ingredients.contains(ingredient)) {
             throw new IllegalArgumentException("This ingredient is not part of this menu item");
         }
@@ -272,7 +272,7 @@ public abstract class MenuItem implements Serializable {
 
         ingredients.remove(ingredient);
 
-        // Remove reverse connection directly to avoid constraint check
+
         if (ingredient.getMenuItems().contains(this)) {
             ingredient.removeMenuItemDirect(this);
         }

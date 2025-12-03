@@ -13,25 +13,18 @@ public class ItemQuantity implements Serializable {
     @Serial
     private static final long serialVersionUID = 1L;
 
-    // Class extent to track all ItemQuantity instances
+
     private static List<ItemQuantity> allItemQuantities = new ArrayList<>();
 
-    // Association references (both sides of the association)
+
     private OrderRequest orderRequest;
     private MenuItem menuItem;
-
-    // Association attributes
     private int quantity;
-    // Optional attribute
     private String specialRequests;
-    // Optional attribute - timestamp when item was served
     private LocalDateTime servedTimestamp; 
 
 
-    /**
-     * Private constructor - use static factory method create() instead.
-     * This ensures proper association management.
-     */
+
     private ItemQuantity(OrderRequest orderRequest, MenuItem menuItem, int quantity, String specialRequests) {
         if (orderRequest == null) {
             throw new IllegalArgumentException("OrderRequest cannot be null - ItemQuantity must connect to an OrderRequest");
@@ -46,23 +39,13 @@ public class ItemQuantity implements Serializable {
         setSpecialRequests(specialRequests);
         this.servedTimestamp = null;
 
-        // Add to class extent
+
         allItemQuantities.add(this);
     }
 
-    /**
-     * Static factory method to create ItemQuantity and establish reverse connections.
-     * This is the ONLY way to create an ItemQuantity instance.
-     *
-     * @param orderRequest The OrderRequest this item belongs to
-     * @param menuItem The MenuItem being ordered
-     * @param quantity The quantity ordered (must be > 0)
-     * @param specialRequests Optional special requests (can be null)
-     * @return The created ItemQuantity instance
-     * @throws IllegalArgumentException if orderRequest or menuItem is null, or quantity <= 0
-     */
+
     public static ItemQuantity create(OrderRequest orderRequest, MenuItem menuItem, int quantity, String specialRequests) {
-        // Create the ItemQuantity instance
+
         ItemQuantity itemQuantity = new ItemQuantity(orderRequest, menuItem, quantity, specialRequests);
 
         // Establish reverse connections on both sides
@@ -72,9 +55,7 @@ public class ItemQuantity implements Serializable {
         return itemQuantity;
     }
 
-    /**
-     * Convenience factory method without special requests.
-     */
+
     public static ItemQuantity create(OrderRequest orderRequest, MenuItem menuItem, int quantity) {
         return create(orderRequest, menuItem, quantity, null);
     }

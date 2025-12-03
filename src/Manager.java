@@ -27,7 +27,7 @@ public class Manager extends Employee {
         setAccessLevel(accessLevel);
     }
 
-    // ===== Basic attribute getters =====
+
 
     public String getDepartment() {
         return department;
@@ -37,7 +37,7 @@ public class Manager extends Employee {
         return accessLevel;
     }
 
-    // ===== Reflex association getters =====
+
 
     /**
      * Returns the supervisor of this manager (0..1).
@@ -53,7 +53,7 @@ public class Manager extends Employee {
         return Collections.unmodifiableSet(subordinates);
     }
 
-    // ===== Basic attribute setters =====
+
 
     public void setDepartment(String department) {
         if (department == null || department.trim().isEmpty()) {
@@ -71,12 +71,7 @@ public class Manager extends Employee {
 
     // ===== Reflex association logic =====
 
-    /**
-     * Sets the supervisor for this manager.
-     * Maintains the bidirectional association and prevents cycles in the hierarchy.
-     *
-     * @param newSupervisor new supervisor to assign, or null to clear the supervisor
-     */
+
     public void setSupervisor(Manager newSupervisor) {
         if (newSupervisor == this) {
             throw new IllegalArgumentException("Manager cannot supervise themself");
@@ -92,7 +87,7 @@ public class Manager extends Employee {
         }
 
         if (this.supervisor == newSupervisor) {
-            // No change required
+
             return;
         }
 
@@ -110,10 +105,7 @@ public class Manager extends Employee {
         }
     }
 
-    /**
-     * Adds a subordinate to this manager.
-     * Delegates the main logic to subordinate.setSupervisor(this).
-     */
+
     public void addSubordinate(Manager subordinate) {
         if (subordinate == null) {
             throw new IllegalArgumentException("Subordinate cannot be null");
@@ -121,9 +113,7 @@ public class Manager extends Employee {
         subordinate.setSupervisor(this);
     }
 
-    /**
-     * Removes a subordinate from this manager and clears its supervisor reference.
-     */
+
     public void removeSubordinate(Manager subordinate) {
         if (subordinate == null || !subordinates.contains(subordinate)) {
             throw new IllegalArgumentException("Subordinate is not managed by this manager");
@@ -136,7 +126,7 @@ public class Manager extends Employee {
         }
     }
 
-    // ===== Existing business logic =====
+
 
     public void assignWaiterToSection(Waiter waiter, String section) {
         if (waiter == null) {
