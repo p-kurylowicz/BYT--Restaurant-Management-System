@@ -9,7 +9,7 @@ Java implementation of a restaurant management system demonstrating all attribut
 mvn clean compile
 mvn exec:java -Dexec.mainClass="Main"
 
-# Run tests (285 tests, all passing)
+# Run tests (293 tests, all passing)
 mvn test
 ```
 
@@ -21,7 +21,7 @@ mvn test
 - **Class extent** with persistence (serialization)
 - **32 domain classes**: Customer, MenuItem, Order, Employee, Reservation, Payment, etc.
 - **Comprehensive validation** and exception handling
-- **285 tests passing** with JUnit 5 (69 association-specific tests)
+- **293 tests passing** with JUnit 5 (77 association-specific tests)
 
 ## Attributes
 
@@ -33,16 +33,16 @@ mvn test
 
 ## Associations (Task 6)
 
-All 6 required association types implemented with reverse connections and comprehensive test coverage (69 tests).
+All 6 required association types implemented with reverse connections and comprehensive test coverage (75 tests).
 
 | Association Type | Classes |
 |-----------------|---------|
 | **Basic (0..\*)** | `Customer` ↔ `Order` |
 | **Basic (1..\*)** | `Ingredient` ↔ `MenuItem` |
-| **Composition** | `Order` ↔ `Payment` |
-| **Aggregation** | `Menu` ↔ `MenuItem` |
+| **Composition (1 to 1..\*)** | `Order` ↔ `Payment` |
+| **Aggregation (0..\* to 1..\*)** | `Menu` ↔ `MenuItem` |
 | **Reflexive** | `Manager` ↔ `Manager` |
-| **Qualified** | `Customer` ↔ `Reservation` |
+| **Qualified** | `Customer` (0..1) ↔ (1) `Reservation` (qualifier: DateTime) |
 | **Association Class** | `ItemQuantity` (OrderRequest ↔ MenuItem) |
 | **{Bag} Association** | `SupplyLog` (Supplier ↔ Ingredient) |
 

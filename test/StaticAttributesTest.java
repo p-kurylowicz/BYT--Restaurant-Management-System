@@ -4,7 +4,6 @@ import static org.junit.jupiter.api.Assertions.*;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
-import java.util.Arrays;
 
 /**
  * Tests for static attribute implementation.
@@ -84,7 +83,7 @@ public class StaticAttributesTest {
 
         // Reservation 7 days in future - can be cancelled
         Reservation futureReservation = new Reservation(
-            LocalDate.now().plusDays(7), LocalTime.of(19, 0), 4);
+            LocalDate.now().plusDays(7), LocalTime.of(19, 0), 4, customer);
 
         assertTrue(futureReservation.canBeCancelled());
     }
@@ -97,7 +96,7 @@ public class StaticAttributesTest {
 
         // Reservation 2 hours from now - within 4-hour window
         Reservation soonReservation = new Reservation(
-            LocalDate.now(), LocalTime.now().plusHours(2), 2);
+            LocalDate.now(), LocalTime.now().plusHours(2), 2, customer);
 
         assertFalse(soonReservation.canBeCancelled());
     }
@@ -109,7 +108,7 @@ public class StaticAttributesTest {
             "+48987654321", LocalDateTime.now().minusMonths(6));
 
         Reservation reservation = new Reservation(
-            LocalDate.now(), LocalTime.now().plusHours(2), 2);
+            LocalDate.now(), LocalTime.now().plusHours(2), 2, customer);
 
         IllegalStateException exception = assertThrows(IllegalStateException.class, () -> {
             reservation.cancelReservation();
@@ -125,7 +124,7 @@ public class StaticAttributesTest {
             "+48987654321", LocalDateTime.now().minusMonths(6));
 
         Reservation reservation = new Reservation(
-            LocalDate.now().plusDays(7), LocalTime.of(19, 0), 4);
+            LocalDate.now().plusDays(7), LocalTime.of(19, 0), 4, customer);
 
         assertTrue(reservation.canBeCancelled());
         reservation.confirmReservation();
@@ -158,7 +157,7 @@ public class StaticAttributesTest {
         // Reservation 5 hours from now - use LocalDateTime to handle day transitions correctly
         LocalDateTime futureTime = LocalDateTime.now().plusHours(5);
         Reservation boundaryReservation = new Reservation(
-            futureTime.toLocalDate(), futureTime.toLocalTime(), 2);
+            futureTime.toLocalDate(), futureTime.toLocalTime(), 2, customer);
 
         assertTrue(boundaryReservation.canBeCancelled(),
             "Reservation at 5 hours should be cancellable (beyond 4-hour window)");

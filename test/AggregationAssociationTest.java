@@ -142,13 +142,51 @@ public class AggregationAssociationTest {
     }
 
     @Test
-    @DisplayName("Aggregation: MenuItem can exist without being in any menu (0..*)")
-    void testMenuItemCanExistWithoutMenus() {
+    @DisplayName("Aggregation: MenuItem can be created without menus initially")
+    void testMenuItemCanBeCreatedWithoutMenus() {
         MainDish dish = new MainDish("Burger", "Beef burger", 30.0, "burger.jpg",
             "American", new NutritionalInfo(600, 25, 50, 35, 2), 1);
 
         assertNotNull(dish);
         assertEquals(0, dish.getMenus().size());
+    }
+
+    @Test
+    @DisplayName("Aggregation (1..*): Cannot remove last menu from MenuItem")
+    void testCannotRemoveLastMenuFromMenuItem() {
+        Menu menu = new Menu("Test Menu", "Spring");
+        MainDish dish = new MainDish("Steak", "Juicy steak", 75.0, "steak.jpg",
+            "American", new NutritionalInfo(500, 40, 5, 30, 1), 1);
+
+        menu.addMenuItem(dish);
+
+        IllegalStateException exception = assertThrows(IllegalStateException.class, () -> {
+            dish.removeMenu(menu);
+        });
+        assertTrue(exception.getMessage().contains("Cannot remove the last menu"));
+        assertTrue(exception.getMessage().contains("1..*"));
+    }
+
+    @Test
+    @DisplayName("Aggregation (1..*): Can remove menu when multiple exist")
+    void testCanRemoveMenuWhenMultipleExist() {
+        Menu menu1 = new Menu("Menu 1", "Spring");
+        Menu menu2 = new Menu("Menu 2", "Summer");
+        Dessert dessert = new Dessert("Ice Cream", "Vanilla ice cream", 15.0, "ice.jpg",
+            "Italian", new NutritionalInfo(200, 3, 30, 8, 0), false);
+
+        menu1.addMenuItem(dessert);
+        menu2.addMenuItem(dessert);
+
+        assertEquals(2, dessert.getMenus().size());
+
+        assertDoesNotThrow(() -> {
+            dessert.removeMenu(menu1);
+        });
+
+        assertEquals(1, dessert.getMenus().size());
+        assertFalse(dessert.getMenus().contains(menu1));
+        assertTrue(dessert.getMenus().contains(menu2));
     }
 
     @Test

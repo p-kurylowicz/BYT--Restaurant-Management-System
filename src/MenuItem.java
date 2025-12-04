@@ -230,6 +230,11 @@ public abstract class MenuItem implements Serializable {
             throw new IllegalArgumentException("This menu item is not in this menu");
         }
 
+        // Enforce 1..* multiplicity: cannot remove last menu
+        if (menus.size() <= 1) {
+            throw new IllegalStateException("Cannot remove the last menu. MenuItem must be in at least one menu (1..*)");
+        }
+
         menus.remove(menu);
 
         if (menu.getMenuItems().contains(this)) {

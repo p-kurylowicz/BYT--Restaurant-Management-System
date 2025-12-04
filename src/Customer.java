@@ -92,7 +92,8 @@ public class Customer implements Serializable {
             LocalDateTime key = LocalDateTime.of(reservation.getDate(), reservation.getTime());
             if (reservations.containsKey(key)) {
                 reservations.remove(key);
-                reservation.setCustomer(null);
+                // Note: Cannot set reservation.customer to null as Reservation must always have a Customer (1)
+                // Reservation can only change to a different customer via setCustomer()
             }
         }
     }

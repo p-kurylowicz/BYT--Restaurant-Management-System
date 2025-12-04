@@ -39,15 +39,14 @@ public abstract class Payment implements Serializable {
         this.amountPayed = amountPayed;
     }
 
-
+    // Composition: Payment -> Order (1 to 1..*)
     public Order getOrder() {
         return order;
     }
 
-
     public void setOrder(Order order) {
         if (order == null) {
-            throw new IllegalArgumentException("Order cannot be null - Payment must have an Order (mandatory 1:1 relationship)");
+            throw new IllegalArgumentException("Order cannot be null - Payment must have an Order (mandatory 1:1..* composition)");
         }
 
         // Prevent duplicate assignment
@@ -55,17 +54,17 @@ public abstract class Payment implements Serializable {
             return; // Already connected
         }
 
-        // Prevent changing order once set (cannot remove association)
+        // Prevent changing order once set (composition - cannot remove association)
         if (this.order != null && this.order != order) {
-            throw new IllegalStateException("Order is already set and cannot be changed - association cannot be removed once established");
+            throw new IllegalStateException("Order is already set and cannot be changed - composition association cannot be removed once established");
         }
 
         // Set the order
         this.order = order;
 
         // Establish reverse connection if not already set
-        if (order.getPayment() != this) {
-            order.setPayment(this);
+        if (!order.getPayments().contains(this)) {
+            order.addPayment(this);
         }
     }
 
