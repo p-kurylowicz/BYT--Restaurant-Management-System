@@ -146,7 +146,6 @@ public class AssociationClassTest {
     void testSupplyLogCreation() {
         Supplier supplier = new Supplier("Farm Fresh", "123", "farm@test.com", "Farm Road", 4.5, "John");
         Ingredient ingredient = new Ingredient("Tomato", "kg", 100, 50, 5.0);
-        supplier.addIngredient(ingredient);
 
         SupplyLog log = SupplyLog.create(supplier, ingredient, LocalDate.now(), 4.8, 20.0);
 
@@ -164,7 +163,6 @@ public class AssociationClassTest {
     void testSupplyLogBagBehavior() {
         Supplier supplier = new Supplier("Fresh Foods", "456", "fresh@test.com", "Food St", 4.0, "Jane");
         Ingredient ingredient = new Ingredient("Carrot", "kg", 50, 20, 3.0);
-        supplier.addIngredient(ingredient);
 
         // Create multiple logs for same supplier-ingredient pair
         SupplyLog log1 = SupplyLog.create(supplier, ingredient, LocalDate.of(2024, 1, 15), 3.0, 10.0);
@@ -184,7 +182,6 @@ public class AssociationClassTest {
     void testSupplyLogDelete() {
         Supplier supplier = new Supplier("Organic Co", "789", "organic@test.com", "Org Ave", 5.0, "Bob");
         Ingredient ingredient = new Ingredient("Lettuce", "kg", 30, 15, 4.0);
-        supplier.addIngredient(ingredient);
 
         SupplyLog log = SupplyLog.create(supplier, ingredient, LocalDate.now(), 4.2, 8.0);
 
@@ -228,7 +225,6 @@ public class AssociationClassTest {
     void testSupplyLogFutureDate() {
         Supplier supplier = new Supplier("Future Foods", "111", "future@test.com", "Time St", 4.0, "Doc");
         Ingredient ingredient = new Ingredient("Potato", "kg", 80, 40, 1.5);
-        supplier.addIngredient(ingredient);
 
         assertThrows(IllegalArgumentException.class, () -> {
             SupplyLog.create(supplier, ingredient, LocalDate.now().plusDays(1), 1.5, 10.0);
@@ -240,7 +236,6 @@ public class AssociationClassTest {
     void testSupplyLogNegativeCost() {
         Supplier supplier = new Supplier("Cheap Co", "222", "cheap@test.com", "Low St", 3.0, "Penny");
         Ingredient ingredient = new Ingredient("Pepper", "kg", 20, 10, 8.0);
-        supplier.addIngredient(ingredient);
 
         assertThrows(IllegalArgumentException.class, () -> {
             SupplyLog.create(supplier, ingredient, LocalDate.now(), -5.0, 10.0);
@@ -252,7 +247,6 @@ public class AssociationClassTest {
     void testSupplyLogInvalidQuantity() {
         Supplier supplier = new Supplier("Quality Foods", "333", "quality@test.com", "Q St", 4.5, "Quinn");
         Ingredient ingredient = new Ingredient("Garlic", "kg", 15, 5, 12.0);
-        supplier.addIngredient(ingredient);
 
         assertThrows(IllegalArgumentException.class, () -> {
             SupplyLog.create(supplier, ingredient, LocalDate.now(), 12.0, 0.0);
@@ -268,7 +262,6 @@ public class AssociationClassTest {
     void testSupplyLogMultipleDeletes() {
         Supplier supplier = new Supplier("Multi Supply", "444", "multi@test.com", "M St", 4.2, "Mike");
         Ingredient ingredient = new Ingredient("Cucumber", "kg", 25, 10, 3.5);
-        supplier.addIngredient(ingredient);
 
         SupplyLog log1 = SupplyLog.create(supplier, ingredient, LocalDate.of(2024, 1, 1), 3.5, 5.0);
         SupplyLog log2 = SupplyLog.create(supplier, ingredient, LocalDate.of(2024, 2, 1), 3.6, 8.0);

@@ -26,14 +26,23 @@ public abstract class MenuItem implements Serializable {
 
     private final List<ItemQuantity> itemQuantities = new ArrayList<>();
 
+    private List<Menu> menus;
+
+    // Basic Association: MenuItem -> Ingredient (1..*)
+    private Set<Ingredient> ingredients;
+
     protected MenuItem() {
         this.allergens = new HashSet<>();
+        this.menus = new ArrayList<>();
+        this.ingredients = new HashSet<>();
     }
 
 
     protected MenuItem(String name, String description, double price, String image,
                       String nationalOrigin, NutritionalInfo nutritionalInfo) {
         this.allergens = new HashSet<>();
+        this.menus = new ArrayList<>();
+        this.ingredients = new HashSet<>();
         setName(name);
         setDescription(description);
         setPrice(price);
@@ -48,6 +57,8 @@ public abstract class MenuItem implements Serializable {
     protected MenuItem(String name, String description, double price, String image,
                       String nationalOrigin, NutritionalInfo nutritionalInfo, Set<String> allergens) {
         this.allergens = new HashSet<>();
+        this.menus = new ArrayList<>();
+        this.ingredients = new HashSet<>();
         setName(name);
         setDescription(description);
         setPrice(price);
@@ -76,7 +87,14 @@ public abstract class MenuItem implements Serializable {
         return Collections.unmodifiableSet(allergens);
     }
 
-    
+    public List<Menu> getMenus() {
+        return Collections.unmodifiableList(menus);
+    }
+
+    public Set<Ingredient> getIngredients() {
+        return Collections.unmodifiableSet(ingredients);
+    }
+
     public void setName(String name) {
         if (name == null || name.trim().isEmpty()) {
             throw new IllegalArgumentException("Menu item name cannot be null or empty");
@@ -187,6 +205,89 @@ public abstract class MenuItem implements Serializable {
         }
     }
 
+    void addMenu(Menu menu) {
+        if (menu == null) {
+            throw new IllegalArgumentException("Menu cannot be null");
+        }
+
+        if (menus.contains(menu)) {
+            throw new IllegalStateException("This menu item is already in this menu");
+        }
+
+        menus.add(menu);
+
+        if (!menu.getMenuItems().contains(this)) {
+            menu.addMenuItem(this);
+        }
+    }
+
+    void removeMenu(Menu menu) {
+        if (menu == null) {
+            throw new IllegalArgumentException("Menu cannot be null");
+        }
+
+        if (!menus.contains(menu)) {
+            throw new IllegalArgumentException("This menu item is not in this menu");
+        }
+
+        // Enforce 1..* multiplicity: cannot remove last menu
+        if (menus.size() <= 1) {
+            throw new IllegalStateException("Cannot remove the last menu. MenuItem must be in at least one menu (1..*)");
+        }
+
+        menus.remove(menu);
+
+        if (menu.getMenuItems().contains(this)) {
+            menu.removeMenuItem(this);
+        }
+    }
+
+    // Basic Association: MenuItem -> Ingredient (1..*)
+    public void addIngredient(Ingredient ingredient) {
+        if (ingredient == null) {
+            throw new IllegalArgumentException("Ingredient cannot be null");
+        }
+
+        if (ingredients.contains(ingredient)) {
+            return;
+        }
+
+        ingredients.add(ingredient);
+
+
+        if (!ingredient.getMenuItems().contains(this)) {
+            ingredient.addMenuItem(this);
+        }
+    }
+
+    public void removeIngredient(Ingredient ingredient) {
+        if (ingredient == null) {
+            throw new IllegalArgumentException("Ingredient cannot be null");
+        }
+
+
+        if (!ingredients.contains(ingredient)) {
+            throw new IllegalArgumentException("This ingredient is not part of this menu item");
+        }
+
+        // Enforce 1..* multiplicity: cannot remove last ingredient
+        if (ingredients.size() <= 1) {
+            throw new IllegalStateException("Cannot remove the last ingredient. MenuItem must have at least one ingredient (1..*)");
+        }
+
+        ingredients.remove(ingredient);
+
+
+        if (ingredient.getMenuItems().contains(this)) {
+            ingredient.removeMenuItemDirect(this);
+        }
+    }
+
+    // Package-private method to directly remove without constraint check
+    void removeIngredientDirect(Ingredient ingredient) {
+        ingredients.remove(ingredient);
+    }
+
     public double calculatePriceWithTax() {
         return price * (1 + TAX_RATE);
     }
@@ -249,7 +350,7 @@ public abstract class MenuItem implements Serializable {
 
     @Override
     public String toString() {
-        return String.format("MenuItem[%s, price=%.2f PLN (%.2f with tax), origin=%s, availability=%s, allergens=%d]",
-            name, price, calculatePriceWithTax(), nationalOrigin, availability, allergens.size());
+        return String.format("MenuItem[%s, price=%.2f PLN (%.2f with tax), origin=%s, availability=%s, allergens=%d, menus=%d]",
+            name, price, calculatePriceWithTax(), nationalOrigin, availability, allergens.size(), menus.size());
     }
 }

@@ -21,32 +21,44 @@ public class Reservation implements Serializable {
     
     // Aggregation: Reservation -> Table (0..1)
     private Table assignedTable;
+
+    // Qualified Association: Reservation -> Customer (1, mandatory)
     private Customer customer;
 
-    public Reservation() {
+    // Package-private no-arg constructor for serialization only
+    Reservation() {
         this.specialRequests = new HashSet<>();
     }
 
-    public Reservation(LocalDate date, LocalTime time, int size) {
+    public Reservation(LocalDate date, LocalTime time, int size, Customer customer) {
         this.specialRequests = new HashSet<>();
+        if (customer == null) {
+            throw new IllegalArgumentException("Customer cannot be null - Reservation must have a Customer (mandatory 1)");
+        }
         setDate(date);
         setTime(time);
         setSize(size);
+        this.customer = customer;
         this.status = ReservationStatus.PENDING;
         addReservation(this);
+
+        // Establish reverse connection in Customer's qualified map
+        customer.addReservation(this);
     }
 
     public Customer getCustomer() { return customer; }
 
     public void setCustomer(Customer newCustomer) {
+        if (newCustomer == null) {
+            throw new IllegalArgumentException("Customer cannot be null - Reservation must have a Customer (mandatory 1)");
+        }
+
         if (this.customer != newCustomer) {
             if (this.customer != null) {
                 this.customer.removeReservation(this);
             }
             this.customer = newCustomer;
-            if (newCustomer != null) {
-                newCustomer.addReservation(this);
-            }
+            newCustomer.addReservation(this);
         }
     }
 

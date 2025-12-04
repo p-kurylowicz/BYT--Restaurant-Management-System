@@ -12,14 +12,17 @@ public class Menu implements Serializable {
     
     private static List<Menu> allMenus = new ArrayList<>();
 
-
     private String name;
     private String season;
 
-    public Menu() {}
+    private List<MenuItem> menuItems;
 
+    public Menu() {
+        this.menuItems = new ArrayList<>();
+    }
 
     public Menu(String name, String season) {
+        this.menuItems = new ArrayList<>();
         setName(name);
         setSeason(season);
         addMenu(this);
@@ -28,6 +31,9 @@ public class Menu implements Serializable {
     public String getName() { return name; }
     public String getSeason() { return season; }
 
+    public List<MenuItem> getMenuItems() {
+        return Collections.unmodifiableList(menuItems);
+    }
 
     public void setName(String name) {
         if (name == null || name.trim().isEmpty()) {
@@ -43,7 +49,38 @@ public class Menu implements Serializable {
         this.season = season.trim();
     }
 
-    
+    public void addMenuItem(MenuItem menuItem) {
+        if (menuItem == null) {
+            throw new IllegalArgumentException("MenuItem cannot be null");
+        }
+
+        if (menuItems.contains(menuItem)) {
+            throw new IllegalStateException("This menu item is already in this menu");
+        }
+
+        menuItems.add(menuItem);
+
+        if (!menuItem.getMenus().contains(this)) {
+            menuItem.addMenu(this);
+        }
+    }
+
+    public void removeMenuItem(MenuItem menuItem) {
+        if (menuItem == null) {
+            throw new IllegalArgumentException("MenuItem cannot be null");
+        }
+
+        if (!menuItems.contains(menuItem)) {
+            throw new IllegalArgumentException("This menu item is not in this menu");
+        }
+
+        menuItems.remove(menuItem);
+
+        if (menuItem.getMenus().contains(this)) {
+            menuItem.removeMenu(this);
+        }
+    }
+
     private static void addMenu(Menu menu) {
         if (menu == null) {
             throw new IllegalArgumentException("Menu cannot be null");
@@ -81,6 +118,6 @@ public class Menu implements Serializable {
 
     @Override
     public String toString() {
-        return String.format("Menu[%s, season=%s]", name, season);
+        return String.format("Menu[%s, season=%s, items=%d]", name, season, menuItems.size());
     }
 }

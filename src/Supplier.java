@@ -13,19 +13,14 @@ public class Supplier implements Serializable {
     private ContactInfo contactInfo;
     private double reliabilityRating;
     private String contactPerson;
-    
-    // Aggregation: Supplier -> Ingredient (0..*)
-    private List<Ingredient> ingredients;
-    // {Bag} Association: Supplier -> SupplyLog (0..*)
+
     private List<SupplyLog> supplyLogs;
 
     public Supplier() {
-        this.ingredients = new ArrayList<>();
         this.supplyLogs = new ArrayList<>();
     }
 
     public Supplier(String name, String phone, String email, String address, double reliabilityRating, String contactPerson) {
-        this.ingredients = new ArrayList<>();
         this.supplyLogs = new ArrayList<>();
         setName(name);
         setContactInfo(new ContactInfo(phone, email, address));
@@ -35,7 +30,6 @@ public class Supplier implements Serializable {
     }
 
     public Supplier(String name, ContactInfo contactInfo, double reliabilityRating, String contactPerson) {
-        this.ingredients = new ArrayList<>();
         this.supplyLogs = new ArrayList<>();
         setName(name);
         setContactInfo(contactInfo);
@@ -51,10 +45,6 @@ public class Supplier implements Serializable {
     public String getAddress() { return contactInfo != null ? contactInfo.getAddress() : null; }
     public double getReliabilityRating() { return reliabilityRating; }
     public String getContactPerson() { return contactPerson; }
-    
-    public List<Ingredient> getIngredients() {
-        return Collections.unmodifiableList(ingredients);
-    }
 
     public List<SupplyLog> getSupplyLogs() {
         return Collections.unmodifiableList(supplyLogs);
@@ -110,64 +100,6 @@ public class Supplier implements Serializable {
         }
     }
 
-    public void addIngredient(Ingredient ingredient) {
-        if (ingredient == null) {
-            throw new IllegalArgumentException("Ingredient cannot be null");
-        }
-        
-        if (ingredients.contains(ingredient)) {
-            throw new IllegalStateException("This ingredient is already supplied by this supplier");
-        }
-        
-        ingredients.add(ingredient);
-        
-        if (!ingredient.getSuppliers().contains(this)) {
-            ingredient.addSupplier(this);
-        }
-    }
-    
-    public void removeIngredient(Ingredient ingredient) {
-        if (ingredient == null) {
-            throw new IllegalArgumentException("Ingredient cannot be null");
-        }
-        
-        // No minimum multiplicity constraint (0..*)
-        if (!ingredients.contains(ingredient)) {
-            throw new IllegalArgumentException("This ingredient is not supplied by this supplier");
-        }
-        
-        // Check if ingredient would violate its minimum multiplicity (1..*)
-        if (ingredient.getSuppliers().size() <= 1) {
-            throw new IllegalStateException(
-                "Cannot remove ingredient: it would leave the ingredient without any suppliers (violates 1..* constraint)");
-        }
-        
-        ingredients.remove(ingredient);
-        
-        if (ingredient.getSuppliers().contains(this)) {
-            ingredient.removeSupplier(this);
-        }
-    }
-    
-    public void clearIngredients() {
-        List<Ingredient> ingredientsCopy = new ArrayList<>(ingredients);
-        
-        for (Ingredient ingredient : ingredientsCopy) {
-            if (ingredient.getSuppliers().size() > 1) {
-                removeIngredient(ingredient);
-            }
-        }
-    }
-    
-    public boolean suppliesIngredient(String ingredientName) {
-        for (Ingredient ingredient : ingredients) {
-            if (ingredient.getName().equalsIgnoreCase(ingredientName)) {
-                return true;
-            }
-        }
-        return false;
-    }
-
     private static void addSupplier(Supplier supplier) {
         if (supplier == null) {
             throw new IllegalArgumentException("Supplier cannot be null");
@@ -204,7 +136,7 @@ public class Supplier implements Serializable {
 
     @Override
     public String toString() {
-        return String.format("Supplier[%s, contact=%s, contactPerson=%s, rating=%.1f, ingredients=%d]",
-            name, contactInfo, contactPerson != null ? contactPerson : "N/A", reliabilityRating, ingredients.size());
+        return String.format("Supplier[%s, contact=%s, contactPerson=%s, rating=%.1f]",
+            name, contactInfo, contactPerson != null ? contactPerson : "N/A", reliabilityRating);
     }
 }

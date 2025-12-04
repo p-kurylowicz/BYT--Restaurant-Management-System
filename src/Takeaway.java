@@ -9,12 +9,10 @@ public class Takeaway extends Order {
     private LocalTime collectionTime;
     private boolean wasPickedUp;
 
-
     public Takeaway() {
         super();
         this.wasPickedUp = false;
     }
-
 
     public Takeaway(LocalTime collectionTime) {
         super();

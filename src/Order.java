@@ -4,6 +4,8 @@ import java.time.LocalTime;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.Set;
+import java.util.HashSet;
 
 public abstract class Order implements Serializable {
     @Serial
@@ -17,16 +19,17 @@ public abstract class Order implements Serializable {
     private LocalDate date;
     private LocalTime time;
 
-    // Composition: Order <-> Payment (1 to 1, mandatory both sides)
-    private Payment payment;
+    // Composition: Order -> Payment (1 to 1..*)
+    private Set<Payment> payments;
 
-
+    // Basic Association: Order -> Customer (0..1 to 0..*)
     private Customer customer;
-    
+
     protected Order() {
         this.status = OrderStatus.ACTIVE;
         this.date = LocalDate.now();
         this.time = LocalTime.now();
+        this.payments = new HashSet<>();
         addOrder(this);
     }
 
@@ -82,40 +85,53 @@ public abstract class Order implements Serializable {
         this.time = time;
     }
 
-    // Composition: Order <-> Payment (1 to 1, mandatory)
-    public Payment getPayment() {
-        return payment;
+    // Composition: Order <-> Payment (1 to 1..*)
+    public Set<Payment> getPayments() {
+        return Collections.unmodifiableSet(payments);
     }
 
-    /**
-     * Sets the payment for this order and establishes the reverse connection.
-     * This is a mandatory 1:1 relationship - once set, it cannot be removed.
-     * @param payment The payment to associate with this order
-     * @throws IllegalArgumentException if payment is null
-     * @throws IllegalStateException if payment is already set or if order already has a different payment
-     */
-    public void setPayment(Payment payment) {
+    public void addPayment(Payment payment) {
         if (payment == null) {
-            throw new IllegalArgumentException("Payment cannot be null - Order must have a Payment (mandatory 1:1 relationship)");
+            throw new IllegalArgumentException("Payment cannot be null - Order must have at least one Payment (1..*)");
         }
 
         // Prevent duplicate assignment
-        if (this.payment == payment) {
+        if (payments.contains(payment)) {
             return; // Already connected
         }
 
-        // Prevent changing payment once set (cannot remove association)
-        if (this.payment != null && this.payment != payment) {
-            throw new IllegalStateException("Payment is already set and cannot be changed - association cannot be removed once established");
-        }
-
-        // Set the payment
-        this.payment = payment;
+        payments.add(payment);
 
         // Establish reverse connection if not already set
         if (payment.getOrder() != this) {
             payment.setOrder(this);
         }
+    }
+
+    public void removePayment(Payment payment) {
+        if (payment == null) {
+            throw new IllegalArgumentException("Payment cannot be null");
+        }
+
+        // Check if payment exists first
+        if (!payments.contains(payment)) {
+            throw new IllegalArgumentException("This payment is not part of this order");
+        }
+
+        // Enforce 1..* multiplicity: cannot remove last payment
+        if (payments.size() <= 1) {
+            throw new IllegalStateException("Cannot remove the last payment. Order must have at least one payment (1..*)");
+        }
+
+        payments.remove(payment);
+
+        // Note: Cannot remove order from payment as it's composition - payment cannot exist without order
+        // The payment should be deleted from extent when removed from order
+    }
+
+    // Package-private method to directly add without constraint check (for reverse connection)
+    void addPaymentDirect(Payment payment) {
+        payments.add(payment);
     }
 
     // Finalize order

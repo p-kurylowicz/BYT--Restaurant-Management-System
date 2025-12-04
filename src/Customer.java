@@ -21,11 +21,11 @@ public class Customer implements Serializable {
     private LocalDateTime registrationDate;
     private List<Feedback> feedbacks = new ArrayList<>();
 
-    // Basic Association: Customer -> Order (0..*)
+    // Basic Association
     private Set<Order> orders = new HashSet<>();
 
     private Map<LocalDateTime, Reservation> reservations = new HashMap<>();
-    
+
     public Customer() {
         this.orders = new HashSet<>();
     }
@@ -92,7 +92,8 @@ public class Customer implements Serializable {
             LocalDateTime key = LocalDateTime.of(reservation.getDate(), reservation.getTime());
             if (reservations.containsKey(key)) {
                 reservations.remove(key);
-                reservation.setCustomer(null);
+                // Note: Cannot set reservation.customer to null as Reservation must always have a Customer (1)
+                // Reservation can only change to a different customer via setCustomer()
             }
         }
     }

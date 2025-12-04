@@ -2,6 +2,8 @@ import java.io.*;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.Set;
+import java.util.HashSet;
 
 public class Ingredient implements Serializable {
     @Serial
@@ -14,20 +16,20 @@ public class Ingredient implements Serializable {
     private double currentStock;
     private double reorderPoint;
     private double costPerUnit;
-    
-    // Aggregation: Ingredient -> Supplier (1..*)
-    private List<Supplier> suppliers;
-    // {Bag} Association: Ingredient -> SupplyLog (0..*)
+
     private List<SupplyLog> supplyLogs;
 
+    // Basic Association: Ingredient -> MenuItem (1..*)
+    private Set<MenuItem> menuItems;
+
     public Ingredient() {
-        this.suppliers = new ArrayList<>();
         this.supplyLogs = new ArrayList<>();
+        this.menuItems = new HashSet<>();
     }
 
     public Ingredient(String name, String unit, double currentStock, double reorderPoint, double costPerUnit) {
-        this.suppliers = new ArrayList<>();
         this.supplyLogs = new ArrayList<>();
+        this.menuItems = new HashSet<>();
         setName(name);
         setUnit(unit);
         setCurrentStock(currentStock);
@@ -41,13 +43,13 @@ public class Ingredient implements Serializable {
     public double getCurrentStock() { return currentStock; }
     public double getReorderPoint() { return reorderPoint; }
     public double getCostPerUnit() { return costPerUnit; }
-    
-    public List<Supplier> getSuppliers() {
-        return Collections.unmodifiableList(suppliers);
-    }
 
     public List<SupplyLog> getSupplyLogs() {
         return Collections.unmodifiableList(supplyLogs);
+    }
+
+    public Set<MenuItem> getMenuItems() {
+        return Collections.unmodifiableSet(menuItems);
     }
 
     void addSupplyLog(SupplyLog supplyLog) {
@@ -62,6 +64,48 @@ public class Ingredient implements Serializable {
             supplyLogs.remove(supplyLog);
         }
     }
+
+    // Basic Association: Ingredient -> MenuItem (1..*)
+    public void addMenuItem(MenuItem menuItem) {
+        if (menuItem == null) {
+            throw new IllegalArgumentException("MenuItem cannot be null");
+        }
+
+        if (menuItems.contains(menuItem)) {
+            return;
+        }
+
+        menuItems.add(menuItem);
+
+
+        if (!menuItem.getIngredients().contains(this)) {
+            menuItem.addIngredient(this);
+        }
+    }
+
+    public void removeMenuItem(MenuItem menuItem) {
+        if (menuItem == null) {
+            throw new IllegalArgumentException("MenuItem cannot be null");
+        }
+
+
+        if (!menuItems.contains(menuItem)) {
+            throw new IllegalArgumentException("This ingredient is not part of this menu item");
+        }
+
+        // Enforce 1..* multiplicity: cannot remove last menu item
+        if (menuItems.size() <= 1) {
+            throw new IllegalStateException("Cannot remove the last menu item. Ingredient must be used in at least one menu item (1..*)");
+        }
+
+        menuItems.remove(menuItem);
+
+
+        if (menuItem.getIngredients().contains(this)) {
+            menuItem.removeIngredientDirect(this);
+        }
+    }
+
 
     public boolean getNeedsReorder() {
         return currentStock < reorderPoint;
@@ -102,81 +146,6 @@ public class Ingredient implements Serializable {
         this.costPerUnit = costPerUnit;
     }
 
-    public void addSupplier(Supplier supplier) {
-        if (supplier == null) {
-            throw new IllegalArgumentException("Supplier cannot be null");
-        }
-        
-        if (suppliers.contains(supplier)) {
-            throw new IllegalStateException("This supplier is already associated with this ingredient");
-        }
-        
-        suppliers.add(supplier);
-        
-        // Reverse connection: add this ingredient to the supplier
-        if (!supplier.getIngredients().contains(this)) {
-            supplier.addIngredient(this);
-        }
-    }
-    
-    public void removeSupplier(Supplier supplier) {
-        if (supplier == null) {
-            throw new IllegalArgumentException("Supplier cannot be null");
-        }
-        
-        // Check minimum multiplicity (1..*)
-        if (suppliers.size() <= 1) {
-            throw new IllegalStateException(
-                "Cannot remove supplier: ingredient must have at least one supplier");
-        }
-        
-        if (!suppliers.contains(supplier)) {
-            throw new IllegalArgumentException("This supplier is not associated with this ingredient");
-        }
-        
-        suppliers.remove(supplier);
-        
-        if (supplier.getIngredients().contains(this)) {
-            supplier.removeIngredient(this);
-        }
-    }
-    
-    public void replaceSupplier(Supplier oldSupplier, Supplier newSupplier) {
-        if (oldSupplier == null || newSupplier == null) {
-            throw new IllegalArgumentException("Suppliers cannot be null");
-        }
-        
-        if (!suppliers.contains(oldSupplier)) {
-            throw new IllegalArgumentException("Old supplier is not associated with this ingredient");
-        }
-        
-        if (suppliers.contains(newSupplier)) {
-            throw new IllegalStateException("New supplier is already associated with this ingredient");
-        }
-        
-        addSupplier(newSupplier);
-        
-        suppliers.remove(oldSupplier);
-        if (oldSupplier.getIngredients().contains(this)) {
-            oldSupplier.removeIngredient(this);
-        }
-    }
-    
-    public Supplier getPrimarySupplier() {
-        if (suppliers.isEmpty()) {
-            return null;
-        }
-        
-        Supplier primary = suppliers.get(0);
-        for (Supplier supplier : suppliers) {
-            if (supplier.getReliabilityRating() > primary.getReliabilityRating()) {
-                primary = supplier;
-            }
-        }
-        return primary;
-    }
-    // ============ AGGREGATION END ============
-
     public void updateCurrentStock(double quantity) {
         setCurrentStock(currentStock + quantity);
     }
@@ -200,6 +169,11 @@ public class Ingredient implements Serializable {
             throw new IllegalArgumentException("Ingredient cannot be null");
         }
         allIngredients.add(ingredient);
+    }
+
+    // Package-private method to directly remove without constraint check
+    void removeMenuItemDirect(MenuItem menuItem) {
+        menuItems.remove(menuItem);
     }
 
     public static List<Ingredient> getAllIngredients() {
@@ -231,7 +205,7 @@ public class Ingredient implements Serializable {
 
     @Override
     public String toString() {
-        return String.format("Ingredient[%s, stock=%.2f %s, reorderPoint=%.2f, needsReorder=%s, cost=%.2f, suppliers=%d]",
-            name, currentStock, unit, reorderPoint, getNeedsReorder(), costPerUnit, suppliers.size());
+        return String.format("Ingredient[%s, stock=%.2f %s, reorderPoint=%.2f, needsReorder=%s, cost=%.2f]",
+            name, currentStock, unit, reorderPoint, getNeedsReorder(), costPerUnit);
     }
 }

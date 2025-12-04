@@ -13,8 +13,7 @@ public class DineIn extends Order {
 
     
     private List<Table> tables;
-    private Reservation reservation; 
-
+    private Reservation reservation;
 
     public DineIn() {
         super();
@@ -22,7 +21,6 @@ public class DineIn extends Order {
         this.servingStartTime = LocalDateTime.now();
         this.reservation = null;
     }
-
 
     public DineIn(Reservation reservation) {
         super();

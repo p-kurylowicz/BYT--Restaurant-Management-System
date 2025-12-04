@@ -10,14 +10,14 @@ public class CompositionAssociationTest {
     }
 
     @Test
-    @DisplayName("Composition: Setting payment establishes reverse connection")
-    void testSetPaymentEstablishesReverseConnection() {
+    @DisplayName("Composition: Adding payment establishes reverse connection")
+    void testAddPaymentEstablishesReverseConnection() {
         Order order = new DineIn();
         Payment payment = new Cash(100.0, 100.0);
 
-        order.setPayment(payment);
+        order.addPayment(payment);
 
-        assertEquals(payment, order.getPayment());
+        assertTrue(order.getPayments().contains(payment));
         assertEquals(order, payment.getOrder());
     }
 
@@ -30,7 +30,7 @@ public class CompositionAssociationTest {
         payment.setOrder(order);
 
         assertEquals(order, payment.getOrder());
-        assertEquals(payment, order.getPayment());
+        assertTrue(order.getPayments().contains(payment));
     }
 
     @Test
@@ -39,7 +39,7 @@ public class CompositionAssociationTest {
         Order order = new DineIn();
 
         IllegalArgumentException exception = assertThrows(IllegalArgumentException.class, () -> {
-            order.setPayment(null);
+            order.addPayment(null);
         });
         assertTrue(exception.getMessage().contains("Payment cannot be null"));
     }
@@ -56,18 +56,56 @@ public class CompositionAssociationTest {
     }
 
     @Test
-    @DisplayName("Composition: Payment cannot be changed once set")
-    void testPaymentCannotBeChanged() {
+    @DisplayName("Composition (1..*): Can add multiple payments to order")
+    void testCanAddMultiplePayments() {
         Order order = new DineIn();
         Payment payment1 = new Cash(100.0, 100.0);
-        Payment payment2 = new Card(100.0, "1234", "Visa");
+        Payment payment2 = new Card(50.0, "1234", "Visa");
 
-        order.setPayment(payment1);
+        order.addPayment(payment1);
+        order.addPayment(payment2);
+
+        assertEquals(2, order.getPayments().size());
+        assertTrue(order.getPayments().contains(payment1));
+        assertTrue(order.getPayments().contains(payment2));
+        assertEquals(order, payment1.getOrder());
+        assertEquals(order, payment2.getOrder());
+    }
+
+    @Test
+    @DisplayName("Composition (1..*): Cannot remove last payment")
+    void testCannotRemoveLastPayment() {
+        Order order = new DineIn();
+        Payment payment = new Cash(100.0, 100.0);
+
+        order.addPayment(payment);
 
         IllegalStateException exception = assertThrows(IllegalStateException.class, () -> {
-            order.setPayment(payment2);
+            order.removePayment(payment);
         });
-        assertTrue(exception.getMessage().contains("Payment is already set and cannot be changed"));
+        assertTrue(exception.getMessage().contains("Cannot remove the last payment"));
+        assertTrue(exception.getMessage().contains("1..*"));
+    }
+
+    @Test
+    @DisplayName("Composition (1..*): Can remove payment when multiple exist")
+    void testCanRemovePaymentWhenMultipleExist() {
+        Order order = new DineIn();
+        Payment payment1 = new Cash(100.0, 100.0);
+        Payment payment2 = new Card(50.0, "1234", "Visa");
+
+        order.addPayment(payment1);
+        order.addPayment(payment2);
+
+        assertEquals(2, order.getPayments().size());
+
+        assertDoesNotThrow(() -> {
+            order.removePayment(payment1);
+        });
+
+        assertEquals(1, order.getPayments().size());
+        assertFalse(order.getPayments().contains(payment1));
+        assertTrue(order.getPayments().contains(payment2));
     }
 
     @Test
@@ -91,13 +129,14 @@ public class CompositionAssociationTest {
         Order order = new DineIn();
         Payment payment = new Cash(100.0, 100.0);
 
-        order.setPayment(payment);
+        order.addPayment(payment);
 
         assertDoesNotThrow(() -> {
-            order.setPayment(payment);
+            order.addPayment(payment);
         });
 
-        assertEquals(payment, order.getPayment());
+        assertEquals(1, order.getPayments().size());
+        assertTrue(order.getPayments().contains(payment));
         assertEquals(order, payment.getOrder());
     }
 
@@ -106,31 +145,69 @@ public class CompositionAssociationTest {
     void testBidirectionalLinkFromEitherSide() {
         Order order1 = new DineIn();
         Payment payment1 = new Cash(50.0, 50.0);
-        order1.setPayment(payment1);
+        order1.addPayment(payment1);
         assertEquals(order1, payment1.getOrder());
-        assertEquals(payment1, order1.getPayment());
+        assertTrue(order1.getPayments().contains(payment1));
 
         Order order2 = new Takeaway();
         Payment payment2 = new Card(75.0, "5678", "Mastercard");
         payment2.setOrder(order2);
         assertEquals(order2, payment2.getOrder());
-        assertEquals(payment2, order2.getPayment());
+        assertTrue(order2.getPayments().contains(payment2));
     }
 
     @Test
-    @DisplayName("Composition: 1:1 relationship enforced")
-    void testOneToOneRelationship() {
+    @DisplayName("Composition (1..*): Multiple payments per order")
+    void testOneToManyRelationship() {
         Order order = new DineIn();
-        Payment payment = new Cash(100.0, 100.0);
+        Payment payment1 = new Cash(100.0, 100.0);
+        Payment payment2 = new Card(50.0, "1234", "Visa");
 
-        order.setPayment(payment);
+        order.addPayment(payment1);
+        order.addPayment(payment2);
+
+        // One order has multiple payments
+        assertEquals(2, order.getPayments().size());
+
+        // Each payment belongs to exactly one order
+        assertEquals(order, payment1.getOrder());
+        assertEquals(order, payment2.getOrder());
+
+        // Verify in extent
+        assertEquals(1, Order.getAllOrders().stream()
+            .filter(o -> o.getPayments().contains(payment1))
+            .count());
 
         assertEquals(1, Order.getAllOrders().stream()
-            .filter(o -> o.getPayment() == payment)
+            .filter(o -> o.getPayments().contains(payment2))
             .count());
+    }
 
-        assertEquals(1, Payment.getAllPayments().stream()
-            .filter(p -> p.getOrder() == order)
-            .count());
+    @Test
+    @DisplayName("Composition (1..*): Remove non-existent payment throws exception")
+    void testRemoveNonExistentPayment() {
+        Order order = new DineIn();
+        Payment payment1 = new Cash(100.0, 100.0);
+        Payment payment2 = new Card(50.0, "1234", "Visa");
+
+        order.addPayment(payment1);
+
+        IllegalArgumentException exception = assertThrows(IllegalArgumentException.class, () -> {
+            order.removePayment(payment2);
+        });
+        assertTrue(exception.getMessage().contains("This payment is not part of this order"));
+    }
+
+    @Test
+    @DisplayName("Composition (1..*): Null validation for removePayment")
+    void testRemovePaymentNullValidation() {
+        Order order = new DineIn();
+        Payment payment = new Cash(100.0, 100.0);
+        order.addPayment(payment);
+
+        IllegalArgumentException exception = assertThrows(IllegalArgumentException.class, () -> {
+            order.removePayment(null);
+        });
+        assertTrue(exception.getMessage().contains("Payment cannot be null"));
     }
 }
