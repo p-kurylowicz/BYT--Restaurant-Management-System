@@ -37,7 +37,7 @@ public class Customer implements Serializable {
         setEmail(email);
         setPhone(phone);
         setRegistrationDate(registrationDate);
-        addCustomer(this);
+        staticAddCustomer(this);
     }
 
     public Set<Order> getOrders() {
@@ -162,7 +162,7 @@ public class Customer implements Serializable {
         this.registrationDate = registrationDate;
     }
 
-    private static void addCustomer(Customer customer) {
+    private static void staticAddCustomer(Customer customer) {
         if (customer == null) {
             throw new IllegalArgumentException("Customer cannot be null");
         }
