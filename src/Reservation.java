@@ -40,7 +40,8 @@ public class Reservation implements Serializable {
         setSize(size);
         this.customer = customer;
         this.status = ReservationStatus.PENDING;
-        addReservation(this);
+        staticAddReservation(this);
+        assignTable(assignedTable);
 
         // Establish reverse connection in Customer's qualified map
         customer.addReservation(this);
@@ -201,7 +202,7 @@ public class Reservation implements Serializable {
         this.status = newStatus;
     }
 
-    private static void addReservation(Reservation reservation) {
+    private static void staticAddReservation(Reservation reservation) {
         if (reservation == null) {
             throw new IllegalArgumentException("Reservation cannot be null");
         }
