@@ -50,16 +50,19 @@ public class Reservation implements Serializable {
     public Customer getCustomer() { return customer; }
 
     public void setCustomer(Customer newCustomer) {
-        if (newCustomer == null) {
-            throw new IllegalArgumentException("Customer cannot be null - Reservation must have a Customer (mandatory 1)");
-        }
-
         if (this.customer != newCustomer) {
+            
             if (this.customer != null) {
-                this.customer.removeReservation(this);
+                Customer oldCustomer = this.customer;
+                this.customer = null; 
+                oldCustomer.removeReservation(this);
             }
+            
             this.customer = newCustomer;
-            newCustomer.addReservation(this);
+            
+            if (newCustomer != null) {
+                newCustomer.addReservation(this);
+            }
         }
     }
 
