@@ -43,16 +43,12 @@ public class Reservation implements Serializable {
         setSize(size);
         this.customer = customer;
         this.status = ReservationStatus.PENDING;
-        staticAddReservation(this);
-        if (table != null) {
-            assignTable(table);
-        }
+        addReservationToExtent(this);
 
-        // Establish connections
-        // First establish reverse connection in Customer's qualified map
+        // Establish reverse connection in Customer's qualified map
         customer.addReservation(this);
 
-        // Then assign table (this will establish reverse connection with Table)
+        // Assign table (this will establish reverse connection with Table)
         assignTable(table);
     }
 

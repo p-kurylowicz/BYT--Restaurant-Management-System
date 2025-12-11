@@ -20,7 +20,7 @@ public class QualifiedAssociationTest {
         Table table = new Table(1, 4, "Section A");
 
         IllegalArgumentException exception = assertThrows(IllegalArgumentException.class, () -> {
-            new Reservation(date, time, 4, null, null);
+            new Reservation(date, time, 4, null, table);
         });
         assertTrue(exception.getMessage().contains("Customer cannot be null"));
     }
@@ -31,12 +31,13 @@ public class QualifiedAssociationTest {
         Customer customer = new Customer("John", "Doe", "john@test.com", "123456", LocalDateTime.now());
         LocalDate date = LocalDate.now().plusDays(1);
         LocalTime time = LocalTime.of(19, 0);
-        Reservation reservation = new Reservation(date, time, 4, customer, null);
+        Table table = new Table(2, 4, "Section A");
+        Reservation reservation = new Reservation(date, time, 4, customer, table);
 
-        // Note: Current implementation allows setting customer to null
-        // This test verifies the actual behavior
-        reservation.setCustomer(null);
-        assertNull(reservation.getCustomer());
+        IllegalArgumentException exception = assertThrows(IllegalArgumentException.class, () -> {
+            reservation.setCustomer(null);
+        });
+        assertTrue(exception.getMessage().contains("Customer cannot be null"));
     }
 
     @Test
@@ -45,7 +46,8 @@ public class QualifiedAssociationTest {
         Customer customer = new Customer("John", "Doe", "john@test.com", "123456", LocalDateTime.now());
         LocalDate date = LocalDate.now().plusDays(1);
         LocalTime time = LocalTime.of(19, 0);
-        Reservation reservation = new Reservation(date, time, 4, customer, null);
+        Table table = new Table(3, 4, "Section A");
+        Reservation reservation = new Reservation(date, time, 4, customer, table);
 
         LocalDateTime key = LocalDateTime.of(date, time);
         assertEquals(reservation, customer.getReservation(key));
@@ -59,7 +61,8 @@ public class QualifiedAssociationTest {
         Customer customer2 = new Customer("Bob", "Smith", "bob@test.com", "111222", LocalDateTime.now());
         LocalDate date = LocalDate.now().plusDays(2);
         LocalTime time = LocalTime.of(20, 0);
-        Reservation reservation = new Reservation(date, time, 2, customer1, null);
+        Table table = new Table(4, 2, "Section A");
+        Reservation reservation = new Reservation(date, time, 2, customer1, table);
 
         // Change to a different customer
         reservation.setCustomer(customer2);
@@ -78,8 +81,7 @@ public class QualifiedAssociationTest {
         Table table1 = new Table(5, 4, "Section A");
         Table table2 = new Table(6, 2, "Section A");
 
-        Reservation res1 = new Reservation(date, time, 4, customer, null);
-        Reservation res2 = new Reservation(date, time, 2, customer, null);
+        Reservation res1 = new Reservation(date, time, 4, customer, table1);
 
         // Customer can only have 0..1 Reservations at any given DateTime
         // Attempting to create a second reservation at the same date/time should throw an exception
@@ -98,14 +100,15 @@ public class QualifiedAssociationTest {
         Customer customer2 = new Customer("Jane", "Smith", "jane@test.com", "987654", LocalDateTime.now());
         LocalDate date = LocalDate.now().plusDays(1);
         LocalTime time = LocalTime.of(19, 0);
-        Reservation reservation = new Reservation(date, time, 4, customer1, null);
+        Table table = new Table(7, 4, "Section A");
+        Reservation reservation = new Reservation(date, time, 4, customer1, table);
 
         // Remove from customer1's map
         customer1.removeReservation(reservation);
 
         assertNull(customer1.getReservation(LocalDateTime.of(date, time)));
-        // Note: Current implementation sets customer to null when removed from map
-        assertNull(reservation.getCustomer());
+        // Reservation still maintains customer reference (mandatory 1 multiplicity)
+        assertEquals(customer1, reservation.getCustomer());
 
         // Can change to different customer after removal from map
         reservation.setCustomer(customer2);
@@ -122,7 +125,7 @@ public class QualifiedAssociationTest {
         LocalTime time = LocalTime.of(19, 0);
         Table table = new Table(8, 4, "Section A");
 
-        Reservation reservation = new Reservation(oldDate, time, 4, customer, null);
+        Reservation reservation = new Reservation(oldDate, time, 4, customer, table);
 
         // Verify initial state
         LocalDateTime oldKey = LocalDateTime.of(oldDate, time);
@@ -151,7 +154,7 @@ public class QualifiedAssociationTest {
         LocalTime newTime = LocalTime.of(20, 0);
         Table table = new Table(9, 2, "Section A");
 
-        Reservation reservation = new Reservation(date, oldTime, 2, customer, null);
+        Reservation reservation = new Reservation(date, oldTime, 2, customer, table);
 
         // Verify initial state
         LocalDateTime oldKey = LocalDateTime.of(date, oldTime);
@@ -181,7 +184,7 @@ public class QualifiedAssociationTest {
         LocalTime newTime = LocalTime.of(21, 0);
         Table table = new Table(10, 3, "Section A");
 
-        Reservation reservation = new Reservation(oldDate, oldTime, 3, customer, null);
+        Reservation reservation = new Reservation(oldDate, oldTime, 3, customer, table);
 
         // Change date first
         reservation.setDate(newDate);

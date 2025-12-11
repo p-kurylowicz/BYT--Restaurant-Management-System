@@ -370,8 +370,7 @@ public class Main {
         System.out.println("   Price: " + String.format("%.2f", beverageTotal) + " PLN\n");
 
         // Create payment and associate with order (composition)
-        Card cardPayment = new Card(beverageTotal, "4532", "Visa");
-        cardPayment.setOrder(takeawayOrder);  // Establish composition relationship
+        Card cardPayment = new Card(beverageTotal, takeawayOrder, "4532", "Visa");
         cardPayment.processPayment();
 
         System.out.println("PAYMENT PROCESSED:");
@@ -397,8 +396,7 @@ public class Main {
 
         // Create cash payment and associate with order (composition)
         // Using the pizza price calculated earlier
-        Cash cashPayment = new Cash(itemPrice, 200.00);
-        cashPayment.setOrder(dineInOrder);  // Establish composition relationship
+        Cash cashPayment = new Cash(itemPrice, dineInOrder, 200.00);
         cashPayment.processPayment();
 
         System.out.println("CASH PAYMENT:");
