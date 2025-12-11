@@ -27,7 +27,7 @@ public abstract class Employee implements Serializable {
         setContactInfo(new ContactInfo(phone, email, address));
         setHireDate(hireDate);
         setHourlyRate(hourlyRate);
-        addEmployee(this);
+        addEmployeeToExtent(this);
     }
 
     protected Employee(String name, ContactInfo contactInfo, LocalDate hireDate, double hourlyRate) {
@@ -35,7 +35,7 @@ public abstract class Employee implements Serializable {
         setContactInfo(contactInfo);
         setHireDate(hireDate);
         setHourlyRate(hourlyRate);
-        addEmployee(this);
+        addEmployeeToExtent(this);
     }
 
 
@@ -101,14 +101,14 @@ public abstract class Employee implements Serializable {
     }
 
     
-    private static void addEmployee(Employee employee) {
+    private static void addEmployeeToExtent(Employee employee) {
         if (employee == null) {
             throw new IllegalArgumentException("Employee cannot be null");
         }
         allEmployees.add(employee);
     }
 
-    public static List<Employee> getAllEmployees() {
+    public static List<Employee> getAllEmployeesFromExtent() {
         return Collections.unmodifiableList(allEmployees);
     }
 

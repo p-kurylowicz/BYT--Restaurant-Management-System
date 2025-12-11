@@ -15,15 +15,15 @@ public class DineIn extends Order {
     private List<Table> tables;
     private Reservation reservation;
 
-    public DineIn() {
-        super();
+    public DineIn(Customer customer) {
+        super(customer);
         this.tables = new ArrayList<>();
         this.servingStartTime = LocalDateTime.now();
         this.reservation = null;
     }
 
-    public DineIn(Reservation reservation) {
-        super();
+    public DineIn(Customer customer, Reservation reservation) {
+        super(customer);
         this.tables = new ArrayList<>();
         this.servingStartTime = LocalDateTime.now();
         setReservation(reservation);

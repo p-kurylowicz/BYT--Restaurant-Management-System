@@ -8,13 +8,17 @@ import java.util.List;
  * Association Class: ItemQuantity connects OrderRequest to MenuItem
  * Represents the many-to-many relationship with attributes (quantity, specialRequests, servedTimestamp)
  * Multiplicity: OrderRequest (0..*) <-> (0..*) MenuItem
+ *
+ * NOTE: This is a REGULAR association class (NOT {Bag}).
+ * Each OrderRequest-MenuItem pair can have only ONE ItemQuantity.
+ * Attempting to create a duplicate will throw IllegalStateException.
  */
 public class ItemQuantity implements Serializable {
     @Serial
     private static final long serialVersionUID = 1L;
 
 
-    private static List<ItemQuantity> allItemQuantities = new ArrayList<>();
+    private static final List<ItemQuantity> allItemQuantities = new ArrayList<>();
 
 
     private OrderRequest orderRequest;
@@ -39,12 +43,28 @@ public class ItemQuantity implements Serializable {
         setSpecialRequests(specialRequests);
         this.servedTimestamp = null;
 
-
-        allItemQuantities.add(this);
+        addItemQuantityToExtent();
     }
 
 
+
     public static ItemQuantity create(OrderRequest orderRequest, MenuItem menuItem, int quantity, String specialRequests) {
+        if (orderRequest == null) {
+            throw new IllegalArgumentException("OrderRequest cannot be null");
+        }
+        if (menuItem == null) {
+            throw new IllegalArgumentException("MenuItem cannot be null");
+        }
+
+        // Check for existing connection
+        for (ItemQuantity existing : allItemQuantities) {
+            if (existing.getOrderRequest() == orderRequest && existing.getMenuItem() == menuItem) {
+                throw new IllegalStateException(
+                    "ItemQuantity already exists for this OrderRequest and MenuItem combination. " +
+                    "To modify quantity, update the existing ItemQuantity instead of creating a new one."
+                );
+            }
+        }
 
         ItemQuantity itemQuantity = new ItemQuantity(orderRequest, menuItem, quantity, specialRequests);
 
@@ -58,6 +78,19 @@ public class ItemQuantity implements Serializable {
 
     public static ItemQuantity create(OrderRequest orderRequest, MenuItem menuItem, int quantity) {
         return create(orderRequest, menuItem, quantity, null);
+    }
+
+    public void delete() {
+        if (orderRequest != null) {
+            orderRequest.removeItemQuantity(this);
+        }
+        if (menuItem != null) {
+            menuItem.removeItemQuantity(this);
+        }
+        deleteItemQuantityFromExtent();
+
+        this.orderRequest = null;
+        this.menuItem = null;
     }
 
 
@@ -96,20 +129,20 @@ public class ItemQuantity implements Serializable {
         this.servedTimestamp = LocalDateTime.now();
     }
 
-    public void delete() {
-        if (orderRequest != null) {
-            orderRequest.removeItemQuantity(this);
-        }
-        if (menuItem != null) {
-            menuItem.removeItemQuantity(this);
-        }
-        allItemQuantities.remove(this);
 
-        this.orderRequest = null;
-        this.menuItem = null;
+    private void addItemQuantityToExtent() {
+        if (!allItemQuantities.contains(this)) {
+            allItemQuantities.add(this);
+        }
     }
 
-    public static List<ItemQuantity> getAllItemQuantities() {
+    private void deleteItemQuantityFromExtent() {
+        if (!allItemQuantities.remove(this)) {
+            throw new IllegalStateException("ItemQuantity not found in extent - cannot delete");
+        }
+    }
+
+    public static List<ItemQuantity> getAllItemQuantitiesFromExtent() {
         return Collections.unmodifiableList(allItemQuantities);
     }
 

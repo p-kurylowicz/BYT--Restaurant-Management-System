@@ -9,13 +9,16 @@ public class Cash extends Payment {
     private double changeGiven;
 
 
-    public Cash() {
-        super();
-    }
-
-
-    public Cash(double amountPayed, double amountTendered) {
-        super(amountPayed);
+    /**
+     * Creates a Cash payment for the given Order.
+     * Composition: Cash cannot exist without an Order.
+     *
+     * @param amountPayed The payment amount
+     * @param order The Order this Cash payment belongs to
+     * @param amountTendered The amount of cash tendered by customer
+     */
+    public Cash(double amountPayed, Order order, double amountTendered) {
+        super(amountPayed, order);
         setAmountTendered(amountTendered);
         calculateChange();
     }

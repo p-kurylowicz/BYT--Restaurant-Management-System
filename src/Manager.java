@@ -11,7 +11,7 @@ public class Manager extends Employee {
     private String department;
     private int accessLevel;
 
-    // ===== Reflex association: Manager ↔ Manager =====
+
     // Each manager can have 0..1 supervisor and 0..* subordinates.
     private Manager supervisor;
     private final Set<Manager> subordinates = new HashSet<>();
@@ -27,49 +27,15 @@ public class Manager extends Employee {
         setAccessLevel(accessLevel);
     }
 
-
-
-    public String getDepartment() {
-        return department;
-    }
-
-    public int getAccessLevel() {
-        return accessLevel;
-    }
-
-
-
-    /**
-     * Returns the supervisor of this manager (0..1).
-     */
     public Manager getSupervisor() {
         return supervisor;
     }
 
-    /**
-     * Returns an unmodifiable view of this manager's subordinates (0..*).
-     */
+    // Returns an unmodifiable view of this manager's subordinates (0..*).
+
     public Set<Manager> getSubordinates() {
         return Collections.unmodifiableSet(subordinates);
     }
-
-
-
-    public void setDepartment(String department) {
-        if (department == null || department.trim().isEmpty()) {
-            throw new IllegalArgumentException("Department cannot be null or empty");
-        }
-        this.department = department.trim();
-    }
-
-    public void setAccessLevel(int accessLevel) {
-        if (accessLevel < 1 || accessLevel > 10) {
-            throw new IllegalArgumentException("Access level must be between 1 and 10");
-        }
-        this.accessLevel = accessLevel;
-    }
-
-    // ===== Reflex association logic =====
 
 
     public void setSupervisor(Manager newSupervisor) {
@@ -77,7 +43,7 @@ public class Manager extends Employee {
             throw new IllegalArgumentException("Manager cannot supervise themself");
         }
 
-        // Prevent cycles: this must not appear above in the supervisor chain
+        // Prevent cycles
         Manager current = newSupervisor;
         while (current != null) {
             if (current == this) {
@@ -96,10 +62,10 @@ public class Manager extends Employee {
             this.supervisor.subordinates.remove(this);
         }
 
-        // Set the new supervisor
+
         this.supervisor = newSupervisor;
 
-        // Add this manager to the new supervisor's subordinates (reverse connection)
+        // (reverse connection)
         if (newSupervisor != null && !newSupervisor.subordinates.contains(this)) {
             newSupervisor.subordinates.add(this);
         }
@@ -125,6 +91,32 @@ public class Manager extends Employee {
             subordinate.supervisor = null;
         }
     }
+
+
+    public String getDepartment() {
+        return department;
+    }
+
+    public int getAccessLevel() {
+        return accessLevel;
+    }
+
+    public void setDepartment(String department) {
+        if (department == null || department.trim().isEmpty()) {
+            throw new IllegalArgumentException("Department cannot be null or empty");
+        }
+        this.department = department.trim();
+    }
+
+    public void setAccessLevel(int accessLevel) {
+        if (accessLevel < 1 || accessLevel > 10) {
+            throw new IllegalArgumentException("Access level must be between 1 and 10");
+        }
+        this.accessLevel = accessLevel;
+    }
+
+
+
 
 
 

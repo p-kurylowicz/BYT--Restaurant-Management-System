@@ -1,9 +1,7 @@
 import java.io.*;
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 public class Menu implements Serializable {
     @Serial
@@ -25,28 +23,11 @@ public class Menu implements Serializable {
         this.menuItems = new ArrayList<>();
         setName(name);
         setSeason(season);
-        addMenu(this);
+        addMenuToExtent(this);
     }
-
-    public String getName() { return name; }
-    public String getSeason() { return season; }
 
     public List<MenuItem> getMenuItems() {
         return Collections.unmodifiableList(menuItems);
-    }
-
-    public void setName(String name) {
-        if (name == null || name.trim().isEmpty()) {
-            throw new IllegalArgumentException("Menu name cannot be null or empty");
-        }
-        this.name = name.trim();
-    }
-
-    public void setSeason(String season) {
-        if (season == null || season.trim().isEmpty()) {
-            throw new IllegalArgumentException("Season cannot be null or empty");
-        }
-        this.season = season.trim();
     }
 
     public void addMenuItem(MenuItem menuItem) {
@@ -81,14 +62,32 @@ public class Menu implements Serializable {
         }
     }
 
-    private static void addMenu(Menu menu) {
+
+    public String getName() { return name; }
+    public String getSeason() { return season; }
+
+    public void setName(String name) {
+        if (name == null || name.trim().isEmpty()) {
+            throw new IllegalArgumentException("Menu name cannot be null or empty");
+        }
+        this.name = name.trim();
+    }
+
+    public void setSeason(String season) {
+        if (season == null || season.trim().isEmpty()) {
+            throw new IllegalArgumentException("Season cannot be null or empty");
+        }
+        this.season = season.trim();
+    }
+
+    private static void addMenuToExtent(Menu menu) {
         if (menu == null) {
             throw new IllegalArgumentException("Menu cannot be null");
         }
         allMenus.add(menu);
     }
 
-    public static List<Menu> getAllMenus() {
+    public static List<Menu> getAllMenusFromExtent() {
         return Collections.unmodifiableList(allMenus);
     }
 

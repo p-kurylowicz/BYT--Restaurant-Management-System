@@ -17,11 +17,13 @@ public class InvoiceAttributesTest {
         Order.clearExtent();
         Payment.clearExtent();
 
-        completedOrder = new DineIn();
+        Customer customer1 = new Customer();
+        completedOrder = new DineIn(customer1);
         completedOrder.finalizeOrder();
         completedOrder.completeOrder();
 
-        activeOrder = new DineIn();
+        Customer customer2 = new Customer();
+        activeOrder = new DineIn(customer2);
     }
 
     
@@ -32,10 +34,10 @@ public class InvoiceAttributesTest {
         Invoice invoice = new Invoice(completedOrder, validAddress, 100.0, null);
         assertFalse(invoice.isPaid(), "Invoice should start as unpaid");
 
-        invoice.addPayment(new Cash(50.0, 50.0));
+        invoice.addPayment(new Cash(50.0, completedOrder, 50.0));
         assertFalse(invoice.isPaid(), "Partial payment should not mark as paid");
 
-        invoice.addPayment(new Cash(50.0, 50.0));
+        invoice.addPayment(new Cash(50.0, completedOrder, 50.0));
         assertTrue(invoice.isPaid(), "Full payment should mark the invoice as paid");
         
         double totalPaid = invoice.getPayments().stream().mapToDouble(Payment::getAmountPayed).sum();
@@ -102,13 +104,13 @@ public class InvoiceAttributesTest {
         Address validAddress = new Address("St. Test", "City", "00-001", "PL");
         Invoice invoice = new Invoice(completedOrder, validAddress, 100.0, null);
 
-        Payment payment1 = new Cash(50.0, 50.0);
+        Payment payment1 = new Cash(50.0, completedOrder, 50.0);
         invoice.addPayment(payment1);
-        
-        Payment payment2 = new Cash(50.0, 50.0);
+
+        Payment payment2 = new Cash(50.0, completedOrder, 50.0);
         assertDoesNotThrow(() -> invoice.addPayment(payment2));
 
-        Payment overPayment = new Cash(0.01, 0.01);
+        Payment overPayment = new Cash(0.01, completedOrder, 0.01);
         IllegalStateException exception = assertThrows(IllegalStateException.class, () -> {
             invoice.addPayment(overPayment);
         });
@@ -160,12 +162,13 @@ public class InvoiceAttributesTest {
         Address address2 = new Address("Street 2", "City 2", "02-200", "DE");
 
         Invoice i1 = new Invoice(completedOrder, address1, 150.0, 1.0);
-        Order completedOrder2 = new DineIn();
+        Customer customer3 = new Customer();
+        Order completedOrder2 = new DineIn(customer3);
         completedOrder2.finalizeOrder();
         completedOrder2.completeOrder();
         Invoice i2 = new Invoice(completedOrder2, address2, 800.0, null);
 
-        i1.addPayment(new Cash(75.0, 75.0));
+        i1.addPayment(new Cash(75.0, completedOrder, 75.0));
 
         assertEquals(2, Invoice.getAllInvoices().size());
 

@@ -14,7 +14,7 @@ public class Supplier implements Serializable {
     private double reliabilityRating;
     private String contactPerson;
 
-    private List<SupplyLog> supplyLogs;
+    private final List<SupplyLog> supplyLogs;
 
     public Supplier() {
         this.supplyLogs = new ArrayList<>();
@@ -26,7 +26,7 @@ public class Supplier implements Serializable {
         setContactInfo(new ContactInfo(phone, email, address));
         setReliabilityRating(reliabilityRating);
         setContactPerson(contactPerson);
-        addSupplier(this);
+        addSupplierToExtent(this);
     }
 
     public Supplier(String name, ContactInfo contactInfo, double reliabilityRating, String contactPerson) {
@@ -35,16 +35,9 @@ public class Supplier implements Serializable {
         setContactInfo(contactInfo);
         setReliabilityRating(reliabilityRating);
         setContactPerson(contactPerson);
-        addSupplier(this);
+        addSupplierToExtent(this);
     }
 
-    public String getName() { return name; }
-    public ContactInfo getContactInfo() { return contactInfo; }
-    public String getPhone() { return contactInfo != null ? contactInfo.getPhone() : null; }
-    public String getEmail() { return contactInfo != null ? contactInfo.getEmail() : null; }
-    public String getAddress() { return contactInfo != null ? contactInfo.getAddress() : null; }
-    public double getReliabilityRating() { return reliabilityRating; }
-    public String getContactPerson() { return contactPerson; }
 
     public List<SupplyLog> getSupplyLogs() {
         return Collections.unmodifiableList(supplyLogs);
@@ -62,6 +55,15 @@ public class Supplier implements Serializable {
             supplyLogs.remove(supplyLog);
         }
     }
+
+    public String getName() { return name; }
+    public ContactInfo getContactInfo() { return contactInfo; }
+    public String getPhone() { return contactInfo != null ? contactInfo.getPhone() : null; }
+    public String getEmail() { return contactInfo != null ? contactInfo.getEmail() : null; }
+    public String getAddress() { return contactInfo != null ? contactInfo.getAddress() : null; }
+    public double getReliabilityRating() { return reliabilityRating; }
+    public String getContactPerson() { return contactPerson; }
+
 
     public void setName(String name) {
         if (name == null || name.trim().isEmpty()) {
@@ -100,14 +102,14 @@ public class Supplier implements Serializable {
         }
     }
 
-    private static void addSupplier(Supplier supplier) {
+    private static void addSupplierToExtent(Supplier supplier) {
         if (supplier == null) {
             throw new IllegalArgumentException("Supplier cannot be null");
         }
         allSuppliers.add(supplier);
     }
 
-    public static List<Supplier> getAllSuppliers() {
+    public static List<Supplier> getAllSuppliersFromExtent() {
         return Collections.unmodifiableList(allSuppliers);
     }
 

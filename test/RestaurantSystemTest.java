@@ -27,7 +27,15 @@ import org.junit.platform.suite.api.SuiteDisplayName;
     DerivedAttributesTest.class,
     OptionalAttributesTest.class,
     ClassExtentTest.class,
-    ExtentPersistenceTest.class
+    ExtentPersistenceTest.class,
+        ReflexAssociationTest.class,
+        QualifiedAssociationTest.class,
+        OptionalAttributesTest.class,
+        MenuItemIngredientAssociationTest.class,
+        FeedbackLogicTest.class,
+        InvoiceAttributesTest.class,
+        ExtentPersistenceTest.class,
+
 })
 public class RestaurantSystemTest {
 

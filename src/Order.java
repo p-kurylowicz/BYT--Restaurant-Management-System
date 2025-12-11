@@ -25,27 +25,45 @@ public abstract class Order implements Serializable {
     // Basic Association: Order -> Customer (0..1 to 0..*)
     private Customer customer;
 
-    protected Order() {
+    protected Order(Customer customer) {
+        if (customer == null) {
+            throw new IllegalArgumentException("Customer cannot be null - Order must have a Customer");
+        }
         this.status = OrderStatus.ACTIVE;
         this.date = LocalDate.now();
         this.time = LocalTime.now();
         this.payments = new HashSet<>();
-        addOrder(this);
+        addOrderToExtent(this);
+
+        // Establish bidirectional connection with customer
+        this.customer = customer;
+        customer.addOrder(this);
     }
+
 
     public Customer getCustomer() {
         return customer;
     }
 
     public void setCustomer(Customer newCustomer) {
-        if (this.customer != newCustomer) {
-            if (this.customer != null) {
-                this.customer.removeOrder(this);
-            }
-            this.customer = newCustomer;
-            if (newCustomer != null) {
-                newCustomer.addOrder(this);
-            }
+        // Prevent redundant assignment
+        if (this.customer == newCustomer) {
+            return;
+        }
+
+        // Remove old connection if exists
+        if (this.customer != null) {
+            Customer oldCustomer = this.customer;
+            this.customer = null; // Clear before calling removeOrder to prevent recursion
+            oldCustomer.removeOrder(this);
+        }
+
+        // Set new customer
+        this.customer = newCustomer;
+
+        // Establish reverse connection
+        if (newCustomer != null && !newCustomer.getOrders().contains(this)) {
+            newCustomer.addOrder(this);
         }
     }
 
@@ -57,35 +75,27 @@ public abstract class Order implements Serializable {
         }
     }
 
-    public OrderStatus getStatus() { return status; }
-    public LocalDate getDate() { return date; }
-    public LocalTime getTime() { return time; }
-
-    /**
-     * Calculates the total price of the order.
-     * TODO: Implement when we have inheritance
-     */
-    // Derived attribute
-    public double getTotalAmount() {
-        // Placeholder
-        return 0.0;
-    }
-
-    public void setDate(LocalDate date) {
-        if (date == null) {
-            throw new IllegalArgumentException("Date cannot be null");
+    public void delete() {
+        // Step 1: Cascade delete all Payments (create a copy to avoid concurrent modification)
+        List<Payment> paymentsCopy = new ArrayList<>(payments);
+        for (Payment payment : paymentsCopy) {
+            // Delete each payment - this removes it from extent and clears associations
+            payment.delete();
         }
-        this.date = date;
-    }
+        // Clear the payments collection
+        payments.clear();
 
-    public void setTime(LocalTime time) {
-        if (time == null) {
-            throw new IllegalArgumentException("Time cannot be null");
+        // Step 2: Remove association with Customer
+        if (this.customer != null) {
+            Customer oldCustomer = this.customer;
+            this.customer = null; // Clear reference first to prevent recursion
+            oldCustomer.removeOrder(this);
         }
-        this.time = time;
+
+        // Step 3: Remove this Order from the extent
+        allOrders.remove(this);
     }
 
-    // Composition: Order <-> Payment (1 to 1..*)
     public Set<Payment> getPayments() {
         return Collections.unmodifiableSet(payments);
     }
@@ -108,31 +118,60 @@ public abstract class Order implements Serializable {
         }
     }
 
+
     public void removePayment(Payment payment) {
         if (payment == null) {
             throw new IllegalArgumentException("Payment cannot be null");
         }
 
-        // Check if payment exists first
+        // check if payment exists first
         if (!payments.contains(payment)) {
             throw new IllegalArgumentException("This payment is not part of this order");
         }
 
-        // Enforce 1..* multiplicity: cannot remove last payment
+        // cannot remove last payment
         if (payments.size() <= 1) {
             throw new IllegalStateException("Cannot remove the last payment. Order must have at least one payment (1..*)");
         }
 
         payments.remove(payment);
 
-        // Note: Cannot remove order from payment as it's composition - payment cannot exist without order
-        // The payment should be deleted from extent when removed from order
+        // Composition cascade: when removed from Order ("Whole"), the Payment ("Part") must be deleted
+        payment.delete();
     }
 
     // Package-private method to directly add without constraint check (for reverse connection)
     void addPaymentDirect(Payment payment) {
         payments.add(payment);
     }
+
+    public OrderStatus getStatus() { return status; }
+    public LocalDate getDate() { return date; }
+    public LocalTime getTime() { return time; }
+
+
+    // Derived attribute
+    public double getTotalAmount() {
+        // Placeholder
+        return 0.0;
+    }
+
+    public void setDate(LocalDate date) {
+        if (date == null) {
+            throw new IllegalArgumentException("Date cannot be null");
+        }
+        this.date = date;
+    }
+
+    public void setTime(LocalTime time) {
+        if (time == null) {
+            throw new IllegalArgumentException("Time cannot be null");
+        }
+        this.time = time;
+    }
+
+    // Composition: Order <-> Payment (1 to 1..*)
+
 
     // Finalize order
     public void finalizeOrder() {
@@ -160,15 +199,16 @@ public abstract class Order implements Serializable {
         this.status = OrderStatus.CANCELLED;
     }
 
-    
-    private static void addOrder(Order order) {
+
+
+    private static void addOrderToExtent(Order order) {
         if (order == null) {
             throw new IllegalArgumentException("Order cannot be null");
         }
         allOrders.add(order);
     }
 
-    public static List<Order> getAllOrders() {
+    public static List<Order> getAllOrdersFromExtent() {
         return Collections.unmodifiableList(allOrders);
     }
 
