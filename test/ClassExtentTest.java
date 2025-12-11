@@ -27,18 +27,18 @@ public class ClassExtentTest {
     @Test
     @DisplayName("Objects automatically added to extent on creation")
     void testObjectsAutoAddedToExtent() {
-        assertEquals(0, Customer.getAllCustomers().size());
+        assertEquals(0, Customer.getAllCustomersFromExtent().size());
 
         Customer c1 = new Customer("Bob", "Johnson", "bob@example.com",
             "+48111111111", LocalDateTime.now());
-        assertEquals(1, Customer.getAllCustomers().size());
+        assertEquals(1, Customer.getAllCustomersFromExtent().size());
 
         Customer c2 = new Customer("Mary", "Williams", "mary@example.com",
             "+48222222222", LocalDateTime.now());
-        assertEquals(2, Customer.getAllCustomers().size());
+        assertEquals(2, Customer.getAllCustomersFromExtent().size());
 
-        assertTrue(Customer.getAllCustomers().contains(c1));
-        assertTrue(Customer.getAllCustomers().contains(c2));
+        assertTrue(Customer.getAllCustomersFromExtent().contains(c1));
+        assertTrue(Customer.getAllCustomersFromExtent().contains(c2));
     }
 
     @Test
@@ -48,7 +48,7 @@ public class ClassExtentTest {
             "+48111111111", LocalDateTime.now());
 
         assertThrows(UnsupportedOperationException.class, () -> {
-            Customer.getAllCustomers().add(c1);
+            Customer.getAllCustomersFromExtent().add(c1);
         }, "Should not be able to modify extent directly");
     }
 
@@ -59,7 +59,7 @@ public class ClassExtentTest {
             "+48111111111", LocalDateTime.now());
 
         assertThrows(UnsupportedOperationException.class, () -> {
-            Customer.getAllCustomers().remove(c1);
+            Customer.getAllCustomersFromExtent().remove(c1);
         }, "Should not be able to remove from extent directly");
     }
 
@@ -70,7 +70,7 @@ public class ClassExtentTest {
             "+48111111111", LocalDateTime.now());
 
         assertThrows(UnsupportedOperationException.class, () -> {
-            Customer.getAllCustomers().clear();
+            Customer.getAllCustomersFromExtent().clear();
         }, "Should not be able to clear extent directly");
     }
 
@@ -82,9 +82,9 @@ public class ClassExtentTest {
         new Ingredient("Pepper", "kg", 80, 10, 2.0);
         new Table(1, 4, "Main Hall");
 
-        assertEquals(1, Customer.getAllCustomers().size());
+        assertEquals(1, Customer.getAllCustomersFromExtent().size());
         assertEquals(2, Ingredient.getAllIngredients().size());
-        assertEquals(1, Table.getAllTables().size());
+        assertEquals(1, Table.getAllTablesFromExtent().size());
     }
 
     @Test
@@ -94,10 +94,10 @@ public class ClassExtentTest {
         new Customer("Test2", "User2", "test2@example.com", "+48222222222", LocalDateTime.now());
         new Customer("Test3", "User3", "test3@example.com", "+48333333333", LocalDateTime.now());
 
-        assertEquals(3, Customer.getAllCustomers().size());
+        assertEquals(3, Customer.getAllCustomersFromExtent().size());
 
         Customer.clearExtent();
-        assertEquals(0, Customer.getAllCustomers().size());
+        assertEquals(0, Customer.getAllCustomersFromExtent().size());
     }
 
     @Test
@@ -110,10 +110,10 @@ public class ClassExtentTest {
         Customer c3 = new Customer("Third", "Customer", "third@example.com",
             "+48333333333", LocalDateTime.now());
 
-        assertEquals(3, Customer.getAllCustomers().size());
-        assertEquals(c1, Customer.getAllCustomers().get(0));
-        assertEquals(c2, Customer.getAllCustomers().get(1));
-        assertEquals(c3, Customer.getAllCustomers().get(2));
+        assertEquals(3, Customer.getAllCustomersFromExtent().size());
+        assertEquals(c1, Customer.getAllCustomersFromExtent().get(0));
+        assertEquals(c2, Customer.getAllCustomersFromExtent().get(1));
+        assertEquals(c3, Customer.getAllCustomersFromExtent().get(2));
     }
 
     @Test
@@ -124,7 +124,7 @@ public class ClassExtentTest {
 
         customer.setPhone("+48999999999");
 
-        Customer fromExtent = Customer.getAllCustomers().get(0);
+        Customer fromExtent = Customer.getAllCustomersFromExtent().get(0);
         assertEquals("+48999999999", fromExtent.getPhone(),
             "Extent should contain reference to actual object");
     }
@@ -150,9 +150,9 @@ public class ClassExtentTest {
     void testEmptyExtentNotNull() {
         Customer.clearExtent();
 
-        assertNotNull(Customer.getAllCustomers());
-        assertEquals(0, Customer.getAllCustomers().size());
-        assertTrue(Customer.getAllCustomers().isEmpty());
+        assertNotNull(Customer.getAllCustomersFromExtent());
+        assertEquals(0, Customer.getAllCustomersFromExtent().size());
+        assertTrue(Customer.getAllCustomersFromExtent().isEmpty());
     }
 
     @Test
@@ -163,7 +163,7 @@ public class ClassExtentTest {
                 "+48" + String.format("%09d", i), LocalDateTime.now());
         }
 
-        assertEquals(100, Customer.getAllCustomers().size());
+        assertEquals(100, Customer.getAllCustomersFromExtent().size());
     }
 
     @Test
@@ -172,7 +172,7 @@ public class ClassExtentTest {
         Customer c1 = new Customer("Valid", "Customer", "valid@example.com",
             "+48111111111", LocalDateTime.now());
 
-        assertEquals(1, Customer.getAllCustomers().size());
+        assertEquals(1, Customer.getAllCustomersFromExtent().size());
 
         // Try to create invalid customer (should throw exception)
         assertThrows(IllegalArgumentException.class, () -> {
@@ -181,7 +181,7 @@ public class ClassExtentTest {
         });
 
         // Extent should still contain only valid customer
-        assertEquals(1, Customer.getAllCustomers().size());
-        assertEquals(c1, Customer.getAllCustomers().get(0));
+        assertEquals(1, Customer.getAllCustomersFromExtent().size());
+        assertEquals(c1, Customer.getAllCustomersFromExtent().get(0));
     }
 }

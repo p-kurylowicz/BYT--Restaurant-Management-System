@@ -37,7 +37,7 @@ public class Customer implements Serializable {
         setEmail(email);
         setPhone(phone);
         setRegistrationDate(registrationDate);
-        staticAddCustomer(this);
+        addCustomerToExtent(this);
     }
 
     public Set<Order> getOrders() {
@@ -48,8 +48,17 @@ public class Customer implements Serializable {
         if (order == null) {
             throw new IllegalArgumentException("Order cannot be null");
         }
-        if (!orders.contains(order)) {
-            orders.add(order);
+
+        // Prevent duplicate assignment
+        if (orders.contains(order)) {
+            return;
+        }
+
+        // Add order to collection
+        orders.add(order);
+
+        // Establish reverse connection
+        if (order.getCustomer() != this) {
             order.setCustomer(this);
         }
     }
@@ -73,11 +82,20 @@ public class Customer implements Serializable {
         if (reservation == null) {
             throw new IllegalArgumentException("Reservation cannot be null");
         }
-        
+
         LocalDateTime key = LocalDateTime.of(reservation.getDate(), reservation.getTime());
 
-        if (!reservations.containsKey(key)) {
-            reservations.put(key, reservation);
+        // Check if a reservation already exists at this date/time
+        if (reservations.containsKey(key)) {
+            throw new IllegalStateException(
+                String.format("Customer already has a reservation at %s. " +
+                    "Cannot create multiple reservations at the same date and time.", key));
+        }
+
+        reservations.put(key, reservation);
+
+        // reverse connection
+        if (reservation.getCustomer() != this) {
             reservation.setCustomer(this);
         }
     }
@@ -87,17 +105,34 @@ public class Customer implements Serializable {
         return reservations.get(dateAndTime);
     }
 
-    public void removeReservation(Reservation reservation) {
-        if (reservation != null) {
-            LocalDateTime key = LocalDateTime.of(reservation.getDate(), reservation.getTime());
-            if (reservations.containsKey(key)) {
-                reservations.remove(key);
-                reservation.setCustomer(null);
-            }
+
+
+    public void deleteReservation(Reservation reservation) {
+        if (reservation == null) {
+            throw new IllegalArgumentException("Reservation cannot be null");
         }
+
+        LocalDateTime key = LocalDateTime.of(reservation.getDate(), reservation.getTime());
+
+        // Verify this customer owns the reservation
+        if (!reservations.containsKey(key) || reservations.get(key) != reservation) {
+            throw new IllegalStateException(
+                "Cannot delete reservation - it does not belong to this customer");
+        }
+
+        // 1. Remove from customer's map
+        reservations.remove(key);
+
+        // 2. Remove from table (if assigned)
+        if (reservation.getAssignedTable() != null) {
+            reservation.removeTable();
+        }
+
+        // 3. Remove from class extent
+        Reservation.removeFromExtent(reservation);
     }
 
-  
+
     void updateReservationKey(Reservation reservation, LocalDateTime oldKey, LocalDateTime newKey) {
         if (reservation == null || oldKey == null || newKey == null) {
             throw new IllegalArgumentException("Reservation and keys cannot be null");
@@ -105,8 +140,26 @@ public class Customer implements Serializable {
 
         // Remove old key and add with new key without triggering setCustomer
         if (reservations.containsKey(oldKey)) {
+            // Check if new key would collide with a different reservation
+            Reservation existing = reservations.get(newKey);
+            if (existing != null && existing != reservation) {
+                throw new IllegalStateException(
+                    String.format("Customer already has a reservation at %s", newKey));
+            }
+
             reservations.remove(oldKey);
             reservations.put(newKey, reservation);
+        }
+    }
+
+    // Package-private method used internally during customer transfers.
+
+    void removeReservation(Reservation reservation) {
+        if (reservation != null) {
+            LocalDateTime key = LocalDateTime.of(reservation.getDate(), reservation.getTime());
+            if (reservations.containsKey(key)) {
+                reservations.remove(key);
+            }
         }
     }
 
@@ -161,7 +214,7 @@ public class Customer implements Serializable {
         this.registrationDate = registrationDate;
     }
 
-    private static void staticAddCustomer(Customer customer) {
+    private static void addCustomerToExtent(Customer customer) {
         if (customer == null) {
             throw new IllegalArgumentException("Customer cannot be null");
         }
@@ -173,7 +226,7 @@ public class Customer implements Serializable {
         feedbacks.add(feedback);
     }
 
-    public static List<Customer> getAllCustomers() {
+    public static List<Customer> getAllCustomersFromExtent() {
         return Collections.unmodifiableList(allCustomers);
     }
 

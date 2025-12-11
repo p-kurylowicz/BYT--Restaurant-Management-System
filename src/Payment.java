@@ -17,14 +17,56 @@ public abstract class Payment implements Serializable {
     // Composition
     private Order order;
 
-    
-    protected Payment() {}
-
-    
-    protected Payment(double amountPayed) {
+    protected Payment(double amountPayed, Order order) {
+        if (order == null) {
+            throw new IllegalArgumentException("Order cannot be null - Payment cannot exist without an Order (composition)");
+        }
         setAmountPayed(amountPayed);
         this.status = PaymentStatus.UNPAID;
-        addPayment(this);
+
+        // Add to extent first
+        addPaymentToExtent(this);
+
+        // Establish the composition relationship - must happen during construction
+        this.order = order;
+        order.addPaymentDirect(this);
+    }
+
+    // Composition: Payment -> Order (1 to 1..*)
+    public Order getOrder() {
+        return order;
+    }
+
+    void setOrder(Order order) {
+        if (order == null) {
+            throw new IllegalArgumentException("Order cannot be null - Payment must have an Order (mandatory 1:1..* composition)");
+        }
+
+        // Prevent duplicate assignment
+        if (this.order == order) {
+            return; // Already connected
+        }
+
+        // Prevent sharing - Payment cannot be associated with multiple Orders (composition rule)
+        if (this.order != null && this.order != order) {
+            throw new IllegalStateException("Payment is already associated with a different Order - Payment cannot be shared between Orders (composition)");
+        }
+
+        // Set the order
+        this.order = order;
+
+        // Establish reverse connection if not already set
+        if (!order.getPayments().contains(this)) {
+            order.addPaymentDirect(this);
+        }
+    }
+
+    void delete() {
+        // Clear the order reference (without triggering reverse connection)
+        this.order = null;
+
+        // Remove from extent
+        allPayments.remove(this);
     }
 
     
@@ -39,34 +81,6 @@ public abstract class Payment implements Serializable {
         this.amountPayed = amountPayed;
     }
 
-    // Composition: Payment -> Order (1 to 1..*)
-    public Order getOrder() {
-        return order;
-    }
-
-    public void setOrder(Order order) {
-        if (order == null) {
-            throw new IllegalArgumentException("Order cannot be null - Payment must have an Order (mandatory 1:1..* composition)");
-        }
-
-        // Prevent duplicate assignment
-        if (this.order == order) {
-            return; // Already connected
-        }
-
-        // Prevent changing order once set (composition - cannot remove association)
-        if (this.order != null && this.order != order) {
-            throw new IllegalStateException("Order is already set and cannot be changed - composition association cannot be removed once established");
-        }
-
-        // Set the order
-        this.order = order;
-
-        // Establish reverse connection if not already set
-        if (!order.getPayments().contains(this)) {
-            order.addPayment(this);
-        }
-    }
 
     // Confirm payment
     public void confirmPayment() {
@@ -89,14 +103,16 @@ public abstract class Payment implements Serializable {
     }
 
 
-    private static void addPayment(Payment payment) {
+    private static void addPaymentToExtent(Payment payment) {
         if (payment == null) {
             throw new IllegalArgumentException("Payment cannot be null");
         }
         allPayments.add(payment);
     }
 
-    public static List<Payment> getAllPayments() {
+
+
+    public static List<Payment> getAllPaymentsFromExtent() {
         return Collections.unmodifiableList(allPayments);
     }
 

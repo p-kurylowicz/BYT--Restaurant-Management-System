@@ -80,10 +80,11 @@ public class StaticAttributesTest {
     void testReservationCanBeCancelled() {
         Customer customer = new Customer("Jane", "Smith", "jane@example.com",
             "+48987654321", LocalDateTime.now().minusMonths(6));
+        Table table = new Table(1, 4, "Section A");
 
         // Reservation 7 days in future - can be cancelled
         Reservation futureReservation = new Reservation(
-            LocalDate.now().plusDays(7), LocalTime.of(19, 0), 4, customer);
+            LocalDate.now().plusDays(7), LocalTime.of(19, 0), 4, customer, table);
 
         assertTrue(futureReservation.canBeCancelled());
     }
@@ -93,10 +94,11 @@ public class StaticAttributesTest {
     void testReservationCannotBeCancelled() {
         Customer customer = new Customer("Jane", "Smith", "jane@example.com",
             "+48987654321", LocalDateTime.now().minusMonths(6));
+        Table table = new Table(2, 2, "Section A");
 
         // Reservation 2 hours from now - within 4-hour window
         Reservation soonReservation = new Reservation(
-            LocalDate.now(), LocalTime.now().plusHours(2), 2, customer);
+            LocalDate.now(), LocalTime.now().plusHours(2), 2, customer, table);
 
         assertFalse(soonReservation.canBeCancelled());
     }
@@ -106,9 +108,10 @@ public class StaticAttributesTest {
     void testCancelReservationWithinWindow() {
         Customer customer = new Customer("Jane", "Smith", "jane@example.com",
             "+48987654321", LocalDateTime.now().minusMonths(6));
+        Table table = new Table(3, 2, "Section A");
 
         Reservation reservation = new Reservation(
-            LocalDate.now(), LocalTime.now().plusHours(2), 2, customer);
+            LocalDate.now(), LocalTime.now().plusHours(2), 2, customer, table);
 
         IllegalStateException exception = assertThrows(IllegalStateException.class, () -> {
             reservation.cancelReservation();
@@ -122,9 +125,10 @@ public class StaticAttributesTest {
     void testCancelReservationOutsideWindow() {
         Customer customer = new Customer("Jane", "Smith", "jane@example.com",
             "+48987654321", LocalDateTime.now().minusMonths(6));
+        Table table = new Table(4, 4, "Section A");
 
         Reservation reservation = new Reservation(
-            LocalDate.now().plusDays(7), LocalTime.of(19, 0), 4, customer);
+            LocalDate.now().plusDays(7), LocalTime.of(19, 0), 4, customer, table);
 
         assertTrue(reservation.canBeCancelled());
         reservation.confirmReservation();
@@ -153,11 +157,12 @@ public class StaticAttributesTest {
     void testReservationBeyondBoundary() {
         Customer customer = new Customer("Jane", "Smith", "jane@example.com",
             "+48987654321", LocalDateTime.now().minusMonths(6));
+        Table table = new Table(5, 2, "Section A");
 
         // Reservation 5 hours from now - use LocalDateTime to handle day transitions correctly
         LocalDateTime futureTime = LocalDateTime.now().plusHours(5);
         Reservation boundaryReservation = new Reservation(
-            futureTime.toLocalDate(), futureTime.toLocalTime(), 2, customer);
+            futureTime.toLocalDate(), futureTime.toLocalTime(), 2, customer, table);
 
         assertTrue(boundaryReservation.canBeCancelled(),
             "Reservation at 5 hours should be cancellable (beyond 4-hour window)");

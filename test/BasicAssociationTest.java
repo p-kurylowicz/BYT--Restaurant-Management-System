@@ -14,7 +14,8 @@ public class BasicAssociationTest {
     @DisplayName("Basic Association: Add order to customer (Reverse Connection)")
     void testAddOrderToCustomer() {
         Customer customer = new Customer("John", "Doe", "john@test.com", "123456", LocalDateTime.now());
-        Order order = new DineIn();
+        Customer tempCustomer = new Customer("Temp", "Customer", "temp@test.com", "000000", LocalDateTime.now());
+        Order order = new DineIn(tempCustomer);
 
         customer.addOrder(order);
 
@@ -26,7 +27,8 @@ public class BasicAssociationTest {
     @DisplayName("Basic Association: Set customer for order (Reverse Connection)")
     void testSetCustomerForOrder() {
         Customer customer = new Customer("Jane", "Doe", "jane@test.com", "654321", LocalDateTime.now());
-        Order order = new Takeaway();
+        Customer tempCustomer = new Customer("Temp", "Customer", "temp@test.com", "000000", LocalDateTime.now());
+        Order order = new Takeaway(tempCustomer);
 
         order.setCustomer(customer);
 
@@ -38,8 +40,7 @@ public class BasicAssociationTest {
     @DisplayName("Basic Association: Remove order from customer")
     void testRemoveOrderFromCustomer() {
         Customer customer = new Customer("John", "Doe", "john@test.com", "123456", LocalDateTime.now());
-        Order order = new DineIn();
-        customer.addOrder(order);
+        Order order = new DineIn(customer);
 
         customer.removeOrder(order);
 
@@ -52,9 +53,8 @@ public class BasicAssociationTest {
     void testChangeCustomer() {
         Customer c1 = new Customer("C1", "D1", "c1@test.com", "111", LocalDateTime.now());
         Customer c2 = new Customer("C2", "D2", "c2@test.com", "222", LocalDateTime.now());
-        Order order = new DineIn();
+        Order order = new DineIn(c1);
 
-        c1.addOrder(order);
         assertEquals(c1, order.getCustomer());
 
         order.setCustomer(c2);

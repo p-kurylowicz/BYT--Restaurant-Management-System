@@ -9,13 +9,13 @@ public class Takeaway extends Order {
     private LocalTime collectionTime;
     private boolean wasPickedUp;
 
-    public Takeaway() {
-        super();
+    public Takeaway(Customer customer) {
+        super(customer);
         this.wasPickedUp = false;
     }
 
-    public Takeaway(LocalTime collectionTime) {
-        super();
+    public Takeaway(Customer customer, LocalTime collectionTime) {
+        super(customer);
         setCollectionTime(collectionTime);
         this.wasPickedUp = false;
     }
