@@ -28,6 +28,7 @@ public class OptionalAttributesTest {
     void testOptionalAttributeDefaultEmpty() {
         Customer customer = new Customer("Alice", "Brown", "alice@example.com",
             "+48123123123", LocalDateTime.now().minusYears(1));
+        Table table = new Table(1, 2, "Section A");
 
         Reservation reservation = new Reservation(
             LocalDate.now().plusDays(7), LocalTime.of(18, 30), 2, customer, null);
@@ -41,6 +42,7 @@ public class OptionalAttributesTest {
     void testOptionalAttributeWithValue() {
         Customer customer = new Customer("Alice", "Brown", "alice@example.com",
             "+48123123123", LocalDateTime.now().minusYears(1));
+        Table table = new Table(2, 4, "Section A");
 
         Reservation reservation = new Reservation(
             LocalDate.now().plusDays(7), LocalTime.of(20, 0), 4, customer, null);
@@ -58,6 +60,7 @@ public class OptionalAttributesTest {
     void testOptionalAttributeEmptyStringRejected() {
         Customer customer = new Customer("Alice", "Brown", "alice@example.com",
             "+48123123123", LocalDateTime.now().minusYears(1));
+        Table table = new Table(3, 4, "Section A");
 
         Reservation reservation = new Reservation(
             LocalDate.now().plusDays(7), LocalTime.of(20, 0), 4, customer, null);
@@ -76,6 +79,7 @@ public class OptionalAttributesTest {
     void testOptionalAttributeWhitespaceRejected() {
         Customer customer = new Customer("Alice", "Brown", "alice@example.com",
             "+48123123123", LocalDateTime.now().minusYears(1));
+        Table table = new Table(4, 4, "Section A");
 
         Reservation reservation = new Reservation(
             LocalDate.now().plusDays(7), LocalTime.of(20, 0), 4, customer, null);
@@ -90,6 +94,7 @@ public class OptionalAttributesTest {
     void testOptionalAttributeCleared() {
         Customer customer = new Customer("Alice", "Brown", "alice@example.com",
             "+48123123123", LocalDateTime.now().minusYears(1));
+        Table table = new Table(5, 4, "Section A");
 
         Reservation reservation = new Reservation(
             LocalDate.now().plusDays(7), LocalTime.of(20, 0), 4, customer, null);
@@ -107,6 +112,7 @@ public class OptionalAttributesTest {
     void testOptionalAttributeTrimming() {
         Customer customer = new Customer("Alice", "Brown", "alice@example.com",
             "+48123123123", LocalDateTime.now().minusYears(1));
+        Table table = new Table(6, 4, "Section A");
 
         Reservation reservation = new Reservation(
             LocalDate.now().plusDays(7), LocalTime.of(20, 0), 4, customer, null);
@@ -121,6 +127,7 @@ public class OptionalAttributesTest {
     void testOptionalAttributeMultipleChanges() {
         Customer customer = new Customer("Alice", "Brown", "alice@example.com",
             "+48123123123", LocalDateTime.now().minusYears(1));
+        Table table = new Table(7, 4, "Section A");
 
         Reservation reservation = new Reservation(
             LocalDate.now().plusDays(7), LocalTime.of(20, 0), 4, customer, null);
@@ -152,6 +159,8 @@ public class OptionalAttributesTest {
     void testOptionalAttributeIndependent() {
         Customer customer = new Customer("Alice", "Brown", "alice@example.com",
             "+48123123123", LocalDateTime.now().minusYears(1));
+        Table table1 = new Table(8, 4, "Section A");
+        Table table2 = new Table(9, 2, "Section A");
 
         // Reservation should work fine without special requests
         Reservation reservation1 = new Reservation(
@@ -174,6 +183,7 @@ public class OptionalAttributesTest {
     void testOptionalAttributeLongText() {
         Customer customer = new Customer("Alice", "Brown", "alice@example.com",
             "+48123123123", LocalDateTime.now().minusYears(1));
+        Table table = new Table(10, 4, "Section A");
 
         Reservation reservation = new Reservation(
             LocalDate.now().plusDays(7), LocalTime.of(20, 0), 4, customer, null);
@@ -191,6 +201,7 @@ public class OptionalAttributesTest {
     void testOptionalAttributePersistsThroughStateChanges() {
         Customer customer = new Customer("Alice", "Brown", "alice@example.com",
             "+48123123123", LocalDateTime.now().minusYears(1));
+        Table table = new Table(11, 4, "Section A");
 
         Reservation reservation = new Reservation(
             LocalDate.now().plusDays(7), LocalTime.of(20, 0), 4, customer, null);
@@ -211,6 +222,7 @@ public class OptionalAttributesTest {
     void testOptionalAttributeRejectsNull() {
         Customer customer = new Customer("Alice", "Brown", "alice@example.com",
             "+48123123123", LocalDateTime.now().minusYears(1));
+        Table table = new Table(12, 4, "Section A");
 
         Reservation reservation = new Reservation(
             LocalDate.now().plusDays(7), LocalTime.of(20, 0), 4, customer, null);
@@ -225,6 +237,7 @@ public class OptionalAttributesTest {
     void testOptionalAttributePreventsDuplicates() {
         Customer customer = new Customer("Alice", "Brown", "alice@example.com",
             "+48123123123", LocalDateTime.now().minusYears(1));
+        Table table = new Table(13, 4, "Section A");
 
         Reservation reservation = new Reservation(
             LocalDate.now().plusDays(7), LocalTime.of(20, 0), 4, customer, null);
@@ -241,6 +254,7 @@ public class OptionalAttributesTest {
     void testOptionalAttributeUnmodifiable() {
         Customer customer = new Customer("Alice", "Brown", "alice@example.com",
             "+48123123123", LocalDateTime.now().minusYears(1));
+        Table table = new Table(14, 4, "Section A");
 
         Reservation reservation = new Reservation(
             LocalDate.now().plusDays(7), LocalTime.of(20, 0), 4, customer, null);

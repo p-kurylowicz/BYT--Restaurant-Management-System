@@ -129,9 +129,9 @@ public class Main {
         System.out.println("EXTENT SIZES (in memory):");
         System.out.println("   - Ingredients: " + Ingredient.getAllIngredients().size());
         System.out.println("   - Menu Items: " + MenuItem.getAllMenuItems().size());
-        System.out.println("   - Customers: " + Customer.getAllCustomers().size());
-        System.out.println("   - Employees: " + Employee.getAllEmployees().size());
-        System.out.println("   - Tables: " + Table.getAllTables().size() + "\n");
+        System.out.println("   - Customers: " + Customer.getAllCustomersFromExtent().size());
+        System.out.println("   - Employees: " + Employee.getAllEmployeesFromExtent().size());
+        System.out.println("   - Tables: " + Table.getAllTablesFromExtent().size() + "\n");
 
         // Save all extents to .dat files
         System.out.println("[STEP 2] Saving extents to .dat files...\n");
@@ -184,9 +184,9 @@ public class Main {
         System.out.println("EXTENT SIZES (after loading from .dat files):");
         System.out.println("   - Ingredients: " + Ingredient.getAllIngredients().size());
         System.out.println("   - Menu Items: " + MenuItem.getAllMenuItems().size());
-        System.out.println("   - Customers: " + Customer.getAllCustomers().size());
-        System.out.println("   - Employees: " + Employee.getAllEmployees().size());
-        System.out.println("   - Tables: " + Table.getAllTables().size() + "\n");
+        System.out.println("   - Customers: " + Customer.getAllCustomersFromExtent().size());
+        System.out.println("   - Employees: " + Employee.getAllEmployeesFromExtent().size());
+        System.out.println("   - Tables: " + Table.getAllTablesFromExtent().size() + "\n");
 
         System.out.println(">>> EXTENT PERSISTENCE VERIFIED <<<");
         System.out.println("    Data persisted to .dat files and restored successfully!");
@@ -197,10 +197,10 @@ public class Main {
      */
     private static void demonstrateCoreOperations() {
         // Get existing objects from extents
-        List<Customer> customers = Customer.getAllCustomers();
+        List<Customer> customers = Customer.getAllCustomersFromExtent();
         List<MenuItem> menuItems = MenuItem.getAllMenuItems();
-        List<Table> tables = Table.getAllTables();
-        List<Employee> employees = Employee.getAllEmployees();
+        List<Table> tables = Table.getAllTablesFromExtent();
+        List<Employee> employees = Employee.getAllEmployeesFromExtent();
 
         if (customers.isEmpty() || menuItems.isEmpty() || tables.isEmpty()) {
             System.out.println("[WARNING] No data available. Run extent persistence demonstration first.");
@@ -279,7 +279,6 @@ public class Main {
             null
         );
         reservation.addSpecialRequest("Window seat preferred");
-        // Note: Table association removed - tables managed separately
 
         System.out.println("RESERVATION CREATED:");
         System.out.println("   Customer: " + customer.getName() + " " + customer.getSurname());
@@ -301,8 +300,8 @@ public class Main {
         System.out.println("2.3: DINE-IN ORDER (Simplified)");
         System.out.println("---------------------------------------------------------------\n");
 
-        // Note: Order associations simplified - using basic order tracking
-        DineIn dineInOrder = new DineIn();
+        // Note: Order must have a Customer (constructor requirement)
+        DineIn dineInOrder = new DineIn(customer);
 
         System.out.println("DINE-IN ORDER CREATED:");
         System.out.println("   Type: Dine-In");
@@ -355,7 +354,7 @@ public class Main {
         System.out.println("---------------------------------------------------------------\n");
 
         LocalTime collectionTime = LocalTime.now().plusHours(1);
-        Takeaway takeawayOrder = new Takeaway(collectionTime);
+        Takeaway takeawayOrder = new Takeaway(customer, collectionTime);
 
         MenuItem beverage = menuItems.stream()
             .filter(m -> m instanceof Beverage)
@@ -370,8 +369,9 @@ public class Main {
         System.out.println("   Item: " + beverage.getName() + " x3");
         System.out.println("   Price: " + String.format("%.2f", beverageTotal) + " PLN\n");
 
-        // Create standalone payment (no longer associated with order)
+        // Create payment and associate with order (composition)
         Card cardPayment = new Card(beverageTotal, "4532", "Visa");
+        cardPayment.setOrder(takeawayOrder);  // Establish composition relationship
         cardPayment.processPayment();
 
         System.out.println("PAYMENT PROCESSED:");
@@ -395,9 +395,10 @@ public class Main {
         System.out.println("2.5: PAYMENT OPTIONS");
         System.out.println("---------------------------------------------------------------\n");
 
-        // Create standalone cash payment (no longer associated with order)
+        // Create cash payment and associate with order (composition)
         // Using the pizza price calculated earlier
         Cash cashPayment = new Cash(itemPrice, 200.00);
+        cashPayment.setOrder(dineInOrder);  // Establish composition relationship
         cashPayment.processPayment();
 
         System.out.println("CASH PAYMENT:");
@@ -517,11 +518,11 @@ public class Main {
             System.out.println("   [OK] Saved suppliers.dat");
 
             System.out.println("\nFINAL EXTENT STATISTICS:");
-            System.out.println("   - Orders: " + Order.getAllOrders().size());
-            System.out.println("   - Order Requests: " + OrderRequest.getAllOrderRequests().size());
-            System.out.println("   - Reservations: " + Reservation.getAllReservations().size());
-            System.out.println("   - Payments: " + Payment.getAllPayments().size());
-            System.out.println("   - Suppliers: " + Supplier.getAllSuppliers().size());
+            System.out.println("   - Orders: " + Order.getAllOrdersFromExtent().size());
+            System.out.println("   - Order Requests: " + OrderRequest.getAllOrderRequestsFromExtent().size());
+            System.out.println("   - Reservations: " + Reservation.getAllReservationsFromExtent().size());
+            System.out.println("   - Payments: " + Payment.getAllPaymentsFromExtent().size());
+            System.out.println("   - Suppliers: " + Supplier.getAllSuppliersFromExtent().size());
             System.out.println("\n>>> All changes persisted to .dat files successfully!");
         } catch (Exception e) {
             System.out.println("[ERROR] Error saving extents: " + e.getMessage());

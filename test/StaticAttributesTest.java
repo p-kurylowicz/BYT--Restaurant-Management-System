@@ -80,6 +80,7 @@ public class StaticAttributesTest {
     void testReservationCanBeCancelled() {
         Customer customer = new Customer("Jane", "Smith", "jane@example.com",
             "+48987654321", LocalDateTime.now().minusMonths(6));
+        Table table = new Table(1, 4, "Section A");
 
         // Reservation 7 days in future - can be cancelled
         Reservation futureReservation = new Reservation(
@@ -93,6 +94,7 @@ public class StaticAttributesTest {
     void testReservationCannotBeCancelled() {
         Customer customer = new Customer("Jane", "Smith", "jane@example.com",
             "+48987654321", LocalDateTime.now().minusMonths(6));
+        Table table = new Table(2, 2, "Section A");
 
         // Reservation 2 hours from now - within 4-hour window
         Reservation soonReservation = new Reservation(
@@ -106,6 +108,7 @@ public class StaticAttributesTest {
     void testCancelReservationWithinWindow() {
         Customer customer = new Customer("Jane", "Smith", "jane@example.com",
             "+48987654321", LocalDateTime.now().minusMonths(6));
+        Table table = new Table(3, 2, "Section A");
 
         Reservation reservation = new Reservation(
             LocalDate.now(), LocalTime.now().plusHours(2), 2, customer, null);
@@ -122,6 +125,7 @@ public class StaticAttributesTest {
     void testCancelReservationOutsideWindow() {
         Customer customer = new Customer("Jane", "Smith", "jane@example.com",
             "+48987654321", LocalDateTime.now().minusMonths(6));
+        Table table = new Table(4, 4, "Section A");
 
         Reservation reservation = new Reservation(
             LocalDate.now().plusDays(7), LocalTime.of(19, 0), 4, customer, null);
@@ -153,6 +157,7 @@ public class StaticAttributesTest {
     void testReservationBeyondBoundary() {
         Customer customer = new Customer("Jane", "Smith", "jane@example.com",
             "+48987654321", LocalDateTime.now().minusMonths(6));
+        Table table = new Table(5, 2, "Section A");
 
         // Reservation 5 hours from now - use LocalDateTime to handle day transitions correctly
         LocalDateTime futureTime = LocalDateTime.now().plusHours(5);

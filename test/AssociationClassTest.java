@@ -61,14 +61,14 @@ public class AssociationClassTest {
         // Verify connections exist
         assertTrue(request.getItemQuantities().contains(iq));
         assertTrue(item.getItemQuantities().contains(iq));
-        assertTrue(ItemQuantity.getAllItemQuantities().contains(iq));
+        assertTrue(ItemQuantity.getAllItemQuantitiesFromExtent().contains(iq));
 
         iq.delete();
 
         // All 4 references removed
         assertFalse(request.getItemQuantities().contains(iq));
         assertFalse(item.getItemQuantities().contains(iq));
-        assertFalse(ItemQuantity.getAllItemQuantities().contains(iq));
+        assertFalse(ItemQuantity.getAllItemQuantitiesFromExtent().contains(iq));
         assertNull(iq.getOrderRequest());
         assertNull(iq.getMenuItem());
     }
@@ -188,14 +188,14 @@ public class AssociationClassTest {
         // Verify connections exist
         assertTrue(supplier.getSupplyLogs().contains(log));
         assertTrue(ingredient.getSupplyLogs().contains(log));
-        assertTrue(SupplyLog.getAllSupplyLogs().contains(log));
+        assertTrue(SupplyLog.getAllSupplyLogsFromExtent().contains(log));
 
         log.delete();
 
         // All 4 references removed
         assertFalse(supplier.getSupplyLogs().contains(log));
         assertFalse(ingredient.getSupplyLogs().contains(log));
-        assertFalse(SupplyLog.getAllSupplyLogs().contains(log));
+        assertFalse(SupplyLog.getAllSupplyLogsFromExtent().contains(log));
         assertNull(log.getSupplier());
         assertNull(log.getIngredient());
     }

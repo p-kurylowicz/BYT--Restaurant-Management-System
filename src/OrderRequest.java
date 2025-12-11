@@ -23,9 +23,28 @@ public class OrderRequest implements Serializable {
         this.requestId = UUID.randomUUID().toString();
         this.status = OrderRequestStatus.PENDING;
         this.requestDetails = "";
-        addOrderRequest(this);
+        addOrderRequestToExtent(this);
     }
 
+    public List<ItemQuantity> getItemQuantities() {
+        return Collections.unmodifiableList(itemQuantities);
+    }
+
+    void addItemQuantity(ItemQuantity itemQuantity) {
+        if (itemQuantity == null) {
+            throw new IllegalArgumentException("ItemQuantity cannot be null");
+        }
+        if (itemQuantities.contains(itemQuantity)) {
+            return;
+        }
+        itemQuantities.add(itemQuantity);
+    }
+
+    void removeItemQuantity(ItemQuantity itemQuantity) {
+        if (itemQuantity != null) {
+            itemQuantities.remove(itemQuantity);
+        }
+    }
 
     public String getRequestId() { return requestId; }
     public OrderRequestStatus getStatus() { return status; }
@@ -94,25 +113,7 @@ public class OrderRequest implements Serializable {
         }
     }
 
-    public List<ItemQuantity> getItemQuantities() {
-        return Collections.unmodifiableList(itemQuantities);
-    }
 
-    void addItemQuantity(ItemQuantity itemQuantity) {
-        if (itemQuantity == null) {
-            throw new IllegalArgumentException("ItemQuantity cannot be null");
-        }
-        if (itemQuantities.contains(itemQuantity)) {
-            return;
-        }
-        itemQuantities.add(itemQuantity);
-    }
-
-    void removeItemQuantity(ItemQuantity itemQuantity) {
-        if (itemQuantity != null) {
-            itemQuantities.remove(itemQuantity);
-        }
-    }
 
     public double calculateRequestTotal() {
         return itemQuantities.stream()
@@ -120,15 +121,16 @@ public class OrderRequest implements Serializable {
             .sum();
     }
 
+
     
-    private static void addOrderRequest(OrderRequest orderRequest) {
+    private static void addOrderRequestToExtent(OrderRequest orderRequest) {
         if (orderRequest == null) {
             throw new IllegalArgumentException("OrderRequest cannot be null");
         }
         allOrderRequests.add(orderRequest);
     }
 
-    public static List<OrderRequest> getAllOrderRequests() {
+    public static List<OrderRequest> getAllOrderRequestsFromExtent() {
         return Collections.unmodifiableList(allOrderRequests);
     }
 

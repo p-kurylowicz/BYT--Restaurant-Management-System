@@ -17,6 +17,7 @@ public class QualifiedAssociationTest {
     void testReservationRequiresCustomer() {
         LocalDate date = LocalDate.now().plusDays(1);
         LocalTime time = LocalTime.of(19, 0);
+        Table table = new Table(1, 4, "Section A");
 
         IllegalArgumentException exception = assertThrows(IllegalArgumentException.class, () -> {
             new Reservation(date, time, 4, null, null);
@@ -74,14 +75,20 @@ public class QualifiedAssociationTest {
         Customer customer = new Customer("John", "Doe", "john@test.com", "123456", LocalDateTime.now());
         LocalDate date = LocalDate.now().plusDays(1);
         LocalTime time = LocalTime.of(19, 0);
+        Table table1 = new Table(5, 4, "Section A");
+        Table table2 = new Table(6, 2, "Section A");
 
         Reservation res1 = new Reservation(date, time, 4, customer, null);
         Reservation res2 = new Reservation(date, time, 2, customer, null);
 
         // Customer can only have 0..1 Reservations at any given DateTime
-        // res1 was added first, res2 should not replace it (addReservation checks if key exists)
+        // Attempting to create a second reservation at the same date/time should throw an exception
+        IllegalStateException exception = assertThrows(IllegalStateException.class, () -> {
+            new Reservation(date, time, 2, customer, table2);
+        });
+
+        assertTrue(exception.getMessage().contains("already has a reservation"));
         assertEquals(res1, customer.getReservation(LocalDateTime.of(date, time)));
-        assertNotEquals(res2, customer.getReservation(LocalDateTime.of(date, time)));
     }
 
     @Test
@@ -113,6 +120,7 @@ public class QualifiedAssociationTest {
         LocalDate oldDate = LocalDate.now().plusDays(1);
         LocalDate newDate = LocalDate.now().plusDays(2);
         LocalTime time = LocalTime.of(19, 0);
+        Table table = new Table(8, 4, "Section A");
 
         Reservation reservation = new Reservation(oldDate, time, 4, customer, null);
 
@@ -141,6 +149,7 @@ public class QualifiedAssociationTest {
         LocalDate date = LocalDate.now().plusDays(1);
         LocalTime oldTime = LocalTime.of(18, 0);
         LocalTime newTime = LocalTime.of(20, 0);
+        Table table = new Table(9, 2, "Section A");
 
         Reservation reservation = new Reservation(date, oldTime, 2, customer, null);
 
@@ -170,6 +179,7 @@ public class QualifiedAssociationTest {
         LocalTime oldTime = LocalTime.of(18, 0);
         LocalDate newDate = LocalDate.now().plusDays(3);
         LocalTime newTime = LocalTime.of(21, 0);
+        Table table = new Table(10, 3, "Section A");
 
         Reservation reservation = new Reservation(oldDate, oldTime, 3, customer, null);
 
@@ -189,5 +199,136 @@ public class QualifiedAssociationTest {
 
         // Customer association should still be intact
         assertEquals(customer, reservation.getCustomer());
+    }
+
+    @Test
+    @DisplayName("Qualified Association: Cannot update qualifier to existing reservation time")
+    void testCannotUpdateToExistingQualifier() {
+        Customer customer = new Customer("Alice", "Brown", "alice@test.com", "999888", LocalDateTime.now());
+        LocalDate date = LocalDate.now().plusDays(1);
+        LocalTime time1 = LocalTime.of(18, 0);
+        LocalTime time2 = LocalTime.of(19, 0);
+        Table table1 = new Table(11, 4, "Section A");
+        Table table2 = new Table(12, 2, "Section B");
+
+        // Create two reservations at different times
+        Reservation res1 = new Reservation(date, time1, 4, customer, table1);
+        Reservation res2 = new Reservation(date, time2, 2, customer, table2);
+
+        // Verify both exist
+        assertEquals(res1, customer.getReservation(LocalDateTime.of(date, time1)));
+        assertEquals(res2, customer.getReservation(LocalDateTime.of(date, time2)));
+
+        // Try to change res2's time to res1's time - should throw exception
+        IllegalStateException exception = assertThrows(IllegalStateException.class, () -> {
+            res2.setTime(time1);
+        });
+
+        assertTrue(exception.getMessage().contains("already has a reservation"));
+
+        // Verify res2's time is unchanged
+        assertEquals(time2, res2.getTime());
+        assertEquals(res2, customer.getReservation(LocalDateTime.of(date, time2)));
+        assertEquals(res1, customer.getReservation(LocalDateTime.of(date, time1)));
+    }
+
+    @Test
+    @DisplayName("Qualified Association: Delete reservation completely")
+    void testDeleteReservation() {
+        Customer customer = new Customer("Mike", "Wilson", "mike@test.com", "777888", LocalDateTime.now());
+        LocalDate date = LocalDate.now().plusDays(1);
+        LocalTime time = LocalTime.of(19, 0);
+        Table table = new Table(13, 4, "Section A");
+
+        int initialExtentSize = Reservation.getAllReservationsFromExtent().size();
+
+        Reservation reservation = new Reservation(date, time, 4, customer, table);
+
+        // Verify reservation exists everywhere
+        assertEquals(reservation, customer.getReservation(LocalDateTime.of(date, time)));
+        assertTrue(table.getReservations().contains(reservation));
+        assertEquals(initialExtentSize + 1, Reservation.getAllReservationsFromExtent().size());
+
+        // Delete the reservation
+        customer.deleteReservation(reservation);
+
+        // Verify reservation is removed from everywhere
+        assertNull(customer.getReservation(LocalDateTime.of(date, time)));
+        assertFalse(table.getReservations().contains(reservation));
+        assertEquals(initialExtentSize, Reservation.getAllReservationsFromExtent().size());
+    }
+
+    @Test
+    @DisplayName("Qualified Association: Cannot delete reservation that doesn't belong to customer")
+    void testCannotDeleteOtherCustomerReservation() {
+        Customer customer1 = new Customer("Tom", "Brown", "tom@test.com", "111222", LocalDateTime.now());
+        Customer customer2 = new Customer("Sarah", "Green", "sarah@test.com", "333444", LocalDateTime.now());
+        LocalDate date = LocalDate.now().plusDays(1);
+        LocalTime time = LocalTime.of(19, 0);
+        Table table = new Table(14, 4, "Section A");
+
+        Reservation reservation = new Reservation(date, time, 4, customer1, table);
+
+        // customer2 tries to delete customer1's reservation
+        IllegalStateException exception = assertThrows(IllegalStateException.class, () -> {
+            customer2.deleteReservation(reservation);
+        });
+
+        assertTrue(exception.getMessage().contains("does not belong to this customer"));
+
+        // Verify reservation still exists
+        assertEquals(reservation, customer1.getReservation(LocalDateTime.of(date, time)));
+        assertTrue(table.getReservations().contains(reservation));
+    }
+
+    @Test
+    @DisplayName("Qualified Association: Customer can have multiple reservations at different times")
+    void testMultipleReservationsAtDifferentTimes() {
+        Customer customer = new Customer("Emma", "Davis", "emma@test.com", "555666", LocalDateTime.now());
+        LocalDate date = LocalDate.now().plusDays(1);
+        Table table1 = new Table(15, 4, "Section A");
+        Table table2 = new Table(16, 2, "Section B");
+        Table table3 = new Table(17, 6, "Section C");
+
+        // Create 3 reservations at different times
+        Reservation res1 = new Reservation(date, LocalTime.of(18, 0), 4, customer, table1);
+        Reservation res2 = new Reservation(date, LocalTime.of(19, 0), 2, customer, table2);
+        Reservation res3 = new Reservation(date, LocalTime.of(20, 0), 6, customer, table3);
+
+        // Customer should have all 3 reservations
+        assertEquals(3, customer.getReservations().size());
+        assertEquals(res1, customer.getReservation(LocalDateTime.of(date, LocalTime.of(18, 0))));
+        assertEquals(res2, customer.getReservation(LocalDateTime.of(date, LocalTime.of(19, 0))));
+        assertEquals(res3, customer.getReservation(LocalDateTime.of(date, LocalTime.of(20, 0))));
+    }
+
+    @Test
+    @DisplayName("Qualified Association: Cannot transfer to customer with conflicting reservation")
+    void testCannotTransferToCustomerWithConflict() {
+        Customer customer1 = new Customer("Frank", "Miller", "frank@test.com", "111333", LocalDateTime.now());
+        Customer customer2 = new Customer("Grace", "Lee", "grace@test.com", "222444", LocalDateTime.now());
+        LocalDate date = LocalDate.now().plusDays(1);
+        LocalTime time = LocalTime.of(19, 0);
+        Table table1 = new Table(18, 4, "Section A");
+        Table table2 = new Table(19, 2, "Section B");
+
+        // Both customers have reservations at the same date/time
+        Reservation res1 = new Reservation(date, time, 4, customer1, table1);
+        Reservation res2 = new Reservation(date, time, 2, customer2, table2);
+
+        // Try to transfer res1 to customer2 (who already has res2 at that time)
+        IllegalStateException exception = assertThrows(IllegalStateException.class, () -> {
+            res1.setCustomer(customer2);
+        });
+
+        assertTrue(exception.getMessage().contains("already has a reservation"));
+
+        // Verify res1 is still with customer1 (no orphaned reservation)
+        assertEquals(customer1, res1.getCustomer());
+        assertEquals(res1, customer1.getReservation(LocalDateTime.of(date, time)));
+
+        // Verify res2 is still with customer2 (unchanged)
+        assertEquals(customer2, res2.getCustomer());
+        assertEquals(res2, customer2.getReservation(LocalDateTime.of(date, time)));  // Should still be res2, not res1
     }
 }

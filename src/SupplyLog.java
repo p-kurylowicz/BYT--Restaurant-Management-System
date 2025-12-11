@@ -4,7 +4,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
-// {Bag} Association Class: tracks supply history (allows multiple logs for same Supplier-Ingredient pair)
+// {Bag} Association Class - allows multiple logs
 public class SupplyLog implements Serializable {
     @Serial
     private static final long serialVersionUID = 1L;
@@ -31,16 +31,29 @@ public class SupplyLog implements Serializable {
         setSupplyDate(supplyDate);
         setCostAtSupply(costAtSupply);
         setQuantitySupplied(quantitySupplied);
-        allSupplyLogs.add(this);
+        addSupplyLogToExtent(this);
     }
 
     // {Bag} - allows multiple logs for same pair (no duplicate checking)
     public static SupplyLog create(Supplier supplier, Ingredient ingredient, LocalDate supplyDate,
                                    double costAtSupply, double quantitySupplied) {
         SupplyLog supplyLog = new SupplyLog(supplier, ingredient, supplyDate, costAtSupply, quantitySupplied);
+        // reverse connection
         supplier.addSupplyLog(supplyLog);
         ingredient.addSupplyLog(supplyLog);
         return supplyLog;
+    }
+
+    public void delete() {
+        if (supplier != null) {
+            supplier.removeSupplyLog(this);
+        }
+        if (ingredient != null) {
+            ingredient.removeSupplyLog(this);
+        }
+        allSupplyLogs.remove(this);
+        this.supplier = null;
+        this.ingredient = null;
     }
 
     public Supplier getSupplier() { return supplier; }
@@ -73,19 +86,14 @@ public class SupplyLog implements Serializable {
         this.quantitySupplied = quantitySupplied;
     }
 
-    public void delete() {
-        if (supplier != null) {
-            supplier.removeSupplyLog(this);
+    private static void addSupplyLogToExtent(SupplyLog supplyLog) {
+        if (supplyLog == null) {
+            throw new IllegalArgumentException("Supply log cannot be null");
         }
-        if (ingredient != null) {
-            ingredient.removeSupplyLog(this);
-        }
-        allSupplyLogs.remove(this);
-        this.supplier = null;
-        this.ingredient = null;
+        allSupplyLogs.add(supplyLog);
     }
 
-    public static List<SupplyLog> getAllSupplyLogs() {
+    public static List<SupplyLog> getAllSupplyLogsFromExtent() {
         return Collections.unmodifiableList(allSupplyLogs);
     }
 

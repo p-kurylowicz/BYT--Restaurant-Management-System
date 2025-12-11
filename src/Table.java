@@ -27,7 +27,64 @@ public class Table implements Serializable {
         setCapacity(capacity);
         setSection(section);
         this.status = TableStatus.AVAILABLE;
-        addTable(this);
+        addTableToExtent(this);
+    }
+
+    public void assignReservation(Reservation reservation) {
+        if (reservation == null) {
+            throw new IllegalArgumentException("Reservation cannot be null");
+        }
+
+        if (reservations.contains(reservation)) {
+            throw new IllegalStateException("This reservation is already assigned to this table");
+        }
+
+        if (this.capacity < reservation.getSize()) {
+            throw new IllegalArgumentException(
+                    String.format("Table capacity (%d) is insufficient for party size (%d)",
+                            this.capacity, reservation.getSize()));
+        }
+
+        reservations.add(reservation);
+
+        if (reservation.getAssignedTable() != this) {
+            reservation.assignTable(this);
+        }
+    }
+
+    public void removeReservation(Reservation reservation) {
+        if (reservation == null) {
+            throw new IllegalArgumentException("Reservation cannot be null");
+        }
+
+        // No minimum multiplicity constraint (0..*)
+        if (!reservations.contains(reservation)) {
+            throw new IllegalArgumentException("This reservation is not assigned to this table");
+        }
+
+        reservations.remove(reservation);
+
+        if (reservation.getAssignedTable() == this) {
+            reservation.removeTable();
+        }
+    }
+
+    public void clearReservations() {
+        List<Reservation> reservationsCopy = new ArrayList<>(reservations);
+
+        for (Reservation reservation : reservationsCopy) {
+            removeReservation(reservation);
+        }
+    }
+
+    public boolean hasActiveReservations() {
+        for (Reservation reservation : reservations) {
+            if (reservation.getStatus() == ReservationStatus.CONFIRMED ||
+                    reservation.getStatus() == ReservationStatus.PENDING) {
+                return true;
+            }
+        }
+        return false;
     }
     
     public TableStatus getStatus() { return status; }
@@ -59,63 +116,7 @@ public class Table implements Serializable {
         }
         this.section = section.trim();
     }
-    
-    public void addReservation(Reservation reservation) {
-        if (reservation == null) {
-            throw new IllegalArgumentException("Reservation cannot be null");
-        }
-        
-        if (reservations.contains(reservation)) {
-            throw new IllegalStateException("This reservation is already assigned to this table");
-        }
-        
-        if (this.capacity < reservation.getSize()) {
-            throw new IllegalArgumentException(
-                String.format("Table capacity (%d) is insufficient for party size (%d)", 
-                    this.capacity, reservation.getSize()));
-        }
-        
-        reservations.add(reservation);
-        
-        if (reservation.getAssignedTable() != this) {
-            reservation.assignTable(this);
-        }
-    }
-    
-    public void removeReservation(Reservation reservation) {
-        if (reservation == null) {
-            throw new IllegalArgumentException("Reservation cannot be null");
-        }
-        
-        // No minimum multiplicity constraint (0..*)
-        if (!reservations.contains(reservation)) {
-            throw new IllegalArgumentException("This reservation is not assigned to this table");
-        }
-        
-        reservations.remove(reservation);
-        
-        if (reservation.getAssignedTable() == this) {
-            reservation.removeTable();
-        }
-    }
-    
-    public void clearReservations() {
-        List<Reservation> reservationsCopy = new ArrayList<>(reservations);
-        
-        for (Reservation reservation : reservationsCopy) {
-            removeReservation(reservation);
-        }
-    }
-    
-    public boolean hasActiveReservations() {
-        for (Reservation reservation : reservations) {
-            if (reservation.getStatus() == ReservationStatus.CONFIRMED || 
-                reservation.getStatus() == ReservationStatus.PENDING) {
-                return true;
-            }
-        }
-        return false;
-    }
+
     
     public void changeStatus(TableStatus newStatus) {
         if (newStatus == null) {
@@ -135,14 +136,14 @@ public class Table implements Serializable {
         return this.status == TableStatus.AVAILABLE;
     }
     
-    private static void addTable(Table table) {
+    private static void addTableToExtent(Table table) {
         if (table == null) {
             throw new IllegalArgumentException("Table cannot be null");
         }
         allTables.add(table);
     }
     
-    public static List<Table> getAllTables() {
+    public static List<Table> getAllTablesFromExtent() {
         return Collections.unmodifiableList(allTables);
     }
     

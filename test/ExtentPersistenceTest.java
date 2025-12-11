@@ -43,19 +43,19 @@ public class ExtentPersistenceTest {
         Table t2 = new Table(2, 2, "Terrace");
         Table t3 = new Table(3, 6, "Garden");
 
-        assertEquals(3, Table.getAllTables().size());
+        assertEquals(3, Table.getAllTablesFromExtent().size());
 
         // Save extent
         Table.saveExtent(TEST_TABLES_FILE);
 
         // Clear extent
         Table.clearExtent();
-        assertEquals(0, Table.getAllTables().size());
+        assertEquals(0, Table.getAllTablesFromExtent().size());
 
         // Load extent
         boolean loaded = Table.loadExtent(TEST_TABLES_FILE);
         assertTrue(loaded, "Extent should load successfully");
-        assertEquals(3, Table.getAllTables().size());
+        assertEquals(3, Table.getAllTablesFromExtent().size());
     }
 
     @Test
@@ -72,14 +72,14 @@ public class ExtentPersistenceTest {
         Table.loadExtent(TEST_TABLES_FILE);
 
         // Verify data integrity
-        assertEquals(2, Table.getAllTables().size());
+        assertEquals(2, Table.getAllTablesFromExtent().size());
 
-        Table loadedTable1 = Table.getAllTables().get(0);
+        Table loadedTable1 = Table.getAllTablesFromExtent().get(0);
         assertEquals(1, loadedTable1.getNumber());
         assertEquals(4, loadedTable1.getCapacity());
         assertEquals("Main Hall", loadedTable1.getSection());
 
-        Table loadedTable2 = Table.getAllTables().get(1);
+        Table loadedTable2 = Table.getAllTablesFromExtent().get(1);
         assertEquals(2, loadedTable2.getNumber());
         assertEquals(2, loadedTable2.getCapacity());
         assertEquals("Terrace", loadedTable2.getSection());
@@ -89,11 +89,11 @@ public class ExtentPersistenceTest {
     @DisplayName("Loading nonexistent file returns false and clears extent")
     void testLoadNonexistentFile() {
         new Table(1, 4, "Main Hall");
-        assertEquals(1, Table.getAllTables().size());
+        assertEquals(1, Table.getAllTablesFromExtent().size());
 
         boolean loaded = Table.loadExtent("nonexistent_file_xyz.dat");
         assertFalse(loaded, "Loading nonexistent file should return false");
-        assertEquals(0, Table.getAllTables().size(), "Extent should be cleared on failed load");
+        assertEquals(0, Table.getAllTablesFromExtent().size(), "Extent should be cleared on failed load");
     }
 
     @Test
@@ -113,13 +113,13 @@ public class ExtentPersistenceTest {
         Customer.clearExtent();
         assertTrue(Customer.loadExtent(TEST_CUSTOMERS_FILE));
 
-        assertEquals(2, Customer.getAllCustomers().size());
+        assertEquals(2, Customer.getAllCustomersFromExtent().size());
 
-        Customer loaded1 = Customer.getAllCustomers().get(0);
+        Customer loaded1 = Customer.getAllCustomersFromExtent().get(0);
         assertEquals(originalName1, loaded1.getName());
         assertEquals(originalEmail1, loaded1.getEmail());
 
-        Customer loaded2 = Customer.getAllCustomers().get(1);
+        Customer loaded2 = Customer.getAllCustomersFromExtent().get(1);
         assertEquals(originalName2, loaded2.getName());
         assertEquals(originalEmail2, loaded2.getEmail());
     }
@@ -127,18 +127,18 @@ public class ExtentPersistenceTest {
     @Test
     @DisplayName("Save empty extent")
     void testSaveEmptyExtent() throws Exception {
-        assertEquals(0, Table.getAllTables().size());
+        assertEquals(0, Table.getAllTablesFromExtent().size());
 
         // Save empty extent
         Table.saveExtent(TEST_TABLES_FILE);
 
         // Add some data
         new Table(1, 4, "Main Hall");
-        assertEquals(1, Table.getAllTables().size());
+        assertEquals(1, Table.getAllTablesFromExtent().size());
 
         // Load empty extent
         Table.loadExtent(TEST_TABLES_FILE);
-        assertEquals(0, Table.getAllTables().size());
+        assertEquals(0, Table.getAllTablesFromExtent().size());
     }
 
     @Test
@@ -149,20 +149,20 @@ public class ExtentPersistenceTest {
         Table.saveExtent(TEST_TABLES_FILE);
         Table.clearExtent();
         Table.loadExtent(TEST_TABLES_FILE);
-        assertEquals(1, Table.getAllTables().size());
+        assertEquals(1, Table.getAllTablesFromExtent().size());
 
         // Second cycle - add more data
         Table t2 = new Table(2, 2, "Terrace");
         Table.saveExtent(TEST_TABLES_FILE);
         Table.clearExtent();
         Table.loadExtent(TEST_TABLES_FILE);
-        assertEquals(2, Table.getAllTables().size());
+        assertEquals(2, Table.getAllTablesFromExtent().size());
 
         // Third cycle - verify persistence
         Table.saveExtent(TEST_TABLES_FILE);
         Table.clearExtent();
         Table.loadExtent(TEST_TABLES_FILE);
-        assertEquals(2, Table.getAllTables().size());
+        assertEquals(2, Table.getAllTablesFromExtent().size());
     }
 
     @Test
@@ -184,9 +184,9 @@ public class ExtentPersistenceTest {
         Table.clearExtent();
         Table.loadExtent(TEST_TABLES_FILE);
 
-        assertEquals(2, Table.getAllTables().size());
-        assertEquals(2, Table.getAllTables().get(0).getNumber());
-        assertEquals(3, Table.getAllTables().get(1).getNumber());
+        assertEquals(2, Table.getAllTablesFromExtent().size());
+        assertEquals(2, Table.getAllTablesFromExtent().get(0).getNumber());
+        assertEquals(3, Table.getAllTablesFromExtent().get(1).getNumber());
     }
 
     @Test
@@ -249,7 +249,7 @@ public class ExtentPersistenceTest {
         Customer.clearExtent();
         Customer.loadExtent(TEST_CUSTOMERS_FILE);
 
-        Customer loaded = Customer.getAllCustomers().get(0);
+        Customer loaded = Customer.getAllCustomersFromExtent().get(0);
         assertEquals("Michał", loaded.getName());
         assertEquals("Żółtański", loaded.getSurname());
     }

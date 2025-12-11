@@ -11,13 +11,17 @@ public class Card extends Payment {
     private String cardType;
 
 
-    public Card() {
-        super();
-    }
-
-
-    public Card(double amountPayed, String lastFourDigits, String cardType) {
-        super(amountPayed);
+    /**
+     * Creates a Card payment for the given Order.
+     * Composition: Card cannot exist without an Order.
+     *
+     * @param amountPayed The payment amount
+     * @param order The Order this Card payment belongs to
+     * @param lastFourDigits Last 4 digits of the card
+     * @param cardType Type of card (Visa, MasterCard, etc.)
+     */
+    public Card(double amountPayed, Order order, String lastFourDigits, String cardType) {
+        super(amountPayed, order);
         setLastFourDigits(lastFourDigits);
         setCardType(cardType);
 

@@ -35,6 +35,9 @@ public class Reservation implements Serializable {
         if (customer == null) {
             throw new IllegalArgumentException("Customer cannot be null - Reservation must have a Customer (mandatory 1)");
         }
+        if (table == null) {
+            throw new IllegalArgumentException("Table cannot be null - Reservation must have a Table assigned");
+        }
         setDate(date);
         setTime(time);
         setSize(size);
@@ -45,27 +48,96 @@ public class Reservation implements Serializable {
             assignTable(table);
         }
 
-        // Establish reverse connection in Customer's qualified map
+        // Establish connections
+        // First establish reverse connection in Customer's qualified map
         customer.addReservation(this);
+
+        // Then assign table (this will establish reverse connection with Table)
+        assignTable(table);
     }
 
     public Customer getCustomer() { return customer; }
 
     public void setCustomer(Customer newCustomer) {
-        if (this.customer != newCustomer) {
-            
-            if (this.customer != null) {
-                Customer oldCustomer = this.customer;
-                this.customer = null; 
-                oldCustomer.removeReservation(this);
-            }
-            
-            this.customer = newCustomer;
-            
-            if (newCustomer != null) {
-                newCustomer.addReservation(this);
+        if (newCustomer == null) {
+            throw new IllegalArgumentException("Customer cannot be null - Reservation must have a Customer (mandatory 1)");
+        }
+
+        if (this.customer == newCustomer) {
+            return; // Already set to this customer
+        }
+
+        LocalDateTime key = LocalDateTime.of(this.date, this.time);
+        Reservation existing = newCustomer.getReservation(key);
+        if (existing != null && existing != this) {
+            throw new IllegalStateException(
+                String.format("Cannot transfer reservation - customer already has a reservation at %s", key));
+        }
+
+        Customer oldCustomer = this.customer;
+
+
+        if (oldCustomer != null) {
+            oldCustomer.removeReservation(this);
+        }
+
+        // Set new customer
+        this.customer = newCustomer;
+
+        // Add to new customer's map
+        newCustomer.addReservation(this);
+    }
+
+    public void assignTable(Table table) {
+        if (table == null) {
+            throw new IllegalArgumentException("Table cannot be null");
+        }
+
+        if (table.getCapacity() < this.size) {
+            throw new IllegalArgumentException(
+                    String.format("Table capacity (%d) is insufficient for party size (%d)",
+                            table.getCapacity(), this.size));
+        }
+
+        if (this.assignedTable != null && this.assignedTable != table) {
+            Table oldTable = this.assignedTable;
+            this.assignedTable = null;
+            oldTable.removeReservation(this);
+        }
+
+        this.assignedTable = table;
+
+        // Reverse connection: add this reservation to the table
+        if (!table.getReservations().contains(this)) {
+            table.assignReservation(this);
+        }
+    }
+
+    public void removeTable() {
+        if (this.assignedTable != null) {
+            Table table = this.assignedTable;
+            this.assignedTable = null;
+
+            // Reverse connection: remove this reservation from the table
+            if (table.getReservations().contains(this)) {
+                table.removeReservation(this);
             }
         }
+    }
+
+    public void cancelReservation() {
+        if (!canBeCancelled()) {
+            throw new IllegalStateException(
+                    String.format("Cannot cancel reservation within %d hours of scheduled time",
+                            CANCELLATION_WINDOW_HOURS));
+        }
+
+        // Remove table assignment when cancelling
+        if (this.assignedTable != null) {
+            removeTable();
+        }
+
+        this.status = ReservationStatus.CANCELLED;
     }
 
     public LocalDate getDate() { return date; }
@@ -118,42 +190,6 @@ public class Reservation implements Serializable {
         this.size = size;
     }
 
-    public void assignTable(Table table) {
-        if (table == null) {
-            throw new IllegalArgumentException("Table cannot be null");
-        }
-        
-        if (table.getCapacity() < this.size) {
-            throw new IllegalArgumentException(
-                String.format("Table capacity (%d) is insufficient for party size (%d)", 
-                    table.getCapacity(), this.size));
-        }
-        
-        if (this.assignedTable != null && this.assignedTable != table) {
-            Table oldTable = this.assignedTable;
-            this.assignedTable = null;
-            oldTable.removeReservation(this);
-        }
-        
-        this.assignedTable = table;
-        
-        // Reverse connection: add this reservation to the table
-        if (!table.getReservations().contains(this)) {
-            table.addReservation(this);
-        }
-    }
-
-    public void removeTable() {
-        if (this.assignedTable != null) {
-            Table table = this.assignedTable;
-            this.assignedTable = null;
-            
-            // Reverse connection: remove this reservation from the table
-            if (table.getReservations().contains(this)) {
-                table.removeReservation(this);
-            }
-        }
-    }
 
     public void addSpecialRequest(String request) {
         if (request == null || request.trim().isEmpty()) {
@@ -178,20 +214,7 @@ public class Reservation implements Serializable {
         return minutesUntilReservation >= requiredMinutes;
     }
 
-    public void cancelReservation() {
-        if (!canBeCancelled()) {
-            throw new IllegalStateException(
-                String.format("Cannot cancel reservation within %d hours of scheduled time", 
-                    CANCELLATION_WINDOW_HOURS));
-        }
-        
-        // Remove table assignment when cancelling
-        if (this.assignedTable != null) {
-            removeTable();
-        }
-        
-        this.status = ReservationStatus.CANCELLED;
-    }
+
 
     public void confirmReservation() {
         if (this.status != ReservationStatus.PENDING) {
@@ -207,19 +230,26 @@ public class Reservation implements Serializable {
         this.status = newStatus;
     }
 
-    private static void staticAddReservation(Reservation reservation) {
+    private static void addReservationToExtent(Reservation reservation) {
         if (reservation == null) {
             throw new IllegalArgumentException("Reservation cannot be null");
         }
         allReservations.add(reservation);
     }
 
-    public static List<Reservation> getAllReservations() {
+    public static List<Reservation> getAllReservationsFromExtent() {
         return Collections.unmodifiableList(allReservations);
     }
 
     public static void clearExtent() {
         allReservations.clear();
+    }
+
+
+    static void removeFromExtent(Reservation reservation) {
+        if (reservation != null) {
+            allReservations.remove(reservation);
+        }
     }
 
     public static void saveExtent(String filename) throws IOException {
