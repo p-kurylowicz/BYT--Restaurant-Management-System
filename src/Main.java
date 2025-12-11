@@ -274,7 +274,9 @@ public class Main {
         Reservation reservation = new Reservation(
             reservationTime.toLocalDate(),
             reservationTime.toLocalTime(),
-            4
+            4,
+            customer,
+            null
         );
         reservation.addSpecialRequest("Window seat preferred");
         // Note: Table association removed - tables managed separately

@@ -30,7 +30,7 @@ public class Reservation implements Serializable {
         this.specialRequests = new HashSet<>();
     }
 
-    public Reservation(LocalDate date, LocalTime time, int size, Customer customer) {
+    public Reservation(LocalDate date, LocalTime time, int size, Customer customer, Table table) {
         this.specialRequests = new HashSet<>();
         if (customer == null) {
             throw new IllegalArgumentException("Customer cannot be null - Reservation must have a Customer (mandatory 1)");
@@ -41,7 +41,9 @@ public class Reservation implements Serializable {
         this.customer = customer;
         this.status = ReservationStatus.PENDING;
         staticAddReservation(this);
-        assignTable(assignedTable);
+        if (table != null) {
+            assignTable(table);
+        }
 
         // Establish reverse connection in Customer's qualified map
         customer.addReservation(this);
