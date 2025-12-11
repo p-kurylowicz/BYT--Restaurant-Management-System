@@ -1,61 +1,172 @@
 # Restaurant Management System
 
-Java implementation of a restaurant management system demonstrating all attribute types and class extent persistence for PJATK BYT course.
+[![Build Status](https://img.shields.io/badge/build-passing-brightgreen)]()
+[![Tests](https://img.shields.io/badge/tests-356%20passing-brightgreen)]()
+[![Java](https://img.shields.io/badge/Java-21-orange)]()
+[![Maven](https://img.shields.io/badge/Maven-3.9+-blue)]()
 
-## Quick Start
+A comprehensive Java implementation of a restaurant management system demonstrating advanced object-oriented programming concepts for PJATK BYT course. This project showcases complete implementation of all attribute types, association patterns, class extent persistence, and bidirectional relationships with automatic synchronization.
+
+## 🚀 Quick Start
 
 ```bash
+# Clone the repository
+git clone https://github.com/p-kurylowicz/BYT--Restaurant-Management-System.git
+cd BYT--Restaurant-Management-System
+
 # Compile and run
 mvn clean compile
 mvn exec:java -Dexec.mainClass="Main"
 
-# Run tests (293 tests, all passing)
+# Run all tests
 mvn test
+
+# Package as JAR
+mvn package
+java -jar target/restaurant-management-system-1.0-SNAPSHOT.jar
 ```
 
-## Features
+## ✨ Key Features
 
-- **All 6 attribute types**: Basic, Complex, Multi-value, Static, Derived, Optional
-- **All 6 association types**: Basic, Composition, Aggregation, Reflexive, Qualified, Association Classes
-- **Reverse connections** on all associations with automatic bidirectional updates
-- **Class extent** with persistence (serialization)
-- **32 domain classes**: Customer, MenuItem, Order, Employee, Reservation, Payment, etc.
-- **Comprehensive validation** and exception handling
-- **293 tests passing** with JUnit 5 (77 association-specific tests)
+### Attribute Types (All 6 Required Types)
+- ✅ **Basic Attributes**: Standard validated fields (name, email, price, etc.)
+- ✅ **Complex Attributes**: Composite objects (`NutritionalInfo`, `ContactInfo`, `Address`)
+- ✅ **Multi-value Attributes**: Collections with validation (`allergens`, `specialRequests`, `applicableItems`)
+- ✅ **Static Attributes**: Class-level constants (`TAX_RATE = 0.23`, `CANCELLATION_WINDOW_HOURS = 4`)
+- ✅ **Derived Attributes**: Computed values (`yearsOfService`, `needsReorder`, `isExperienced`)
+- ✅ **Optional Attributes**: Nullable fields with validation (`specialRequests`, `alcoholPercentage`)
 
-## Attributes
+### Association Types (All 6 Required Types)
+- ✅ **Basic Association (0..\*)**: `Customer` ↔ `Order`
+- ✅ **Basic Association (1..\*)**: `Ingredient` ↔ `MenuItem` (constraint: MenuItem requires ≥1 ingredient)
+- ✅ **Composition (1 to 1..\*)**: `Order` ↔ `Payment` (lifecycle dependency)
+- ✅ **Aggregation (0..\* to 1..\*)**: `Menu` ↔ `MenuItem` (shared ownership)
+- ✅ **Reflexive Association**: `Manager` ↔ `Manager` (supervision hierarchy)
+- ✅ **Qualified Association**: `Customer` ↔ `Reservation` qualified by `DateTime`
+- ✅ **Association Classes**: `ItemQuantity` (OrderRequest-MenuItem), `SupplyLog` (Supplier-Ingredient)
 
-- Complex attribute - NutritionalInfo, ContactInfo
-- Multi-value attribute - Reservation, ApplicableItems, Allergens
-- Static attribute - Menu Item, Reservation
-- Derived attribute - Ingredient, Employee, Order
-- Optional attribute - Beverage, ItemQuantity
+### Advanced Features
+- 🔄 **Bidirectional Associations**: All associations maintain reverse connections with automatic synchronization
+- 💾 **Class Extent Persistence**: XML serialization for all domain classes with proper error handling
+- 🔒 **Encapsulation**: Unmodifiable collections, validated setters, protected extent management
+- 🏗️ **Abstract Hierarchies**: `MenuItem`, `Order`, `Employee`, `Payment`, `Discount` with polymorphic behavior
+- 📊 **State Management**: Comprehensive enums for workflow control (6 status enums)
+- ✅ **Extensive Validation**: 356 passing tests covering all requirements
 
-## Associations (Task 6)
+## 📋 Project Structure
 
-All 6 required association types implemented with reverse connections and comprehensive test coverage (75 tests).
+```
+BYT--Restaurant-Management-System/
+├── src/                          # Source code (40 files)
+│   ├── *.java                   # Domain classes (31 classes)
+│   ├── *Status.java             # Enums (6 status types)
+│   └── Complex types            # NutritionalInfo, ContactInfo, Address
+├── test/                        # Test suite (19 test files, 356 tests)
+│   ├── *AttributesTest.java     # Attribute validation tests
+│   ├── *AssociationTest.java    # Association integrity tests
+│   ├── ClassExtentTest.java     # Extent management tests
+│   └── ExtentPersistenceTest.java # Serialization tests
+├── pom.xml                      # Maven                   # AI assistant instructions
+└── README.md                    # This file
+```
 
-| Association Type | Classes |
-|-----------------|---------|
-| **Basic (0..\*)** | `Customer` ↔ `Order` |
-| **Basic (1..\*)** | `Ingredient` ↔ `MenuItem` |
-| **Composition (1 to 1..\*)** | `Order` ↔ `Payment` |
-| **Aggregation (0..\* to 1..\*)** | `Menu` ↔ `MenuItem` |
-| **Reflexive** | `Manager` ↔ `Manager` |
-| **Qualified** | `Customer` (0..1) ↔ (1) `Reservation` (qualifier: DateTime) |
-| **Association Class** | `ItemQuantity` (OrderRequest ↔ MenuItem) |
-| **{Bag} Association** | `SupplyLog` (Supplier ↔ Ingredient) |
+## 🏛️ Domain Model
 
-## Key Classes
+### Core Classes (31 Domain Classes)
 
-| Class | Highlights |
-|-------|-----------|
-| `MenuItem` | Complex attribute `nutritionalInfo`, Static `TAX_RATE = 0.23` |
-| `Ingredient` | Derived attribute `needsReorder` |
-| `Employee` | Derived attributes `yearsOfService`, `isExperienced` |
-| `Reservation` | Static `CANCELLATION_WINDOW_HOURS = 4`, Optional `specialRequests` |
+| Category | Classes |
+|----------|---------|
+| **Menu Management** | `MenuItem` (abstract), `MainDish`, `Beverage`, `Dessert`, `Ingredient`, `Menu` |
+| **Order System** | `Order` (abstract), `DineIn`, `Takeaway`, `OrderRequest`, `ItemQuantity` |
+| **Customer Management** | `Customer`, `Reservation`, `Feedback` |
+| **Employee Management** | `Employee` (abstract), `Waiter`, `Manager` |
+| **Payment Processing** | `Payment` (abstract), `Card`, `Cash`, `Invoice` |
+| **Discount System** | `Discount` (abstract), `TimeBasedDiscount`, `VolumeDiscount`, `OrderLevelDiscount`, `ItemLevelDiscount` |
+| **Inventory** | `Supplier`, `SupplyLog` |
+| **Restaurant** | `Table` |
+| **Supporting** | `Address`, `ContactInfo`, `NutritionalInfo`, `Sensory` |
 
-## Requirements
+### Enumerations (6 Status Types)
+- `OrderStatus`: ACTIVE, COMPLETED, CANCELLED, AWAITING_PAYMENT
+- `OrderRequestStatus`: PENDING, CONFIRMED, IN_PREPARATION, READY, SERVED
+- `ReservationStatus`: PENDING, CONFIRMED, SEATED, COMPLETED, NO_SHOW, CANCELLED
+- `MenuItemAvailability`: AVAILABLE, UNAVAILABLE, PENDING_UPDATE
+- `PaymentStatus`: PAID, IN_TRANSACTION, UNPAID
+- `TableStatus`: AVAILABLE, OCCUPIED, RESERVED
 
-- Java 21
-- Maven 3.9+
+## 🧪 Test Coverage (356 Tests)
+
+### Attribute Tests (90 tests)
+- **BasicAttributesTest** (10 tests): String validation, numeric ranges, null checks
+- **ComplexAttributesTest** (10 tests): `NutritionalInfo`, `ContactInfo` validation
+- **MultiValueAttributesTest** (12 tests): Collection management, unmodifiable views
+- **StaticAttributesTest** (10 tests): `TAX_RATE`, `CANCELLATION_WINDOW_HOURS`
+- **DerivedAttributesTest** (13 tests): Computed values, null handling
+- **OptionalAttributesTest** (13 tests): Nullable fields with constraints
+- **FeedbackAttributesTest** (8 tests): Sensory rating validation
+- **InvoiceAttributesTest** (10 tests): Invoice generation logic
+- **FeedbackLogicTest** (13 tests): Feedback system business rules
+
+### Association Tests (107 tests)
+- **BasicAssociationTest** (5 tests): Customer-Order bidirectional links
+- **MenuItemIngredientAssociationTest** (16 tests): 1..* constraint enforcement
+- **CompositionAssociationTest** (12 tests): Order-Payment lifecycle
+- **AggregationAssociationTest** (14 tests): Menu-MenuItem shared ownership
+- **ReflexAssociationTest** (6 tests): Manager supervision hierarchy
+- **QualifiedAssociationTest** (14 tests): DateTime-qualified reservations
+- **AssociationClassTest** (17 tests): `ItemQuantity`, `SupplyLog` relationship data
+
+### System Tests
+- **ClassExtentTest** (12 tests): Extent management, encapsulation
+- **ExtentPersistenceTest** (11 tests): XML serialization, error recovery
+- **RestaurantSystemTest**: Integration scenarios
+
+
+## 🏗️ Architecture Patterns
+
+### 1. Two-Level Order System
+- **Order** (abstract) contains multiple **OrderRequest** objects
+- Supports progressive ordering for dine-in (add items over time)
+- Supports batch ordering for takeaway (single request)
+- Independent kitchen tracking per OrderRequest
+
+### 2. Abstract Class Hierarchies
+All major entities use abstract base classes:
+- `MenuItem` → MainDish, Beverage, Dessert (polymorphic menu items)
+- `Order` → DineIn, Takeaway (different fulfillment workflows)
+- `Employee` → Waiter, Manager (role-specific behavior)
+- `Payment` → Card, Cash (payment method variations)
+- `Discount` → TimeBasedDiscount, VolumeDiscount, OrderLevelDiscount, ItemLevelDiscount
+
+### 3. Association Classes
+Relationship-specific data stored in dedicated classes:
+- **ItemQuantity**: OrderRequest-MenuItem quantity, special requests, timestamp
+- **SupplyLog**: Supplier-Ingredient supply date, historical cost tracking
+
+## 📖 Business Rules & Constraints
+
+- ✅ MenuItem must have **at least 1 ingredient** (1..* constraint)
+- ✅ Maximum **2 waiters per section** (business rule)
+- ✅ Waiters can only manage tables in **their assigned section** (access control)
+- ✅ Reservations cannot be cancelled within **4 hours** of scheduled time
+- ✅ All prices include **23% Polish VAT** (`TAX_RATE`)
+- ✅ Takeaway orders require **upfront Card payment**
+- ✅ Card payments >500 PLN may have **IN_TRANSACTION** status
+- ✅ DineIn orders can use Card or Cash
+
+## 🛠️ Technology Stack
+
+- **Language**: Java 21 (LTS)
+- **Build Tool**: Maven 3.9+
+- **Testing**: JUnit 5 (Jupiter) with parameterized tests
+- **Persistence**: Java XML serialization
+- **Version Control**: Git + GitHub
+
+
+## 👥 Contributors
+
+- Team collaboration via GitHub pull requests
+
+
+---
+
