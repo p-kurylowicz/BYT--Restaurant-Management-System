@@ -10,6 +10,10 @@ public class BasicAssociationTest {
         Order.clearExtent();
     }
 
+    // ============================================
+    // ADDITION TESTS (Establishing Connections)
+    // ============================================
+
     @Test
     @DisplayName("Basic Association: Add order to customer (Reverse Connection)")
     void testAddOrderToCustomer() {
@@ -37,18 +41,6 @@ public class BasicAssociationTest {
     }
 
     @Test
-    @DisplayName("Basic Association: Remove order from customer")
-    void testRemoveOrderFromCustomer() {
-        Customer customer = new Customer("John", "Doe", "john@test.com", "123456", LocalDateTime.now());
-        Order order = new DineIn(customer);
-
-        customer.removeOrder(order);
-
-        assertFalse(customer.getOrders().contains(order));
-        assertNull(order.getCustomer());
-    }
-
-    @Test
     @DisplayName("Basic Association: Change customer for an order")
     void testChangeCustomer() {
         Customer c1 = new Customer("C1", "D1", "c1@test.com", "111", LocalDateTime.now());
@@ -64,11 +56,31 @@ public class BasicAssociationTest {
         assertTrue(c2.getOrders().contains(order));
     }
 
+    // ============================================
+    // REMOVAL TESTS
+    // ============================================
+
+    @Test
+    @DisplayName("Basic Association: Remove order from customer")
+    void testRemoveOrderFromCustomer() {
+        Customer customer = new Customer("John", "Doe", "john@test.com", "123456", LocalDateTime.now());
+        Order order = new DineIn(customer);
+
+        customer.removeOrder(order);
+
+        assertFalse(customer.getOrders().contains(order));
+        assertNull(order.getCustomer());
+    }
+
+    // ============================================
+    // EXCEPTION/ERROR HANDLING TESTS
+    // ============================================
+
     @Test
     @DisplayName("Basic Association: Error Handling (Null)")
     void testNullErrorHandling() {
         Customer customer = new Customer("John", "Doe", "john@test.com", "123456", LocalDateTime.now());
-        
+
         assertThrows(IllegalArgumentException.class, () -> customer.addOrder(null));
         assertThrows(IllegalArgumentException.class, () -> customer.removeOrder(null));
     }

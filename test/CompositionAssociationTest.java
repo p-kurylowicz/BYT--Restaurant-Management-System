@@ -10,6 +10,10 @@ public class CompositionAssociationTest {
         Customer.clearExtent();
     }
 
+    // ============================================
+    // LIFECYCLE TESTS (Composition Constraints)
+    // ============================================
+
     @Test
     @DisplayName("Composition Lifecycle: Payment must be created with Order")
     void testPaymentMustBeCreatedWithOrder() {
@@ -33,16 +37,25 @@ public class CompositionAssociationTest {
     }
 
     @Test
-    @DisplayName("Composition: Payment cannot be null (mandatory)")
-    void testPaymentCannotBeNull() {
-        Customer customer = new Customer("Bob", "Jones", "bob@test.com", "789456", java.time.LocalDateTime.now());
-        Order order = new DineIn(customer);
+    @DisplayName("Composition Lifecycle: Payment cannot be shared between Orders")
+    void testPaymentCannotBeSharedBetweenOrders() {
+        Customer customer1 = new Customer("Frank", "Wilson", "frank@test.com", "555111", java.time.LocalDateTime.now());
+        Customer customer2 = new Customer("Grace", "Moore", "grace@test.com", "555222", java.time.LocalDateTime.now());
+        Order order1 = new DineIn(customer1);
+        Order order2 = new Takeaway(customer2);
+        Payment payment = new Cash(100.0, order1, 100.0);
 
-        IllegalArgumentException exception = assertThrows(IllegalArgumentException.class, () -> {
-            order.addPayment(null);
+        // Payment already belongs to order1, trying to associate with order2 should fail
+        IllegalStateException exception = assertThrows(IllegalStateException.class, () -> {
+            payment.setOrder(order2);
         });
-        assertTrue(exception.getMessage().contains("Payment cannot be null"));
+        assertTrue(exception.getMessage().contains("already associated with a different Order"));
+        assertTrue(exception.getMessage().contains("cannot be shared"));
     }
+
+    // ============================================
+    // MULTIPLICITY TESTS (1..* Constraints)
+    // ============================================
 
     @Test
     @DisplayName("Composition (1..*): Can create multiple payments for order")
@@ -74,6 +87,35 @@ public class CompositionAssociationTest {
     }
 
     @Test
+    @DisplayName("Composition (1..*): Multiple payments per order")
+    void testOneToManyRelationship() {
+        Customer customer = new Customer("Kelly", "Jackson", "kelly@test.com", "555666", java.time.LocalDateTime.now());
+        Order order = new DineIn(customer);
+        Payment payment1 = new Cash(100.0, order, 100.0);
+        Payment payment2 = new Card(50.0, order, "1234", "Visa");
+
+        // One order has multiple payments
+        assertEquals(2, order.getPayments().size());
+
+        // Each payment belongs to exactly one order
+        assertEquals(order, payment1.getOrder());
+        assertEquals(order, payment2.getOrder());
+
+        // Verify in extent
+        assertEquals(1, Order.getAllOrdersFromExtent().stream()
+            .filter(o -> o.getPayments().contains(payment1))
+            .count());
+
+        assertEquals(1, Order.getAllOrdersFromExtent().stream()
+            .filter(o -> o.getPayments().contains(payment2))
+            .count());
+    }
+
+    // ============================================
+    // CASCADING DELETION TESTS
+    // ============================================
+
+    @Test
     @DisplayName("Composition Lifecycle: Removing payment deletes it from extent")
     void testRemovePaymentDeletesFromExtent() {
         Customer customer = new Customer("Eve", "Miller", "eve@test.com", "987123", java.time.LocalDateTime.now());
@@ -94,23 +136,6 @@ public class CompositionAssociationTest {
         // Verify payment deleted from extent (composition cascade)
         assertEquals(1, Payment.getAllPaymentsFromExtent().size());
         assertFalse(Payment.getAllPaymentsFromExtent().contains(payment1));
-    }
-
-    @Test
-    @DisplayName("Composition Lifecycle: Payment cannot be shared between Orders")
-    void testPaymentCannotBeSharedBetweenOrders() {
-        Customer customer1 = new Customer("Frank", "Wilson", "frank@test.com", "555111", java.time.LocalDateTime.now());
-        Customer customer2 = new Customer("Grace", "Moore", "grace@test.com", "555222", java.time.LocalDateTime.now());
-        Order order1 = new DineIn(customer1);
-        Order order2 = new Takeaway(customer2);
-        Payment payment = new Cash(100.0, order1, 100.0);
-
-        // Payment already belongs to order1, trying to associate with order2 should fail
-        IllegalStateException exception = assertThrows(IllegalStateException.class, () -> {
-            payment.setOrder(order2);
-        });
-        assertTrue(exception.getMessage().contains("already associated with a different Order"));
-        assertTrue(exception.getMessage().contains("cannot be shared"));
     }
 
     @Test
@@ -159,29 +184,20 @@ public class CompositionAssociationTest {
         assertFalse(customer.getOrders().contains(order));
     }
 
+    // ============================================
+    // EXCEPTION/ERROR HANDLING TESTS
+    // ============================================
+
     @Test
-    @DisplayName("Composition (1..*): Multiple payments per order")
-    void testOneToManyRelationship() {
-        Customer customer = new Customer("Kelly", "Jackson", "kelly@test.com", "555666", java.time.LocalDateTime.now());
+    @DisplayName("Composition: Payment cannot be null (mandatory)")
+    void testPaymentCannotBeNull() {
+        Customer customer = new Customer("Bob", "Jones", "bob@test.com", "789456", java.time.LocalDateTime.now());
         Order order = new DineIn(customer);
-        Payment payment1 = new Cash(100.0, order, 100.0);
-        Payment payment2 = new Card(50.0, order, "1234", "Visa");
 
-        // One order has multiple payments
-        assertEquals(2, order.getPayments().size());
-
-        // Each payment belongs to exactly one order
-        assertEquals(order, payment1.getOrder());
-        assertEquals(order, payment2.getOrder());
-
-        // Verify in extent
-        assertEquals(1, Order.getAllOrdersFromExtent().stream()
-            .filter(o -> o.getPayments().contains(payment1))
-            .count());
-
-        assertEquals(1, Order.getAllOrdersFromExtent().stream()
-            .filter(o -> o.getPayments().contains(payment2))
-            .count());
+        IllegalArgumentException exception = assertThrows(IllegalArgumentException.class, () -> {
+            order.addPayment(null);
+        });
+        assertTrue(exception.getMessage().contains("Payment cannot be null"));
     }
 
     @Test

@@ -27,6 +27,10 @@ public class ReflexAssociationTest {
         );
     }
 
+    // ============================================
+    // ADDITION TESTS (Establishing Connections)
+    // ============================================
+
     @Test
     void addSubordinate_createsReverseConnection() {
         Manager boss = createManager("Boss");
@@ -52,6 +56,26 @@ public class ReflexAssociationTest {
         assertTrue(boss2.getSubordinates().contains(worker));
     }
 
+    // ============================================
+    // REMOVAL TESTS
+    // ============================================
+
+    @Test
+    void removeSubordinate_clearsSupervisorReference() {
+        Manager boss = createManager("Boss");
+        Manager worker = createManager("Worker");
+
+        boss.addSubordinate(worker);
+        boss.removeSubordinate(worker);
+
+        assertNull(worker.getSupervisor());
+        assertFalse(boss.getSubordinates().contains(worker));
+    }
+
+    // ============================================
+    // EXCEPTION/ERROR HANDLING TESTS
+    // ============================================
+
     @Test
     void cannotSetSelfAsSupervisor() {
         Manager m = createManager("Selfie");
@@ -69,18 +93,6 @@ public class ReflexAssociationTest {
         b.setSupervisor(c);
 
         assertThrows(IllegalStateException.class, () -> c.setSupervisor(a));
-    }
-
-    @Test
-    void removeSubordinate_clearsSupervisorReference() {
-        Manager boss = createManager("Boss");
-        Manager worker = createManager("Worker");
-
-        boss.addSubordinate(worker);
-        boss.removeSubordinate(worker);
-
-        assertNull(worker.getSupervisor());
-        assertFalse(boss.getSubordinates().contains(worker));
     }
 
     @Test

@@ -19,6 +19,8 @@ public class AssociationClassTest {
     // ITEMQUANTITY TESTS (Regular Association Class)
     // ============================================
 
+    // ---------- Creation Tests ----------
+
     @Test
     @DisplayName("ItemQuantity: Create establishes reverse connections")
     void testItemQuantityCreation() {
@@ -50,6 +52,21 @@ public class AssociationClassTest {
     }
 
     @Test
+    @DisplayName("ItemQuantity: Calculate request total")
+    void testItemQuantityCalculateTotal() {
+        OrderRequest request = new OrderRequest();
+        NutritionalInfo nutrition = new NutritionalInfo(100, 10, 10, 10, 5);
+        MenuItem item = new MainDish("Pasta", "Italian pasta", 25.0, "img", "Italy", nutrition, 1);
+
+        ItemQuantity iq = ItemQuantity.create(request, item, 3);
+
+        // 25.0 * 1.23 (with tax) * 3 = 92.25
+        assertEquals(92.25, iq.getRequestTotal(), 0.01);
+    }
+
+    // ---------- Deletion Tests ----------
+
+    @Test
     @DisplayName("ItemQuantity: Delete removes all 4 references")
     void testItemQuantityDelete() {
         OrderRequest request = new OrderRequest();
@@ -72,6 +89,8 @@ public class AssociationClassTest {
         assertNull(iq.getOrderRequest());
         assertNull(iq.getMenuItem());
     }
+
+    // ---------- Validation Tests ----------
 
     @Test
     @DisplayName("ItemQuantity: Null OrderRequest throws exception")
@@ -124,22 +143,11 @@ public class AssociationClassTest {
         });
     }
 
-    @Test
-    @DisplayName("ItemQuantity: Calculate request total")
-    void testItemQuantityCalculateTotal() {
-        OrderRequest request = new OrderRequest();
-        NutritionalInfo nutrition = new NutritionalInfo(100, 10, 10, 10, 5);
-        MenuItem item = new MainDish("Pasta", "Italian pasta", 25.0, "img", "Italy", nutrition, 1);
-
-        ItemQuantity iq = ItemQuantity.create(request, item, 3);
-
-        // 25.0 * 1.23 (with tax) * 3 = 92.25
-        assertEquals(92.25, iq.getRequestTotal(), 0.01);
-    }
-
     // ============================================
     // SUPPLYLOG TESTS ({Bag} Association Class)
     // ============================================
+
+    // ---------- Creation Tests ----------
 
     @Test
     @DisplayName("SupplyLog: Create establishes reverse connections")
@@ -157,6 +165,8 @@ public class AssociationClassTest {
         assertEquals(4.8, log.getCostAtSupply());
         assertEquals(20.0, log.getQuantitySupplied());
     }
+
+    // ---------- Bag Behavior Tests ----------
 
     @Test
     @DisplayName("SupplyLog: {Bag} allows multiple logs for same pair")
@@ -176,6 +186,33 @@ public class AssociationClassTest {
         assertTrue(supplier.getSupplyLogs().contains(log2));
         assertTrue(supplier.getSupplyLogs().contains(log3));
     }
+
+    @Test
+    @DisplayName("SupplyLog: Multiple deletes from same pair")
+    void testSupplyLogMultipleDeletes() {
+        Supplier supplier = new Supplier("Multi Supply", "444", "multi@test.com", "M St", 4.2, "Mike");
+        Ingredient ingredient = new Ingredient("Cucumber", "kg", 25, 10, 3.5);
+
+        SupplyLog log1 = SupplyLog.create(supplier, ingredient, LocalDate.of(2024, 1, 1), 3.5, 5.0);
+        SupplyLog log2 = SupplyLog.create(supplier, ingredient, LocalDate.of(2024, 2, 1), 3.6, 8.0);
+        SupplyLog log3 = SupplyLog.create(supplier, ingredient, LocalDate.of(2024, 3, 1), 3.4, 6.0);
+
+        assertEquals(3, supplier.getSupplyLogs().size());
+
+        log1.delete();
+        assertEquals(2, supplier.getSupplyLogs().size());
+        assertTrue(supplier.getSupplyLogs().contains(log2));
+        assertTrue(supplier.getSupplyLogs().contains(log3));
+
+        log2.delete();
+        assertEquals(1, supplier.getSupplyLogs().size());
+        assertTrue(supplier.getSupplyLogs().contains(log3));
+
+        log3.delete();
+        assertEquals(0, supplier.getSupplyLogs().size());
+    }
+
+    // ---------- Deletion Tests ----------
 
     @Test
     @DisplayName("SupplyLog: Delete removes all 4 references")
@@ -199,6 +236,8 @@ public class AssociationClassTest {
         assertNull(log.getSupplier());
         assertNull(log.getIngredient());
     }
+
+    // ---------- Validation Tests ----------
 
     @Test
     @DisplayName("SupplyLog: Null Supplier throws exception")
@@ -255,30 +294,5 @@ public class AssociationClassTest {
         assertThrows(IllegalArgumentException.class, () -> {
             SupplyLog.create(supplier, ingredient, LocalDate.now(), 12.0, -10.0);
         });
-    }
-
-    @Test
-    @DisplayName("SupplyLog: Multiple deletes from same pair")
-    void testSupplyLogMultipleDeletes() {
-        Supplier supplier = new Supplier("Multi Supply", "444", "multi@test.com", "M St", 4.2, "Mike");
-        Ingredient ingredient = new Ingredient("Cucumber", "kg", 25, 10, 3.5);
-
-        SupplyLog log1 = SupplyLog.create(supplier, ingredient, LocalDate.of(2024, 1, 1), 3.5, 5.0);
-        SupplyLog log2 = SupplyLog.create(supplier, ingredient, LocalDate.of(2024, 2, 1), 3.6, 8.0);
-        SupplyLog log3 = SupplyLog.create(supplier, ingredient, LocalDate.of(2024, 3, 1), 3.4, 6.0);
-
-        assertEquals(3, supplier.getSupplyLogs().size());
-
-        log1.delete();
-        assertEquals(2, supplier.getSupplyLogs().size());
-        assertTrue(supplier.getSupplyLogs().contains(log2));
-        assertTrue(supplier.getSupplyLogs().contains(log3));
-
-        log2.delete();
-        assertEquals(1, supplier.getSupplyLogs().size());
-        assertTrue(supplier.getSupplyLogs().contains(log3));
-
-        log3.delete();
-        assertEquals(0, supplier.getSupplyLogs().size());
     }
 }
