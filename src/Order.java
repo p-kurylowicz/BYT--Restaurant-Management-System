@@ -1,51 +1,121 @@
 import java.io.*;
 import java.time.LocalDate;
 import java.time.LocalTime;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-import java.util.Set;
-import java.util.HashSet;
+import java.util.*;
 
-public abstract class Order implements Serializable {
+public class Order implements Serializable {
     @Serial
     private static final long serialVersionUID = 1L;
 
-
     private static List<Order> allOrders = new ArrayList<>();
-
 
     private OrderStatus status;
     private LocalDate date;
     private LocalTime time;
 
-    private Set<Payment> payments;
+    private final Set<Payment> payments;
     private Customer customer;
     private Discount discount;
 
-    protected Order(Customer customer) {
+    // Dynamic inheritance via composition (role object)
+    private OrderRole role;
+
+    // Factory methods (complete constraint)
+    public static Order createDineIn(Customer customer) {
+        return new Order(customer, new DineIn());
+    }
+
+    public static Order createDineIn(Customer customer, Reservation reservation) {
+        return new Order(customer, new DineIn(reservation));
+    }
+
+    public static Order createTakeaway(Customer customer) {
+        return new Order(customer, new Takeaway());
+    }
+
+    public static Order createTakeaway(Customer customer, LocalTime collectionTime) {
+        return new Order(customer, new Takeaway(collectionTime));
+    }
+
+    private Order(Customer customer, OrderRole role) {
         if (customer == null) {
             throw new IllegalArgumentException("Customer cannot be null - Order must have a Customer");
         }
+        if (role == null) {
+            throw new IllegalArgumentException("OrderRole cannot be null (complete constraint)");
+        }
+
         this.status = OrderStatus.ACTIVE;
         this.date = LocalDate.now();
         this.time = LocalTime.now();
         this.payments = new HashSet<>();
+
+        this.role = role;
+
         addOrderToExtent(this);
 
         this.customer = customer;
         customer.addOrder(this);
     }
 
-
-    public Customer getCustomer() {
-        return customer;
+    public OrderKind getKind() {
+        return role.kind();
     }
 
-    public void setCustomer(Customer newCustomer) {
-        if (this.customer == newCustomer) {
-            return;
+    public DineIn asDineIn() {
+        if (role.kind() != OrderKind.DINE_IN) throw new IllegalStateException("Order is not DINE_IN");
+        return (DineIn) role;
+    }
+
+    public Takeaway asTakeaway() {
+        if (role.kind() != OrderKind.TAKEAWAY) throw new IllegalStateException("Order is not TAKEAWAY");
+        return (Takeaway) role;
+    }
+
+    private void ensureCanChangeKind() {
+        if (this.status == OrderStatus.AWAITING_PAYMENT || this.status == OrderStatus.COMPLETED) {
+            throw new IllegalStateException("Cannot change order kind when awaiting payment or completed");
         }
+    }
+
+    public void changeToDineIn() {
+        ensureCanChangeKind();
+        if (getKind() == OrderKind.DINE_IN) asDineIn().releaseTables();
+        this.role = new DineIn();
+    }
+
+    public void changeToDineIn(Reservation reservation) {
+        ensureCanChangeKind();
+        if (getKind() == OrderKind.DINE_IN) asDineIn().releaseTables();
+        this.role = new DineIn(reservation);
+    }
+
+    public void changeToTakeaway() {
+        ensureCanChangeKind();
+        if (getKind() == OrderKind.DINE_IN) asDineIn().releaseTables();
+        this.role = new Takeaway();
+    }
+
+    public void changeToTakeaway(LocalTime collectionTime) {
+        ensureCanChangeKind();
+        if (getKind() == OrderKind.DINE_IN) asDineIn().releaseTables();
+        this.role = new Takeaway(collectionTime);
+    }
+
+    public void markAsPickedUp() {
+        if (getKind() != OrderKind.TAKEAWAY) {
+            throw new IllegalStateException("Only takeaway orders can be marked as picked up");
+        }
+        if (getStatus() != OrderStatus.COMPLETED) {
+            throw new IllegalStateException("Order must be completed before marking as picked up");
+        }
+        asTakeaway().markAsPickedUp();
+    }
+
+    public Customer getCustomer() { return customer; }
+
+    public void setCustomer(Customer newCustomer) {
+        if (this.customer == newCustomer) return;
 
         if (this.customer != null) {
             Customer oldCustomer = this.customer;
@@ -69,6 +139,10 @@ public abstract class Order implements Serializable {
     }
 
     public void delete() {
+        if (getKind() == OrderKind.DINE_IN) {
+            asDineIn().releaseTables();
+        }
+
         List<Payment> paymentsCopy = new ArrayList<>(payments);
         for (Payment payment : paymentsCopy) {
             payment.delete();
@@ -92,10 +166,7 @@ public abstract class Order implements Serializable {
         if (payment == null) {
             throw new IllegalArgumentException("Payment cannot be null - Order must have at least one Payment (1..*)");
         }
-
-        if (payments.contains(payment)) {
-            return;
-        }
+        if (payments.contains(payment)) return;
 
         payments.add(payment);
 
@@ -104,11 +175,8 @@ public abstract class Order implements Serializable {
         }
     }
 
-
     public void removePayment(Payment payment) {
-        if (payment == null) {
-            throw new IllegalArgumentException("Payment cannot be null");
-        }
+        if (payment == null) throw new IllegalArgumentException("Payment cannot be null");
 
         if (!payments.contains(payment)) {
             throw new IllegalArgumentException("This payment is not part of this order");
@@ -130,25 +198,12 @@ public abstract class Order implements Serializable {
     public LocalDate getDate() { return date; }
     public LocalTime getTime() { return time; }
 
-    public Discount getDiscount() {
-        return discount;
-    }
+    public Discount getDiscount() { return discount; }
+    public void setDiscount(Discount discount) { this.discount = discount; }
+    public void removeDiscount() { this.discount = null; }
+    public boolean hasDiscount() { return discount != null; }
 
-    public void setDiscount(Discount discount) {
-        this.discount = discount;
-    }
-
-    public void removeDiscount() {
-        this.discount = null;
-    }
-
-    public boolean hasDiscount() {
-        return discount != null;
-    }
-
-    public double getSubtotal() {
-        return 0.0;
-    }
+    public double getSubtotal() { return 0.0; }
 
     public double getTotalAmount() {
         double subtotal = getSubtotal();
@@ -162,16 +217,12 @@ public abstract class Order implements Serializable {
     }
 
     public void setDate(LocalDate date) {
-        if (date == null) {
-            throw new IllegalArgumentException("Date cannot be null");
-        }
+        if (date == null) throw new IllegalArgumentException("Date cannot be null");
         this.date = date;
     }
 
     public void setTime(LocalTime time) {
-        if (time == null) {
-            throw new IllegalArgumentException("Time cannot be null");
-        }
+        if (time == null) throw new IllegalArgumentException("Time cannot be null");
         this.time = time;
     }
 
@@ -187,6 +238,10 @@ public abstract class Order implements Serializable {
             throw new IllegalStateException("Only orders awaiting payment can be completed");
         }
         this.status = OrderStatus.COMPLETED;
+
+        if (getKind() == OrderKind.DINE_IN) {
+            asDineIn().releaseTables();
+        }
     }
 
     public void cancelOrder() {
@@ -194,12 +249,14 @@ public abstract class Order implements Serializable {
             throw new IllegalStateException("Cannot cancel order that is awaiting payment or completed");
         }
         this.status = OrderStatus.CANCELLED;
+
+        if (getKind() == OrderKind.DINE_IN) {
+            asDineIn().releaseTables();
+        }
     }
 
     private static void addOrderToExtent(Order order) {
-        if (order == null) {
-            throw new IllegalArgumentException("Order cannot be null");
-        }
+        if (order == null) throw new IllegalArgumentException("Order cannot be null");
         allOrders.add(order);
     }
 
@@ -232,7 +289,7 @@ public abstract class Order implements Serializable {
 
     @Override
     public String toString() {
-        return String.format("Order[status=%s, date=%s, time=%s]",
-            status, date, time);
+        return String.format("Order[kind=%s, status=%s, date=%s, time=%s, role=%s]",
+                getKind(), status, date, time, role);
     }
 }
