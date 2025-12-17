@@ -58,6 +58,14 @@ public class Employee implements Serializable {
     public void becomeManager(String department, int accessLevel) {
         if (this.type == EmployeeType.MANAGER) return;
 
+        // TODO: CRITICAL BUG FIX NEEDED - When waiter supervision is implemented,
+        // must clean up waiter's supervisor relationship before promotion:
+        // if (this.waiterSupervisor != null) {
+        //     this.waiterSupervisor.removeSupervisedWaiter(this);
+        //     this.waiterSupervisor = null;
+        // }
+        // See: Documents/Employee_Implementation_Issues.md for full details
+
         this.section = null;
         this.tipTotal = null;
 

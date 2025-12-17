@@ -1,32 +1,46 @@
 import java.io.Serial;
+import java.io.Serializable;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
-public class DineIn implements OrderRole {
+/**
+ * Component class for DineIn orders.
+ * Cannot exist without an Order (composition constraint).
+ * Implements IDineIn interface to define contract.
+ */
+public class DineIn implements Serializable, IDineIn {
     @Serial
     private static final long serialVersionUID = 1L;
 
-    private LocalDateTime servingStartTime;
+    // Reverse reference - component cannot exist without parent
+    private final Order order;
 
+    private LocalDateTime servingStartTime;
     private final List<Table> tables;
     private Reservation reservation;
 
-    public DineIn() {
+    // Package-private constructor - only Order can create DineIn
+    DineIn(Order order) {
+        if (order == null) {
+            throw new IllegalArgumentException(
+                "Order cannot be null - DineIn cannot exist without Order");
+        }
+        this.order = order;
         this.tables = new ArrayList<>();
         this.servingStartTime = LocalDateTime.now();
         this.reservation = null;
     }
 
-    public DineIn(Reservation reservation) {
-        this();
+    DineIn(Order order, Reservation reservation) {
+        this(order);
         setReservation(reservation);
     }
 
-    @Override
-    public OrderKind kind() {
-        return OrderKind.DINE_IN;
+    // Getter for parent Order
+    public Order getOrder() {
+        return order;
     }
 
     public LocalDateTime getServingStartTime() { return servingStartTime; }

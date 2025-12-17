@@ -17,32 +17,43 @@ public class Order implements Serializable {
     private Customer customer;
     private Discount discount;
 
-    // Dynamic inheritance via composition (role object)
-    private OrderRole role;
+    // Dynamic inheritance via composition (separate fields)
+    // XOR constraint: Exactly one must be non-null
+    private DineIn dineIn;      // 0..1 - can be null
+    private Takeaway takeaway;  // 0..1 - can be null
 
     // Factory methods (complete constraint)
     public static Order createDineIn(Customer customer) {
-        return new Order(customer, new DineIn());
+        Order order = new Order(customer);
+        order.dineIn = new DineIn(order);
+        order.takeaway = null;
+        return order;
     }
 
     public static Order createDineIn(Customer customer, Reservation reservation) {
-        return new Order(customer, new DineIn(reservation));
+        Order order = new Order(customer);
+        order.dineIn = new DineIn(order, reservation);
+        order.takeaway = null;
+        return order;
     }
 
     public static Order createTakeaway(Customer customer) {
-        return new Order(customer, new Takeaway());
+        Order order = new Order(customer);
+        order.takeaway = new Takeaway(order);
+        order.dineIn = null;
+        return order;
     }
 
     public static Order createTakeaway(Customer customer, LocalTime collectionTime) {
-        return new Order(customer, new Takeaway(collectionTime));
+        Order order = new Order(customer);
+        order.takeaway = new Takeaway(order, collectionTime);
+        order.dineIn = null;
+        return order;
     }
 
-    private Order(Customer customer, OrderRole role) {
+    private Order(Customer customer) {
         if (customer == null) {
             throw new IllegalArgumentException("Customer cannot be null - Order must have a Customer");
-        }
-        if (role == null) {
-            throw new IllegalArgumentException("OrderRole cannot be null (complete constraint)");
         }
 
         this.status = OrderStatus.ACTIVE;
@@ -50,26 +61,40 @@ public class Order implements Serializable {
         this.time = LocalTime.now();
         this.payments = new HashSet<>();
 
-        this.role = role;
-
         addOrderToExtent(this);
 
         this.customer = customer;
         customer.addOrder(this);
     }
 
+    // Type checking (disjoint constraint)
+    public boolean isDineIn() {
+        return dineIn != null;
+    }
+
+    public boolean isTakeaway() {
+        return takeaway != null;
+    }
+
     public OrderKind getKind() {
-        return role.kind();
+        if (isDineIn()) return OrderKind.DINE_IN;
+        if (isTakeaway()) return OrderKind.TAKEAWAY;
+        throw new IllegalStateException("Order must be either DineIn or Takeaway (complete constraint)");
     }
 
-    public DineIn asDineIn() {
-        if (role.kind() != OrderKind.DINE_IN) throw new IllegalStateException("Order is not DINE_IN");
-        return (DineIn) role;
+    // Component access (type-safe)
+    public DineIn getDineIn() {
+        if (!isDineIn()) {
+            throw new IllegalStateException("Order is not DINE_IN");
+        }
+        return dineIn;
     }
 
-    public Takeaway asTakeaway() {
-        if (role.kind() != OrderKind.TAKEAWAY) throw new IllegalStateException("Order is not TAKEAWAY");
-        return (Takeaway) role;
+    public Takeaway getTakeaway() {
+        if (!isTakeaway()) {
+            throw new IllegalStateException("Order is not TAKEAWAY");
+        }
+        return takeaway;
     }
 
     private void ensureCanChangeKind() {
@@ -80,36 +105,58 @@ public class Order implements Serializable {
 
     public void changeToDineIn() {
         ensureCanChangeKind();
-        if (getKind() == OrderKind.DINE_IN) asDineIn().releaseTables();
-        this.role = new DineIn();
+
+        // Delete old component
+        this.takeaway = null;
+
+        // Create new component
+        this.dineIn = new DineIn(this);
     }
 
     public void changeToDineIn(Reservation reservation) {
         ensureCanChangeKind();
-        if (getKind() == OrderKind.DINE_IN) asDineIn().releaseTables();
-        this.role = new DineIn(reservation);
+
+        // Delete old component
+        this.takeaway = null;
+
+        // Create new component
+        this.dineIn = new DineIn(this, reservation);
     }
 
     public void changeToTakeaway() {
         ensureCanChangeKind();
-        if (getKind() == OrderKind.DINE_IN) asDineIn().releaseTables();
-        this.role = new Takeaway();
+
+        // Cleanup old component
+        if (isDineIn()) {
+            dineIn.releaseTables();
+        }
+        this.dineIn = null;
+
+        // Create new component
+        this.takeaway = new Takeaway(this);
     }
 
     public void changeToTakeaway(LocalTime collectionTime) {
         ensureCanChangeKind();
-        if (getKind() == OrderKind.DINE_IN) asDineIn().releaseTables();
-        this.role = new Takeaway(collectionTime);
+
+        // Cleanup old component
+        if (isDineIn()) {
+            dineIn.releaseTables();
+        }
+        this.dineIn = null;
+
+        // Create new component
+        this.takeaway = new Takeaway(this, collectionTime);
     }
 
     public void markAsPickedUp() {
-        if (getKind() != OrderKind.TAKEAWAY) {
+        if (!isTakeaway()) {
             throw new IllegalStateException("Only takeaway orders can be marked as picked up");
         }
         if (getStatus() != OrderStatus.COMPLETED) {
             throw new IllegalStateException("Order must be completed before marking as picked up");
         }
-        asTakeaway().markAsPickedUp();
+        getTakeaway().markAsPickedUp();
     }
 
     public Customer getCustomer() { return customer; }
@@ -139,8 +186,8 @@ public class Order implements Serializable {
     }
 
     public void delete() {
-        if (getKind() == OrderKind.DINE_IN) {
-            asDineIn().releaseTables();
+        if (isDineIn()) {
+            dineIn.releaseTables();
         }
 
         List<Payment> paymentsCopy = new ArrayList<>(payments);
@@ -239,8 +286,8 @@ public class Order implements Serializable {
         }
         this.status = OrderStatus.COMPLETED;
 
-        if (getKind() == OrderKind.DINE_IN) {
-            asDineIn().releaseTables();
+        if (isDineIn()) {
+            dineIn.releaseTables();
         }
     }
 
@@ -250,8 +297,8 @@ public class Order implements Serializable {
         }
         this.status = OrderStatus.CANCELLED;
 
-        if (getKind() == OrderKind.DINE_IN) {
-            asDineIn().releaseTables();
+        if (isDineIn()) {
+            dineIn.releaseTables();
         }
     }
 
@@ -262,6 +309,24 @@ public class Order implements Serializable {
 
     public static List<Order> getAllOrdersFromExtent() {
         return Collections.unmodifiableList(allOrders);
+    }
+
+    /**
+     * View order history for a specific customer.
+     * Returns all orders sorted by date (most recent first).
+     */
+    public static List<Order> viewOrderHistory(Customer customer) {
+        if (customer == null) {
+            throw new IllegalArgumentException("Customer cannot be null");
+        }
+        return allOrders.stream()
+                .filter(o -> o.getCustomer().equals(customer))
+                .sorted((o1, o2) -> {
+                    int dateCompare = o2.getDate().compareTo(o1.getDate());
+                    if (dateCompare != 0) return dateCompare;
+                    return o2.getTime().compareTo(o1.getTime());
+                })
+                .toList();
     }
 
     public static void clearExtent() {
@@ -289,7 +354,17 @@ public class Order implements Serializable {
 
     @Override
     public String toString() {
-        return String.format("Order[kind=%s, status=%s, date=%s, time=%s, role=%s]",
-                getKind(), status, date, time, role);
+        StringBuilder sb = new StringBuilder();
+        sb.append(String.format("Order[kind=%s, status=%s, date=%s, time=%s",
+                getKind(), status, date, time));
+
+        if (isDineIn()) {
+            sb.append(", ").append(dineIn.toString());
+        } else if (isTakeaway()) {
+            sb.append(", ").append(takeaway.toString());
+        }
+
+        sb.append("]");
+        return sb.toString();
     }
 }

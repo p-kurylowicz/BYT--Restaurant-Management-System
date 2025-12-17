@@ -1,25 +1,40 @@
 import java.io.Serial;
+import java.io.Serializable;
 import java.time.LocalTime;
 
-public class Takeaway implements OrderRole {
+/**
+ * Component class for Takeaway orders.
+ * Cannot exist without an Order (composition constraint).
+ * Implements ITakeaway interface to define contract.
+ */
+public class Takeaway implements Serializable, ITakeaway {
     @Serial
     private static final long serialVersionUID = 1L;
+
+    // Reverse reference - component cannot exist without parent
+    private final Order order;
 
     private LocalTime collectionTime;
     private boolean wasPickedUp;
 
-    public Takeaway() {
+    // Package-private constructor - only Order can create Takeaway
+    Takeaway(Order order) {
+        if (order == null) {
+            throw new IllegalArgumentException(
+                "Order cannot be null - Takeaway cannot exist without Order");
+        }
+        this.order = order;
         this.wasPickedUp = false;
     }
 
-    public Takeaway(LocalTime collectionTime) {
+    Takeaway(Order order, LocalTime collectionTime) {
+        this(order);
         setCollectionTime(collectionTime);
-        this.wasPickedUp = false;
     }
 
-    @Override
-    public OrderKind kind() {
-        return OrderKind.TAKEAWAY;
+    // Getter for parent Order
+    public Order getOrder() {
+        return order;
     }
 
     public LocalTime getCollectionTime() { return collectionTime; }
@@ -38,6 +53,19 @@ public class Takeaway implements OrderRole {
 
     public void markAsPickedUp() {
         this.wasPickedUp = true;
+    }
+
+    /**
+     * Confirms the takeaway order.
+     * Handles takeaway-specific confirmation logic.
+     */
+    public void confirmTakeawayOrder() {
+        if (order.getStatus() != OrderStatus.ACTIVE) {
+            throw new IllegalStateException(
+                "Can only confirm active takeaway orders");
+        }
+        // Confirmation logic: verify payment, notify kitchen, send confirmation
+        System.out.println("Takeaway order confirmed for collection at: " + collectionTime);
     }
 
     @Override
