@@ -1,30 +1,45 @@
 import java.io.Serial;
+import java.io.Serializable;
 import java.time.LocalTime;
 
-public class Takeaway extends Order {
+/**
+ * Component class for Takeaway orders.
+ * Cannot exist without an Order (composition constraint).
+ * Implements ITakeaway interface to define contract.
+ */
+public class Takeaway implements Serializable, ITakeaway {
     @Serial
     private static final long serialVersionUID = 1L;
 
+    // Reverse reference - component cannot exist without parent
+    private final Order order;
 
     private LocalTime collectionTime;
     private boolean wasPickedUp;
 
-    public Takeaway(Customer customer) {
-        super(customer);
+    // Package-private constructor - only Order can create Takeaway
+    Takeaway(Order order) {
+        if (order == null) {
+            throw new IllegalArgumentException(
+                "Order cannot be null - Takeaway cannot exist without Order");
+        }
+        this.order = order;
         this.wasPickedUp = false;
     }
 
-    public Takeaway(Customer customer, LocalTime collectionTime) {
-        super(customer);
+    Takeaway(Order order, LocalTime collectionTime) {
+        this(order);
         setCollectionTime(collectionTime);
-        this.wasPickedUp = false;
     }
 
-    
+    // Getter for parent Order
+    public Order getOrder() {
+        return order;
+    }
+
     public LocalTime getCollectionTime() { return collectionTime; }
     public boolean getWasPickedUp() { return wasPickedUp; }
 
-    
     public void setCollectionTime(LocalTime collectionTime) {
         if (collectionTime == null) {
             throw new IllegalArgumentException("Collection time cannot be null");
@@ -36,17 +51,26 @@ public class Takeaway extends Order {
         this.wasPickedUp = wasPickedUp;
     }
 
-    // Mark as picked up
     public void markAsPickedUp() {
-        if (getStatus() != OrderStatus.COMPLETED) {
-            throw new IllegalStateException("Order must be completed before marking as picked up");
-        }
         this.wasPickedUp = true;
+    }
+
+    /**
+     * Confirms the takeaway order.
+     * Handles takeaway-specific confirmation logic.
+     */
+    public void confirmTakeawayOrder() {
+        if (order.getStatus() != OrderStatus.ACTIVE) {
+            throw new IllegalStateException(
+                "Can only confirm active takeaway orders");
+        }
+        // Confirmation logic: verify payment, notify kitchen, send confirmation
+        System.out.println("Takeaway order confirmed for collection at: " + collectionTime);
     }
 
     @Override
     public String toString() {
-        return String.format("Takeaway[collectionTime=%s, wasPickedUp=%s, %s]",
-            collectionTime, wasPickedUp, super.toString());
+        return String.format("Takeaway[collectionTime=%s, wasPickedUp=%s]",
+                collectionTime, wasPickedUp);
     }
 }

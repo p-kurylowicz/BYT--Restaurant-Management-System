@@ -300,11 +300,11 @@ public class Main {
         System.out.println("2.3: DINE-IN ORDER (Simplified)");
         System.out.println("---------------------------------------------------------------\n");
 
-        // Note: Order must have a Customer (constructor requirement)
-        DineIn dineInOrder = new DineIn(customer);
+        // Create Order using factory method (Dynamic Inheritance via Composition)
+        Order dineInOrder = Order.createDineIn(customer);
 
         System.out.println("DINE-IN ORDER CREATED:");
-        System.out.println("   Type: Dine-In");
+        System.out.println("   Type: " + dineInOrder.getKind());
         System.out.println("   Status: " + dineInOrder.getStatus());
         System.out.println("   Date: " + dineInOrder.getDate());
         System.out.println("   Time: " + dineInOrder.getTime() + "\n");
@@ -354,7 +354,8 @@ public class Main {
         System.out.println("---------------------------------------------------------------\n");
 
         LocalTime collectionTime = LocalTime.now().plusHours(1);
-        Takeaway takeawayOrder = new Takeaway(customer, collectionTime);
+        // Create Order using factory method (Dynamic Inheritance via Composition)
+        Order takeawayOrder = Order.createTakeaway(customer, collectionTime);
 
         MenuItem beverage = menuItems.stream()
             .filter(m -> m instanceof Beverage)
@@ -364,7 +365,8 @@ public class Main {
         double beverageTotal = beverage.calculatePriceWithTax() * 3;
 
         System.out.println("TAKEAWAY ORDER CREATED:");
-        System.out.println("   Collection Time: " + collectionTime);
+        System.out.println("   Type: " + takeawayOrder.getKind());
+        System.out.println("   Collection Time: " + takeawayOrder.getTakeaway().getCollectionTime());
         System.out.println("   Status: " + takeawayOrder.getStatus());
         System.out.println("   Item: " + beverage.getName() + " x3");
         System.out.println("   Price: " + String.format("%.2f", beverageTotal) + " PLN\n");
@@ -385,7 +387,7 @@ public class Main {
 
         System.out.println(">>> Order prepared and picked up");
         System.out.println("    Order Status: " + takeawayOrder.getStatus());
-        System.out.println("    Was Picked Up: " + takeawayOrder.getWasPickedUp() + "\n");
+        System.out.println("    Was Picked Up: " + takeawayOrder.getTakeaway().getWasPickedUp() + "\n");
 
         // ================================================================
         // 2.5: PAYMENT OPTIONS
