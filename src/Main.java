@@ -109,9 +109,9 @@ public class Main {
         Customer customer2 = new Customer("Jane", "Smith", "jane.smith@email.com", "987654321", LocalDateTime.now());
 
         // Create employees
-        Waiter waiter1 = new Waiter("Alice", "111222333", "alice@restaurant.com", "123 Main Street",
+        Employee waiter1 = new Employee("Alice", "111222333", "alice@restaurant.com", "123 Main Street",
                                     LocalDate.of(2020, 3, 15), 25.00, "Section A");
-        Manager manager1 = new Manager("Bob", "444555666", "bob@restaurant.com", "456 Oak Avenue",
+        Employee manager1 = new Employee("Bob", "444555666", "bob@restaurant.com", "456 Oak Avenue",
                                        LocalDate.of(2018, 1, 10), 45.00, "Operations", 3);
 
         // Create tables
@@ -466,28 +466,26 @@ public class Main {
         System.out.println("2.7: EMPLOYEE MANAGEMENT");
         System.out.println("---------------------------------------------------------------\n");
 
-        for (Employee emp : employees) {
-            if (emp instanceof Waiter) {
-                Waiter waiter = (Waiter) emp;
+       for (Employee emp : employees) {
+            if (emp.getType() == Employee.EmployeeType.WAITER) {
                 System.out.println("WAITER PROFILE:");
-                System.out.println("   Name: " + waiter.getName());
-                System.out.println("   Email: " + waiter.getEmail());
-                System.out.println("   Section: " + waiter.getSection());
-                System.out.println("   Hire Date: " + waiter.getHireDate());
-                System.out.println("   Hourly Rate: " + String.format("%.2f", waiter.getHourlyRate()) + " PLN");
-                System.out.println("   Years of Service: " + waiter.getYearsOfService() + " years (derived)");
-                System.out.println("   Total Tips: " + String.format("%.2f", waiter.getTipTotal()) + " PLN\n");
-            } else if (emp instanceof Manager) {
-                Manager manager = (Manager) emp;
+                System.out.println("   Name: " + emp.getName());
+                System.out.println("   Email: " + emp.getEmail());
+                System.out.println("   Section: " + emp.getSection());
+                System.out.println("   Hire Date: " + emp.getHireDate());
+                System.out.println("   Hourly Rate: " + String.format("%.2f", emp.getHourlyRate()) + " PLN");
+                System.out.println("   Years of Service: " + emp.getYearsOfService() + " years (derived)");
+                System.out.println("   Total Tips: " + String.format("%.2f", emp.getTipTotal()) + " PLN\n");
+            } else if (emp.getType() == Employee.EmployeeType.MANAGER) {
                 System.out.println("MANAGER PROFILE:");
-                System.out.println("   Name: " + manager.getName());
-                System.out.println("   Email: " + manager.getEmail());
-                System.out.println("   Department: " + manager.getDepartment());
-                System.out.println("   Access Level: " + manager.getAccessLevel());
-                System.out.println("   Hire Date: " + manager.getHireDate());
-                System.out.println("   Hourly Rate: " + String.format("%.2f", manager.getHourlyRate()) + " PLN");
-                System.out.println("   Years of Service: " + manager.getYearsOfService() + " years (derived)");
-                System.out.println("   Is Experienced: " + (manager.getIsExperienced() ? "Yes (>=5 years)" : "No (<5 years)") + "\n");
+                System.out.println("   Name: " + emp.getName());
+                System.out.println("   Email: " + emp.getEmail());
+                System.out.println("   Department: " + emp.getDepartment());
+                System.out.println("   Access Level: " + emp.getAccessLevel());
+                System.out.println("   Hire Date: " + emp.getHireDate());
+                System.out.println("   Hourly Rate: " + String.format("%.2f", emp.getHourlyRate()) + " PLN");
+                System.out.println("   Years of Service: " + emp.getYearsOfService() + " years (derived)");
+                System.out.println("   Is Experienced: " + (emp.getIsExperienced() ? "Yes (>=5 years)" : "No (<5 years)") + "\n");
             }
         }
 
