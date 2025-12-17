@@ -1,30 +1,30 @@
 import java.io.Serial;
 import java.time.LocalTime;
 
-public class Takeaway extends Order {
+public class Takeaway implements OrderRole {
     @Serial
     private static final long serialVersionUID = 1L;
-
 
     private LocalTime collectionTime;
     private boolean wasPickedUp;
 
-    public Takeaway(Customer customer) {
-        super(customer);
+    public Takeaway() {
         this.wasPickedUp = false;
     }
 
-    public Takeaway(Customer customer, LocalTime collectionTime) {
-        super(customer);
+    public Takeaway(LocalTime collectionTime) {
         setCollectionTime(collectionTime);
         this.wasPickedUp = false;
     }
 
-    
+    @Override
+    public OrderKind kind() {
+        return OrderKind.TAKEAWAY;
+    }
+
     public LocalTime getCollectionTime() { return collectionTime; }
     public boolean getWasPickedUp() { return wasPickedUp; }
 
-    
     public void setCollectionTime(LocalTime collectionTime) {
         if (collectionTime == null) {
             throw new IllegalArgumentException("Collection time cannot be null");
@@ -36,17 +36,13 @@ public class Takeaway extends Order {
         this.wasPickedUp = wasPickedUp;
     }
 
-    // Mark as picked up
     public void markAsPickedUp() {
-        if (getStatus() != OrderStatus.COMPLETED) {
-            throw new IllegalStateException("Order must be completed before marking as picked up");
-        }
         this.wasPickedUp = true;
     }
 
     @Override
     public String toString() {
-        return String.format("Takeaway[collectionTime=%s, wasPickedUp=%s, %s]",
-            collectionTime, wasPickedUp, super.toString());
+        return String.format("Takeaway[collectionTime=%s, wasPickedUp=%s]",
+                collectionTime, wasPickedUp);
     }
 }
