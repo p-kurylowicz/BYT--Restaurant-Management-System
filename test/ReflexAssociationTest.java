@@ -1,4 +1,3 @@
-
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
@@ -10,12 +9,11 @@ public class ReflexAssociationTest {
 
     @BeforeEach
     void setup() {
-        // clear static extent before each test
         Employee.clearExtent();
     }
 
-    private Manager createManager(String name) {
-        return new Manager(
+    private Employee createManager(String name) {
+        return new Employee(
                 name,
                 "555",
                 name.toLowerCase() + "@mail.com",
@@ -27,14 +25,10 @@ public class ReflexAssociationTest {
         );
     }
 
-    // ============================================
-    // ADDITION TESTS (Establishing Connections)
-    // ============================================
-
     @Test
     void addSubordinate_createsReverseConnection() {
-        Manager boss = createManager("Boss");
-        Manager worker = createManager("Worker");
+        Employee boss = createManager("Boss");
+        Employee worker = createManager("Worker");
 
         boss.addSubordinate(worker);
 
@@ -44,9 +38,9 @@ public class ReflexAssociationTest {
 
     @Test
     void supervisorChange_updatesBothSides() {
-        Manager boss1 = createManager("Boss1");
-        Manager boss2 = createManager("Boss2");
-        Manager worker = createManager("Worker");
+        Employee boss1 = createManager("Boss1");
+        Employee boss2 = createManager("Boss2");
+        Employee worker = createManager("Worker");
 
         boss1.addSubordinate(worker);
         worker.setSupervisor(boss2);
@@ -56,14 +50,10 @@ public class ReflexAssociationTest {
         assertTrue(boss2.getSubordinates().contains(worker));
     }
 
-    // ============================================
-    // REMOVAL TESTS
-    // ============================================
-
     @Test
     void removeSubordinate_clearsSupervisorReference() {
-        Manager boss = createManager("Boss");
-        Manager worker = createManager("Worker");
+        Employee boss = createManager("Boss");
+        Employee worker = createManager("Worker");
 
         boss.addSubordinate(worker);
         boss.removeSubordinate(worker);
@@ -72,22 +62,18 @@ public class ReflexAssociationTest {
         assertFalse(boss.getSubordinates().contains(worker));
     }
 
-    // ============================================
-    // EXCEPTION/ERROR HANDLING TESTS
-    // ============================================
-
     @Test
     void cannotSetSelfAsSupervisor() {
-        Manager m = createManager("Selfie");
+        Employee m = createManager("Selfie");
 
         assertThrows(IllegalArgumentException.class, () -> m.setSupervisor(m));
     }
 
     @Test
     void cycleInHierarchy_isNotAllowed() {
-        Manager a = createManager("A");
-        Manager b = createManager("B");
-        Manager c = createManager("C");
+        Employee a = createManager("A");
+        Employee b = createManager("B");
+        Employee c = createManager("C");
 
         a.setSupervisor(b);
         b.setSupervisor(c);
@@ -97,8 +83,8 @@ public class ReflexAssociationTest {
 
     @Test
     void removingNotManagedSubordinate_throwsException() {
-        Manager boss = createManager("Boss");
-        Manager worker = createManager("Worker");
+        Employee boss = createManager("Boss");
+        Employee worker = createManager("Worker");
 
         assertThrows(IllegalArgumentException.class, () -> boss.removeSubordinate(worker));
     }
