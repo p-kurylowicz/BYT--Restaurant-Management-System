@@ -19,11 +19,9 @@ public abstract class Order implements Serializable {
     private LocalDate date;
     private LocalTime time;
 
-    // Composition: Order -> Payment (1 to 1..*)
     private Set<Payment> payments;
-
-    // Basic Association: Order -> Customer (0..1 to 0..*)
     private Customer customer;
+    private Discount discount;
 
     protected Order(Customer customer) {
         if (customer == null) {
@@ -35,7 +33,6 @@ public abstract class Order implements Serializable {
         this.payments = new HashSet<>();
         addOrderToExtent(this);
 
-        // Establish bidirectional connection with customer
         this.customer = customer;
         customer.addOrder(this);
     }
@@ -46,22 +43,18 @@ public abstract class Order implements Serializable {
     }
 
     public void setCustomer(Customer newCustomer) {
-        // Prevent redundant assignment
         if (this.customer == newCustomer) {
             return;
         }
 
-        // Remove old connection if exists
         if (this.customer != null) {
             Customer oldCustomer = this.customer;
-            this.customer = null; // Clear before calling removeOrder to prevent recursion
+            this.customer = null;
             oldCustomer.removeOrder(this);
         }
 
-        // Set new customer
         this.customer = newCustomer;
 
-        // Establish reverse connection
         if (newCustomer != null && !newCustomer.getOrders().contains(this)) {
             newCustomer.addOrder(this);
         }
@@ -76,23 +69,18 @@ public abstract class Order implements Serializable {
     }
 
     public void delete() {
-        // Step 1: Cascade delete all Payments (create a copy to avoid concurrent modification)
         List<Payment> paymentsCopy = new ArrayList<>(payments);
         for (Payment payment : paymentsCopy) {
-            // Delete each payment - this removes it from extent and clears associations
             payment.delete();
         }
-        // Clear the payments collection
         payments.clear();
 
-        // Step 2: Remove association with Customer
         if (this.customer != null) {
             Customer oldCustomer = this.customer;
-            this.customer = null; // Clear reference first to prevent recursion
+            this.customer = null;
             oldCustomer.removeOrder(this);
         }
 
-        // Step 3: Remove this Order from the extent
         allOrders.remove(this);
     }
 
@@ -105,14 +93,12 @@ public abstract class Order implements Serializable {
             throw new IllegalArgumentException("Payment cannot be null - Order must have at least one Payment (1..*)");
         }
 
-        // Prevent duplicate assignment
         if (payments.contains(payment)) {
-            return; // Already connected
+            return;
         }
 
         payments.add(payment);
 
-        // Establish reverse connection if not already set
         if (payment.getOrder() != this) {
             payment.setOrder(this);
         }
@@ -124,23 +110,18 @@ public abstract class Order implements Serializable {
             throw new IllegalArgumentException("Payment cannot be null");
         }
 
-        // check if payment exists first
         if (!payments.contains(payment)) {
             throw new IllegalArgumentException("This payment is not part of this order");
         }
 
-        // cannot remove last payment
         if (payments.size() <= 1) {
             throw new IllegalStateException("Cannot remove the last payment. Order must have at least one payment (1..*)");
         }
 
         payments.remove(payment);
-
-        // Composition cascade: when removed from Order ("Whole"), the Payment ("Part") must be deleted
         payment.delete();
     }
 
-    // Package-private method to directly add without constraint check (for reverse connection)
     void addPaymentDirect(Payment payment) {
         payments.add(payment);
     }
@@ -149,11 +130,35 @@ public abstract class Order implements Serializable {
     public LocalDate getDate() { return date; }
     public LocalTime getTime() { return time; }
 
+    public Discount getDiscount() {
+        return discount;
+    }
 
-    // Derived attribute
-    public double getTotalAmount() {
-        // Placeholder
+    public void setDiscount(Discount discount) {
+        this.discount = discount;
+    }
+
+    public void removeDiscount() {
+        this.discount = null;
+    }
+
+    public boolean hasDiscount() {
+        return discount != null;
+    }
+
+    public double getSubtotal() {
         return 0.0;
+    }
+
+    public double getTotalAmount() {
+        double subtotal = getSubtotal();
+        if (discount != null && discount.validateDiscount(this)) {
+            if (discount.isOrderLevel()) {
+                double percentage = discount.getDiscountPercentage();
+                return subtotal * (1 - percentage / 100.0);
+            }
+        }
+        return subtotal;
     }
 
     public void setDate(LocalDate date) {
@@ -170,10 +175,6 @@ public abstract class Order implements Serializable {
         this.time = time;
     }
 
-    // Composition: Order <-> Payment (1 to 1..*)
-
-
-    // Finalize order
     public void finalizeOrder() {
         if (this.status != OrderStatus.ACTIVE) {
             throw new IllegalStateException("Only active orders can be finalized");
@@ -181,9 +182,6 @@ public abstract class Order implements Serializable {
         this.status = OrderStatus.AWAITING_PAYMENT;
     }
 
-
-
-    // Complete order (after payment)
     public void completeOrder() {
         if (this.status != OrderStatus.AWAITING_PAYMENT) {
             throw new IllegalStateException("Only orders awaiting payment can be completed");
@@ -191,15 +189,12 @@ public abstract class Order implements Serializable {
         this.status = OrderStatus.COMPLETED;
     }
 
-    // Cancel order
     public void cancelOrder() {
         if (this.status == OrderStatus.AWAITING_PAYMENT || this.status == OrderStatus.COMPLETED) {
             throw new IllegalStateException("Cannot cancel order that is awaiting payment or completed");
         }
         this.status = OrderStatus.CANCELLED;
     }
-
-
 
     private static void addOrderToExtent(Order order) {
         if (order == null) {
@@ -216,7 +211,6 @@ public abstract class Order implements Serializable {
         allOrders.clear();
     }
 
-    
     public static void saveExtent(String filename) throws IOException {
         String filepath = PersistenceConfig.getDataFilePath(filename);
         try (ObjectOutputStream out = new ObjectOutputStream(new FileOutputStream(filepath))) {
