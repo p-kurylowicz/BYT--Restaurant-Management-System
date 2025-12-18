@@ -19,7 +19,7 @@ public class BasicAssociationTest {
     void testAddOrderToCustomer() {
         Customer customer = new Customer("John", "Doe", "john@test.com", "123456", LocalDateTime.now());
         Customer tempCustomer = new Customer("Temp", "Customer", "temp@test.com", "000000", LocalDateTime.now());
-        Order order = new DineIn(tempCustomer);
+        Order order = Order.createDineIn(tempCustomer);
 
         customer.addOrder(order);
 
@@ -32,7 +32,7 @@ public class BasicAssociationTest {
     void testSetCustomerForOrder() {
         Customer customer = new Customer("Jane", "Doe", "jane@test.com", "654321", LocalDateTime.now());
         Customer tempCustomer = new Customer("Temp", "Customer", "temp@test.com", "000000", LocalDateTime.now());
-        Order order = new Takeaway(tempCustomer);
+        Order order = Order.createTakeaway(tempCustomer);
 
         order.setCustomer(customer);
 
@@ -45,7 +45,7 @@ public class BasicAssociationTest {
     void testChangeCustomer() {
         Customer c1 = new Customer("C1", "D1", "c1@test.com", "111", LocalDateTime.now());
         Customer c2 = new Customer("C2", "D2", "c2@test.com", "222", LocalDateTime.now());
-        Order order = new DineIn(c1);
+        Order order = Order.createDineIn(c1);
 
         assertEquals(c1, order.getCustomer());
 
@@ -64,7 +64,7 @@ public class BasicAssociationTest {
     @DisplayName("Basic Association: Remove order from customer")
     void testRemoveOrderFromCustomer() {
         Customer customer = new Customer("John", "Doe", "john@test.com", "123456", LocalDateTime.now());
-        Order order = new DineIn(customer);
+        Order order = Order.createDineIn(customer);
 
         customer.removeOrder(order);
 

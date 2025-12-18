@@ -17,12 +17,10 @@ public class Order implements Serializable {
     private Customer customer;
     private Discount discount;
 
-    // Dynamic inheritance via composition (separate fields)
-    // XOR constraint: Exactly one must be non-null
     private DineIn dineIn;      // 0..1 - can be null
     private Takeaway takeaway;  // 0..1 - can be null
 
-    // Factory methods (complete constraint)
+   
     public static Order createDineIn(Customer customer) {
         Order order = new Order(customer);
         order.dineIn = new DineIn(order);
@@ -67,7 +65,7 @@ public class Order implements Serializable {
         customer.addOrder(this);
     }
 
-    // Type checking (disjoint constraint)
+   
     public boolean isDineIn() {
         return dineIn != null;
     }
@@ -82,7 +80,7 @@ public class Order implements Serializable {
         throw new IllegalStateException("Order must be either DineIn or Takeaway (complete constraint)");
     }
 
-    // Component access (type-safe)
+    
     public DineIn getDineIn() {
         if (!isDineIn()) {
             throw new IllegalStateException("Order is not DINE_IN");
@@ -106,46 +104,46 @@ public class Order implements Serializable {
     public void changeToDineIn() {
         ensureCanChangeKind();
 
-        // Delete old component
+        // Delete old 
         this.takeaway = null;
 
-        // Create new component
+        // Create new 
         this.dineIn = new DineIn(this);
     }
 
     public void changeToDineIn(Reservation reservation) {
         ensureCanChangeKind();
 
-        // Delete old component
+        // Delete old 
         this.takeaway = null;
 
-        // Create new component
+        // Create new 
         this.dineIn = new DineIn(this, reservation);
     }
 
     public void changeToTakeaway() {
         ensureCanChangeKind();
 
-        // Cleanup old component
+        // Cleanup old
         if (isDineIn()) {
             dineIn.releaseTables();
         }
         this.dineIn = null;
 
-        // Create new component
+        // Create new 
         this.takeaway = new Takeaway(this);
     }
 
     public void changeToTakeaway(LocalTime collectionTime) {
         ensureCanChangeKind();
 
-        // Cleanup old component
+        // Cleanup old
         if (isDineIn()) {
             dineIn.releaseTables();
         }
         this.dineIn = null;
 
-        // Create new component
+        // Create 
         this.takeaway = new Takeaway(this, collectionTime);
     }
 
@@ -311,10 +309,7 @@ public class Order implements Serializable {
         return Collections.unmodifiableList(allOrders);
     }
 
-    /**
-     * View order history for a specific customer.
-     * Returns all orders sorted by date (most recent first).
-     */
+
     public static List<Order> viewOrderHistory(Customer customer) {
         if (customer == null) {
             throw new IllegalArgumentException("Customer cannot be null");

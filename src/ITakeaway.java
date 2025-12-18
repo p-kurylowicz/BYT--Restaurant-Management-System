@@ -1,9 +1,6 @@
 import java.time.LocalTime;
 
-/**
- * Interface defining the contract for Takeaway orders.
- * Similar to IStudent in the guide's Person/Teacher/Student example.
- */
+
 public interface ITakeaway {
     LocalTime getCollectionTime();
     void setCollectionTime(LocalTime collectionTime);

@@ -5,17 +5,8 @@ import java.time.LocalTime;
 import java.util.*;
 
 /**
- * Abstract base class for multi-aspect inheritance using hybrid approach.
- *
- * Aspect 1 (Discount Basis): {complete, overlapping} - COMPOSITION
- *   - TimeBasedDiscount: Can have date/time constraints
- *   - VolumeDiscount: Can have amount/quantity constraints
- *   - Can be BOTH simultaneously (overlapping)
- *
- * Aspect 2 (Discount Application): {complete, disjoint} - INHERITANCE
- *   - OrderLevelDiscount: Extends Discount
- *   - ItemLevelDiscount: Extends Discount
- *   - Must be EXACTLY ONE (disjoint)
+ * Discount Basis): {complete, overlapping} - COMPOSITION
+ * (Discount Application): {complete, disjoint} - INHERITANCE
  */
 public abstract class Discount implements Serializable {
     @Serial

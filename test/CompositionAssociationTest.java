@@ -18,7 +18,7 @@ public class CompositionAssociationTest {
     @DisplayName("Composition Lifecycle: Payment must be created with Order")
     void testPaymentMustBeCreatedWithOrder() {
         Customer customer = new Customer("John", "Doe", "john@test.com", "123456", java.time.LocalDateTime.now());
-        Order order = new DineIn(customer);
+        Order order = Order.createDineIn(customer);
         Payment payment = new Cash(100.0, order, 100.0);
 
         // Verify bidirectional connection established during construction
@@ -41,8 +41,8 @@ public class CompositionAssociationTest {
     void testPaymentCannotBeSharedBetweenOrders() {
         Customer customer1 = new Customer("Frank", "Wilson", "frank@test.com", "555111", java.time.LocalDateTime.now());
         Customer customer2 = new Customer("Grace", "Moore", "grace@test.com", "555222", java.time.LocalDateTime.now());
-        Order order1 = new DineIn(customer1);
-        Order order2 = new Takeaway(customer2);
+        Order order1 = Order.createDineIn(customer1);
+        Order order2 = Order.createTakeaway(customer2);
         Payment payment = new Cash(100.0, order1, 100.0);
 
         // Payment already belongs to order1, trying to associate with order2 should fail
@@ -61,7 +61,7 @@ public class CompositionAssociationTest {
     @DisplayName("Composition (1..*): Can create multiple payments for order")
     void testCanAddMultiplePayments() {
         Customer customer = new Customer("Alice", "Brown", "alice@test.com", "456789", java.time.LocalDateTime.now());
-        Order order = new DineIn(customer);
+        Order order = Order.createDineIn(customer);
         Payment payment1 = new Cash(100.0, order, 100.0);
         Payment payment2 = new Card(50.0, order, "1234", "Visa");
 
@@ -76,7 +76,7 @@ public class CompositionAssociationTest {
     @DisplayName("Composition (1..*): Cannot remove last payment")
     void testCannotRemoveLastPayment() {
         Customer customer = new Customer("Charlie", "Davis", "charlie@test.com", "321654", java.time.LocalDateTime.now());
-        Order order = new DineIn(customer);
+        Order order = Order.createDineIn(customer);
         Payment payment = new Cash(100.0, order, 100.0);
 
         IllegalStateException exception = assertThrows(IllegalStateException.class, () -> {
@@ -90,7 +90,7 @@ public class CompositionAssociationTest {
     @DisplayName("Composition (1..*): Multiple payments per order")
     void testOneToManyRelationship() {
         Customer customer = new Customer("Kelly", "Jackson", "kelly@test.com", "555666", java.time.LocalDateTime.now());
-        Order order = new DineIn(customer);
+        Order order = Order.createDineIn(customer);
         Payment payment1 = new Cash(100.0, order, 100.0);
         Payment payment2 = new Card(50.0, order, "1234", "Visa");
 
@@ -119,7 +119,7 @@ public class CompositionAssociationTest {
     @DisplayName("Composition Lifecycle: Removing payment deletes it from extent")
     void testRemovePaymentDeletesFromExtent() {
         Customer customer = new Customer("Eve", "Miller", "eve@test.com", "987123", java.time.LocalDateTime.now());
-        Order order = new DineIn(customer);
+        Order order = Order.createDineIn(customer);
         Payment payment1 = new Cash(100.0, order, 100.0);
         Payment payment2 = new Card(50.0, order, "1234", "Visa");
 
@@ -142,7 +142,7 @@ public class CompositionAssociationTest {
     @DisplayName("Composition Lifecycle: Cascading deletion removes all payments")
     void testCascadingDeletionRemovesAllPayments() {
         Customer customer = new Customer("Henry", "Taylor", "henry@test.com", "555333", java.time.LocalDateTime.now());
-        Order order = new DineIn(customer);
+        Order order = Order.createDineIn(customer);
         Payment payment1 = new Cash(100.0, order, 100.0);
         Payment payment2 = new Card(50.0, order, "1234", "Visa");
         Payment payment3 = new Card(25.0, order, "5678", "Mastercard");
@@ -169,7 +169,7 @@ public class CompositionAssociationTest {
     @DisplayName("Composition Lifecycle: Cascading deletion clears Customer association")
     void testCascadingDeletionClearsCustomerAssociation() {
         Customer customer = new Customer("Ivy", "Anderson", "ivy@test.com", "555444", java.time.LocalDateTime.now());
-        Order order = new DineIn(customer);
+        Order order = Order.createDineIn(customer);
         Payment payment = new Cash(50.0, order, 50.0);
 
         // Verify initial connections
@@ -192,7 +192,7 @@ public class CompositionAssociationTest {
     @DisplayName("Composition: Payment cannot be null (mandatory)")
     void testPaymentCannotBeNull() {
         Customer customer = new Customer("Bob", "Jones", "bob@test.com", "789456", java.time.LocalDateTime.now());
-        Order order = new DineIn(customer);
+        Order order = Order.createDineIn(customer);
 
         IllegalArgumentException exception = assertThrows(IllegalArgumentException.class, () -> {
             order.addPayment(null);
@@ -204,12 +204,12 @@ public class CompositionAssociationTest {
     @DisplayName("Composition (1..*): Remove non-existent payment throws exception")
     void testRemoveNonExistentPayment() {
         Customer customer = new Customer("Liam", "White", "liam@test.com", "555777", java.time.LocalDateTime.now());
-        Order order = new DineIn(customer);
+        Order order = Order.createDineIn(customer);
         Payment payment1 = new Cash(100.0, order, 100.0);
 
         // Create payment for different order
         Customer customer2 = new Customer("Mia", "Harris", "mia@test.com", "555888", java.time.LocalDateTime.now());
-        Order order2 = new Takeaway(customer2);
+        Order order2 = Order.createTakeaway(customer2);
         Payment payment2 = new Card(50.0, order2, "1234", "Visa");
 
         IllegalArgumentException exception = assertThrows(IllegalArgumentException.class, () -> {
@@ -222,7 +222,7 @@ public class CompositionAssociationTest {
     @DisplayName("Composition (1..*): Null validation for removePayment")
     void testRemovePaymentNullValidation() {
         Customer customer = new Customer("Noah", "Martin", "noah@test.com", "555999", java.time.LocalDateTime.now());
-        Order order = new DineIn(customer);
+        Order order = Order.createDineIn(customer);
         Payment payment = new Cash(100.0, order, 100.0);
 
         IllegalArgumentException exception = assertThrows(IllegalArgumentException.class, () -> {

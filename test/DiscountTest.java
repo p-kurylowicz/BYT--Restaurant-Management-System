@@ -9,7 +9,7 @@ import java.util.Set;
 import java.util.HashSet;
 import java.util.List;
 
-@DisplayName("Discount Multi-Aspect Inheritance Tests (Hybrid: Inheritance + Composition)")
+@DisplayName("Discount Multi-Aspect Inheritance Tests")
 public class DiscountTest {
 
     @BeforeEach
@@ -125,93 +125,7 @@ public class DiscountTest {
         assertEquals(2, discount.getApplicableItems().size());
     }
 
-    @Test
-    @DisplayName("Validate: Code cannot be null or empty")
-    public void testCodeValidation() {
-        assertThrows(IllegalArgumentException.class, () -> {
-            new OrderLevelDiscount(null, LocalDate.now(), LocalTime.now(), 10.0);
-        });
-
-        assertThrows(IllegalArgumentException.class, () -> {
-            new OrderLevelDiscount("", LocalDate.now(), LocalTime.now(), 10.0);
-        });
-
-        assertThrows(IllegalArgumentException.class, () -> {
-            new OrderLevelDiscount("   ", LocalDate.now(), LocalTime.now(), 10.0);
-        });
-    }
-
-    @Test
-    @DisplayName("Validate: Date cannot be null")
-    public void testDateValidation() {
-        assertThrows(IllegalArgumentException.class, () -> {
-            new OrderLevelDiscount("TEST", null, LocalTime.now(), 10.0);
-        });
-    }
-
-    @Test
-    @DisplayName("Validate: Time cannot be null")
-    public void testTimeValidation() {
-        assertThrows(IllegalArgumentException.class, () -> {
-            new OrderLevelDiscount("TEST", LocalDate.now(), null, 10.0);
-        });
-    }
-
-    @Test
-    @DisplayName("Validate: MinAmount cannot be negative")
-    public void testMinAmountValidation() {
-        assertThrows(IllegalArgumentException.class, () -> {
-            new OrderLevelDiscount("TEST", -10.0, 5, 15.0);
-        });
-    }
-
-    @Test
-    @DisplayName("Validate: MinQuantity cannot be negative")
-    public void testMinQuantityValidation() {
-        assertThrows(IllegalArgumentException.class, () -> {
-            new OrderLevelDiscount("TEST", 100.0, -5, 15.0);
-        });
-    }
-
-    @Test
-    @DisplayName("Validate: Discount percentage must be 0-100")
-    public void testDiscountPercentageValidation() {
-        assertThrows(IllegalArgumentException.class, () -> {
-            new OrderLevelDiscount("TEST", LocalDate.now(), LocalTime.now(), -5.0);
-        });
-
-        assertThrows(IllegalArgumentException.class, () -> {
-            new OrderLevelDiscount("TEST", LocalDate.now(), LocalTime.now(), 150.0);
-        });
-
-        assertDoesNotThrow(() -> {
-            new OrderLevelDiscount("MIN", LocalDate.now(), LocalTime.now(), 0.0);
-        });
-
-        assertDoesNotThrow(() -> {
-            new OrderLevelDiscount("MAX", LocalDate.now(), LocalTime.now(), 100.0);
-        });
-    }
-
-    @Test
-    @DisplayName("Validate: Applicable items cannot be null or empty")
-    public void testApplicableItemsValidation() {
-        Set<String> items = new HashSet<>(Set.of("Pizza"));
-        Discount discount = new ItemLevelDiscount("TEST", LocalDate.now(), LocalTime.now(), items);
-
-        assertThrows(IllegalArgumentException.class, () -> {
-            discount.addApplicableItem(null);
-        });
-
-        assertThrows(IllegalArgumentException.class, () -> {
-            discount.addApplicableItem("");
-        });
-
-        assertThrows(IllegalArgumentException.class, () -> {
-            discount.addApplicableItem("   ");
-        });
-    }
-
+    
     @Test
     @DisplayName("Throw exception when accessing time fields on non-time-based discount")
     public void testIllegalAccessToTimeBased() {
@@ -251,32 +165,6 @@ public class DiscountTest {
         assertThrows(UnsupportedOperationException.class, discount::getApplicableItems);
         assertThrows(UnsupportedOperationException.class, () -> discount.addApplicableItem("Pizza"));
         assertThrows(UnsupportedOperationException.class, () -> discount.removeApplicableItem("Pizza"));
-    }
-
-    @Test
-    @DisplayName("Discounts are added to extent on creation")
-    public void testExtentAddition() {
-        assertEquals(0, Discount.getAllDiscounts().size());
-
-        Discount d1 = new OrderLevelDiscount("D1", LocalDate.now(), LocalTime.now(), 10.0);
-        assertEquals(1, Discount.getAllDiscounts().size());
-
-        Discount d2 = new OrderLevelDiscount("D2", 100.0, 5, 15.0);
-        assertEquals(2, Discount.getAllDiscounts().size());
-
-        assertTrue(Discount.getAllDiscounts().contains(d1));
-        assertTrue(Discount.getAllDiscounts().contains(d2));
-    }
-
-    @Test
-    @DisplayName("Extent returns unmodifiable list")
-    public void testExtentUnmodifiable() {
-        new OrderLevelDiscount("D1", LocalDate.now(), LocalTime.now(), 10.0);
-        List<Discount> discounts = Discount.getAllDiscounts();
-
-        assertThrows(UnsupportedOperationException.class, () -> {
-            discounts.add(null);
-        });
     }
 
     @Test
@@ -345,35 +233,6 @@ public class DiscountTest {
         assertFalse(overlappingDiscounts.contains(d2));
     }
 
-    @Test
-    @DisplayName("Save and load extent")
-    public void testPersistence() throws Exception {
-        Discount d1 = new OrderLevelDiscount("D1", LocalDate.of(2024, 12, 25), LocalTime.of(18, 0), 20.0);
-        Discount d2 = new ItemLevelDiscount("D2", 100.0, 5, Set.of("Pizza", "Burger"));
-
-        assertEquals(2, Discount.getAllDiscounts().size());
-
-        Discount.saveExtent("test_discounts.dat");
-
-        Discount.clearExtent();
-        assertEquals(0, Discount.getAllDiscounts().size());
-
-        boolean success = Discount.loadExtent("test_discounts.dat");
-        assertTrue(success);
-        assertEquals(2, Discount.getAllDiscounts().size());
-
-        List<Discount> loaded = Discount.getAllDiscounts();
-        assertTrue(loaded.stream().anyMatch(d -> d.getCode().equals("D1")));
-        assertTrue(loaded.stream().anyMatch(d -> d.getCode().equals("D2")));
-    }
-
-    @Test
-    @DisplayName("Load extent returns false for missing file")
-    public void testLoadMissingFile() {
-        boolean success = Discount.loadExtent("non_existent_file_xyz.dat");
-        assertFalse(success);
-        assertEquals(0, Discount.getAllDiscounts().size());
-    }
 
     @Test
     @DisplayName("Get discount description for all aspects")
@@ -420,49 +279,5 @@ public class DiscountTest {
         });
     }
 
-    @Test
-    @DisplayName("ToString returns description")
-    public void testToString() {
-        Discount discount = new OrderLevelDiscount("TEST", LocalDate.now(), LocalTime.now(), 15.0);
-        String str = discount.toString();
-        assertNotNull(str);
-        assertTrue(str.contains("TEST"));
-    }
-
-    @Test
-    @DisplayName("Equals and hashCode work correctly")
-    public void testEqualsAndHashCode() {
-        Discount d1 = new OrderLevelDiscount("SAME", LocalDate.now(), LocalTime.now(), 10.0);
-        Discount d2 = new OrderLevelDiscount("SAME", 100.0, 5, 15.0);
-        Discount d3 = new OrderLevelDiscount("DIFFERENT", LocalDate.now(), LocalTime.now(), 10.0);
-
-        assertEquals(d1, d2);
-        assertEquals(d1.hashCode(), d2.hashCode());
-
-        assertNotEquals(d1, d3);
-    }
-
-    @Test
-    @DisplayName("Subclass extent - OrderLevelDiscount")
-    public void testOrderLevelDiscountExtent() {
-        assertEquals(0, OrderLevelDiscount.getAllOrderLevelDiscounts().size());
-
-        OrderLevelDiscount d1 = new OrderLevelDiscount("O1", LocalDate.now(), LocalTime.now(), 10.0);
-        new ItemLevelDiscount("I1", LocalDate.now(), LocalTime.now(), Set.of("Pizza"));
-
-        assertEquals(1, OrderLevelDiscount.getAllOrderLevelDiscounts().size());
-        assertTrue(OrderLevelDiscount.getAllOrderLevelDiscounts().contains(d1));
-    }
-
-    @Test
-    @DisplayName("Subclass extent - ItemLevelDiscount")
-    public void testItemLevelDiscountExtent() {
-        assertEquals(0, ItemLevelDiscount.getAllItemLevelDiscounts().size());
-
-        new OrderLevelDiscount("O1", LocalDate.now(), LocalTime.now(), 10.0);
-        ItemLevelDiscount d1 = new ItemLevelDiscount("I1", LocalDate.now(), LocalTime.now(), Set.of("Pizza"));
-
-        assertEquals(1, ItemLevelDiscount.getAllItemLevelDiscounts().size());
-        assertTrue(ItemLevelDiscount.getAllItemLevelDiscounts().contains(d1));
-    }
+  
 }

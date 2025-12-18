@@ -28,14 +28,14 @@ import org.junit.platform.suite.api.SuiteDisplayName;
     OptionalAttributesTest.class,
     ClassExtentTest.class,
     ExtentPersistenceTest.class,
-        ReflexAssociationTest.class,
-        QualifiedAssociationTest.class,
-        OptionalAttributesTest.class,
-        MenuItemIngredientAssociationTest.class,
-        FeedbackLogicTest.class,
-        InvoiceAttributesTest.class,
-        ExtentPersistenceTest.class,
-
+    ReflexAssociationTest.class,
+    QualifiedAssociationTest.class,
+    MenuItemIngredientAssociationTest.class,
+    FeedbackLogicTest.class,
+    InvoiceAttributesTest.class,
+    DiscountTest.class,
+    OrderInheritanceTest.class,
+    EmployeeInheritanceTest.class
 })
 public class RestaurantSystemTest {
 

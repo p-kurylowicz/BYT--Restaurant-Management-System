@@ -18,12 +18,12 @@ public class InvoiceAttributesTest {
         Payment.clearExtent();
 
         Customer customer1 = new Customer();
-        completedOrder = new DineIn(customer1);
+        completedOrder = Order.createDineIn(customer1);
         completedOrder.finalizeOrder();
         completedOrder.completeOrder();
 
         Customer customer2 = new Customer();
-        activeOrder = new DineIn(customer2);
+        activeOrder = Order.createDineIn(customer2);
     }
 
     
@@ -163,7 +163,7 @@ public class InvoiceAttributesTest {
 
         Invoice i1 = new Invoice(completedOrder, address1, 150.0, 1.0);
         Customer customer3 = new Customer();
-        Order completedOrder2 = new DineIn(customer3);
+        Order completedOrder2 = Order.createDineIn(customer3);
         completedOrder2.finalizeOrder();
         completedOrder2.completeOrder();
         Invoice i2 = new Invoice(completedOrder2, address2, 800.0, null);
