@@ -14,14 +14,14 @@ public class Beverage extends MenuItem {
     }
 
     public Beverage(String name, String description, double price, String image,
-                   String nationalOrigin, NutritionalInfo nutritionalInfo, Double alcoholPercentage) {
+                    String nationalOrigin, NutritionalInfo nutritionalInfo, Double alcoholPercentage) {
         super(name, description, price, image, nationalOrigin, nutritionalInfo);
         setAlcoholPercentage(alcoholPercentage);
     }
 
     public Beverage(String name, String description, double price, String image,
-                   String nationalOrigin, NutritionalInfo nutritionalInfo,
-                   Set<String> allergens, Double alcoholPercentage) {
+                    String nationalOrigin, NutritionalInfo nutritionalInfo,
+                    Set<String> allergens, Double alcoholPercentage) {
         super(name, description, price, image, nationalOrigin, nutritionalInfo, allergens);
         setAlcoholPercentage(alcoholPercentage);
     }
@@ -47,6 +47,6 @@ public class Beverage extends MenuItem {
     public String toString() {
         String alcoholStr = alcoholPercentage != null ? String.format("%.1f%%", alcoholPercentage) : "N/A";
         return String.format("Beverage[%s, alcohol=%s, %s, %s]",
-            getName(), alcoholStr, getNutritionalInfo(), super.toString());
+                getName(), alcoholStr, getNutritionalInfo(), super.toString());
     }
 }
