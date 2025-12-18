@@ -5,23 +5,19 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
-/**
- * Component class for DineIn orders.
- * Cannot exist without an Order (composition constraint).
- * Implements IDineIn interface to define contract.
- */
+
 public class DineIn implements Serializable, IDineIn {
     @Serial
     private static final long serialVersionUID = 1L;
 
-    // Reverse reference - component cannot exist without parent
+   
     private final Order order;
 
     private LocalDateTime servingStartTime;
     private final List<Table> tables;
     private Reservation reservation;
 
-    // Package-private constructor - only Order can create DineIn
+    //only Order can create DineIn
     DineIn(Order order) {
         if (order == null) {
             throw new IllegalArgumentException(
@@ -38,7 +34,7 @@ public class DineIn implements Serializable, IDineIn {
         setReservation(reservation);
     }
 
-    // Getter for parent Order
+
     public Order getOrder() {
         return order;
     }

@@ -2,22 +2,18 @@ import java.io.Serial;
 import java.io.Serializable;
 import java.time.LocalTime;
 
-/**
- * Component class for Takeaway orders.
- * Cannot exist without an Order (composition constraint).
- * Implements ITakeaway interface to define contract.
- */
+
 public class Takeaway implements Serializable, ITakeaway {
     @Serial
     private static final long serialVersionUID = 1L;
 
-    // Reverse reference - component cannot exist without parent
+    
     private final Order order;
 
     private LocalTime collectionTime;
     private boolean wasPickedUp;
 
-    // Package-private constructor - only Order can create Takeaway
+    //only Order can create Takeaway
     Takeaway(Order order) {
         if (order == null) {
             throw new IllegalArgumentException(
@@ -32,7 +28,6 @@ public class Takeaway implements Serializable, ITakeaway {
         setCollectionTime(collectionTime);
     }
 
-    // Getter for parent Order
     public Order getOrder() {
         return order;
     }
@@ -55,10 +50,7 @@ public class Takeaway implements Serializable, ITakeaway {
         this.wasPickedUp = true;
     }
 
-    /**
-     * Confirms the takeaway order.
-     * Handles takeaway-specific confirmation logic.
-     */
+    
     public void confirmTakeawayOrder() {
         if (order.getStatus() != OrderStatus.ACTIVE) {
             throw new IllegalStateException(
